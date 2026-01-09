@@ -14,9 +14,16 @@ export const categoriasService = {
    * Listar/Buscar todas as categorias
    * GET /categories
    */
-  async listarTodas(): Promise<Categoria[]> {
+  async listarTodas(
+    description: string = ""
+  ): Promise<Categoria[]> {
     const response = await api.get<Categoria[]>(
-      API_ENDPOINTS.CATEGORIAS.SEARCH
+      API_ENDPOINTS.CATEGORIAS.SEARCH,
+      {
+        params: {
+          description,
+        },
+      }
     );
     return response.data;
   },
