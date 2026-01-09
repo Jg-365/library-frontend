@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api, livrosService } from "@/services";
+import { api } from "@/services/api";
+import { autoresService } from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
 import type {
@@ -97,11 +98,9 @@ export function BookForm({
 
   const carregarAutores = async () => {
     try {
-      const autoresCarregados =
+      const autoresFormatados =
         await autoresService.listarTodos();
-      console.log("Autores carregados:", autoresCarregados);
-      console.log("Primeiro autor:", autoresCarregados[0]);
-      setAutores(autoresCarregados);
+      setAutores(autoresFormatados);
     } catch (error) {
       toast.error("Erro ao carregar autores");
       console.error("Erro ao carregar autores:", error);
