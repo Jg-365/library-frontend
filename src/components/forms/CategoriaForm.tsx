@@ -11,13 +11,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
 import type { Categoria } from "@/types";
 import {
   categoriaFormSchema,
   type CategoriaFormValues,
 } from "@/schemas";
-import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -57,18 +56,15 @@ export function CategoriaForm({
           categoria.id,
           payload
         );
-        await api.patch(
-          API_ENDPOINTS.CATEGORIAS.BY_ID(categoria.id),
+        await categoriasService.atualizar(
+          categoria.id,
           payload
         );
         toast.success("Categoria atualizada com sucesso!");
       } else {
         // Criar nova categoria
         console.log("Criando nova categoria:", payload);
-        await api.post(
-          API_ENDPOINTS.CATEGORIAS.BASE,
-          payload
-        );
+        await categoriasService.criar(payload);
         toast.success("Categoria cadastrada com sucesso!");
       }
 

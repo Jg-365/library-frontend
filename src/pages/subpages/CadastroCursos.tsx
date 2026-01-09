@@ -24,8 +24,7 @@ import { CursoForm } from "@/components/forms/CursoForm";
 import { createCursoColumn } from "@/components/ui/columns/cursosColumn";
 import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { cursosService } from "@/services";
 import type { Curso } from "@/types";
 
 export function CadastroCursos() {
@@ -42,16 +41,8 @@ export function CadastroCursos() {
   const fetchCursos = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.CURSOS.BASE
-      );
-      // Mapear courseCode -> cod_curso e courseName -> nome
-      const cursosMapeados = response.data.map(
-        (curso: any) => ({
-          cod_curso: curso.courseCode,
-          nome: curso.courseName,
-        })
-      );
+      const cursosMapeados =
+        await cursosService.listarTodos();
       setCursos(cursosMapeados);
     } catch (error: any) {
       toast.error("Erro ao carregar cursos");
@@ -79,9 +70,7 @@ export function CadastroCursos() {
     if (!cursoToDelete) return;
 
     try {
-      await api.delete(
-        `${API_ENDPOINTS.CURSOS.BASE}/${cursoToDelete.cod_curso}`
-      );
+      await cursosService.deletar(cursoToDelete.cod_curso);
       toast.success("Curso excluído com sucesso!");
       fetchCursos();
     } catch (error: any) {

@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Search, User } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { usuariosService } from "@/services";
 
 interface Usuario {
   id: string;
@@ -81,15 +80,8 @@ export function SelectUserDialog({
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.USUARIOS.ALL,
-        {
-          params: { page: 0, size: 1000 },
-        }
-      );
-
       const usersArray =
-        response.data?.content || response.data || [];
+        await usuariosService.listarTodos();
       setUsuarios(usersArray);
       setFilteredUsuarios(usersArray);
     } catch (error: any) {
