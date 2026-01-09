@@ -77,6 +77,7 @@ export interface LoanResponse {
 export interface LoanReturnResponse {
   successIsbn: string[];
   failedIsbn: string[];
+  message: string;
 }
 
 /**

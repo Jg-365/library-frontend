@@ -90,31 +90,46 @@ export function CadastroDevolucoes() {
         );
       }
 
-      const response =
-        await emprestimosService.devolver({
-          isbnCodes,
-        });
-      const successIsbn = response.successIsbn ?? [];
-      const failedIsbn = response.failedIsbn ?? [];
+      const response = await emprestimosService.devolver({
+        isbnCodes,
+      });
+      const successIsbn = response?.successIsbn ?? [];
+      const failedIsbn = response?.failedIsbn ?? [];
+      const hasSuccess = successIsbn.length > 0;
+      const hasFailed = failedIsbn.length > 0;
+      const detalhes = [
+        hasSuccess
+          ? `${successIsbn.length} devolvido(s)`
+          : null,
+        hasFailed
+          ? `${failedIsbn.length} falha(s)`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" • ");
+      const mensagem = [response?.message, detalhes]
+        .filter(Boolean)
+        .join(" ");
 
-      if (successIsbn.length > 0) {
+      if (hasSuccess && hasFailed) {
+        toast.info(
+          mensagem ||
+            "Devolução parcial registrada."
+        );
+      } else if (hasSuccess) {
         toast.success(
-          `Devolução registrada: ${successIsbn.join(
-            ", "
-          )}`
+          mensagem ||
+            "Devolução registrada com sucesso!"
         );
-      }
-
-      if (failedIsbn.length > 0) {
+      } else {
         toast.error(
-          `Não foi possível devolver: ${failedIsbn.join(
-            ", "
-          )}`
+          mensagem ||
+            "Nenhuma devolução foi registrada."
         );
       }
 
-      if (successIsbn.length > 0) {
-        setEmprestimoSelecionado(null);
+      setEmprestimoSelecionado(null);
+      if (hasSuccess) {
         fetchEmprestimos();
       }
     } catch (error: any) {
