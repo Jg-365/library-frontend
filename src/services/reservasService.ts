@@ -8,7 +8,11 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Reserva } from "@/types";
-import type { ReserveResponse } from "@/types/BackendResponses";
+import type {
+  BookResponse,
+  ReserveResponse,
+} from "@/types/BackendResponses";
+import { mapBookResponseToLivro } from "./mappers/bookMapper";
 
 /**
  * Converte ReserveResponse do backend para Reserva do frontend
@@ -16,65 +20,50 @@ import type { ReserveResponse } from "@/types/BackendResponses";
 async function mapReserveResponseToReserva(
   reserve: ReserveResponse
 ): Promise<Reserva> {
+  const normalizeStatus = (
+    status?: string
+  ): Reserva["status"] | undefined => {
+    if (!status) return undefined;
+    const normalized = status.trim().toUpperCase();
+    if (["ATIVA", "ATIVO", "ACTIVE"].includes(normalized)) {
+      return "ATIVA";
+    }
+    if (
+      ["CONCLUIDA", "CONCLUIDO", "FINALIZADA", "COMPLETED"].includes(
+        normalized
+      )
+    ) {
+      return "CONCLUIDA";
+    }
+    if (
+      ["CANCELADA", "CANCELADO", "CANCELLED", "CANCELED"].includes(
+        normalized
+      )
+    ) {
+      return "CANCELADA";
+    }
+    return undefined;
+  };
+
   const reserva: Partial<Reserva> = {
     id: reserve.id,
     usuarioId: reserve.userEnrollment,
     livroIsbn: reserve.bookIsbn,
     dataReserva: reserve.reserveDate,
-    status: "ATIVA",
+    status: reserve.status ?? "ATIVA",
   };
 
   // Tentar popular o objeto `livro` para evitar undefined em componentes
   if (reserve.bookIsbn) {
     try {
-      const resp = await api.get(
+      const resp = await api.get<BookResponse>(
         API_ENDPOINTS.LIVROS.BY_ISBN(reserve.bookIsbn)
       );
-      const book = resp.data;
-
-      const autores: any[] = [];
-      if (book?.emailAuthor) {
-        autores.push({
-          id: 0,
-          nome: book.emailAuthor,
-          email: book.emailAuthor,
-          nacionalidade: "",
-        });
-      }
-      if (Array.isArray(book?.coAuthorsEmails)) {
-        for (const email of book.coAuthorsEmails) {
-          autores.push({
-            id: 0,
-            nome: email,
-            email,
-            nacionalidade: "",
-          });
-        }
-      }
-
-      const livro = {
-        id: 0,
-        isbn: reserve.bookIsbn,
-        titulo:
-          book?.title ||
-          `Livro (ISBN: ${reserve.bookIsbn})`,
-        ano: book?.releaseYear || 0,
-        editora: book?.publisher || "",
-        imagemCapa: book?.imageUrl || undefined,
-        categoriaId: book?.subCategoryId || 0,
-        subcategoriaId: book?.subCategoryId || undefined,
-        categoria: book?.category || undefined,
-        subcategoria: undefined,
-        descricao: book?.description || undefined,
-        imagemUrl: book?.imageUrl || undefined,
-        autores: autores,
-        quantidadeExemplares:
-          book?.numberOfCopies ??
-          book?.availableCopies ??
-          0,
+      const livro = mapBookResponseToLivro(resp.data);
+      reserva.livro = {
+        ...livro,
+        isbn: livro.isbn || reserve.bookIsbn,
       };
-
-      reserva.livro = livro as any;
     } catch (error) {
       // Se falhar, continue com fallback simples (livro undefined é tratado nos componentes)
       console.error(
@@ -158,5 +147,15 @@ export const reservasService = {
    */
   async deletar(id: number): Promise<void> {
     await api.delete(API_ENDPOINTS.RESERVAS.DELETE(id));
+  },
+
+  /**
+   * Cancelar reserva
+   * DELETE /reserves/{id}
+   */
+  async cancelar(id: number): Promise<void> {
+    await api.delete(
+      API_ENDPOINTS.RESERVAS.CANCELAR(id)
+    );
   },
 };

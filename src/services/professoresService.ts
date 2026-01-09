@@ -31,6 +31,24 @@ const normalizeProfessoresPage = (
   };
 };
 
+const resolveCourseName = async (
+  course: string | number
+): Promise<string> => {
+  if (typeof course === "string") {
+    return course;
+  }
+
+  const response = await api.get(
+    API_ENDPOINTS.CURSOS.BY_ID(course)
+  );
+  return (
+    response.data?.courseName ||
+    response.data?.nome ||
+    response.data?.name ||
+    ""
+  );
+};
+
 export const professoresService = {
   /**
    * Listar todos os professores
@@ -68,7 +86,7 @@ export const professoresService = {
 
   /**
    * Listar professores por curso
-   * GET /users/teachers/by-course
+   * GET /users/teachers/by-course?course=<nome>
    */
   async listarPorCurso(
     cursoId: number
