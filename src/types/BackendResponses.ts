@@ -60,9 +60,8 @@ export interface LoanResponse {
 }
 
 export interface LoanReturnResponse {
-  loanCode: number;
-  returnDate: string;
-  fineAmount: number | null;
+  successIsbn: string[];
+  failedIsbn: string[];
   message: string;
 }
 

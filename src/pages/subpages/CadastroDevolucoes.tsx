@@ -97,10 +97,48 @@ export function CadastroDevolucoes() {
         );
       }
 
-      await emprestimosService.devolver({ isbnCodes });
-      toast.success("Devolução registrada com sucesso!");
+      const response = await emprestimosService.devolver({
+        isbnCodes,
+      });
+      const successIsbn = response?.successIsbn ?? [];
+      const failedIsbn = response?.failedIsbn ?? [];
+      const hasSuccess = successIsbn.length > 0;
+      const hasFailed = failedIsbn.length > 0;
+      const detalhes = [
+        hasSuccess
+          ? `${successIsbn.length} devolvido(s)`
+          : null,
+        hasFailed
+          ? `${failedIsbn.length} falha(s)`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" • ");
+      const mensagem = [response?.message, detalhes]
+        .filter(Boolean)
+        .join(" ");
+
+      if (hasSuccess && hasFailed) {
+        toast.info(
+          mensagem ||
+            "Devolução parcial registrada."
+        );
+      } else if (hasSuccess) {
+        toast.success(
+          mensagem ||
+            "Devolução registrada com sucesso!"
+        );
+      } else {
+        toast.error(
+          mensagem ||
+            "Nenhuma devolução foi registrada."
+        );
+      }
+
       setEmprestimoSelecionado(null);
-      fetchEmprestimos();
+      if (hasSuccess) {
+        fetchEmprestimos();
+      }
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
