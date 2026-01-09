@@ -24,13 +24,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { cursosService, usuariosService } from "@/services";
 import type { Usuario } from "@/types";
 
 interface Curso {
-  cod_curso: number;
-  nome: string;
+  courseCode: number;
+  courseName: string;
 }
 
 interface UsuarioFormProps {
@@ -76,14 +75,7 @@ export function UsuarioForm({
         const response = await api.get<Curso[]>(
           API_ENDPOINTS.CURSOS.BASE
         );
-        // Mapear courseCode -> cod_curso e courseName -> nome
-        const cursosMapeados = (response.data || []).map(
-          (curso: any) => ({
-            cod_curso: curso.courseCode,
-            nome: curso.courseName,
-          })
-        );
-        setCursos(cursosMapeados);
+        setCursos(response.data || []);
       } catch (error) {
         console.error("Erro ao buscar cursos:", error);
         toast.error("Erro ao carregar lista de cursos");
@@ -109,25 +101,22 @@ export function UsuarioForm({
         const userType = usuario.userType;
 
         // Escolher endpoint correto baseado no tipo de usuário
-        let updateEndpoint;
         if (userType === "ALUNO") {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_STUDENT(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarAluno(
+            enrollment?.toString() || "",
+            payload
+          );
         } else if (userType === "PROFESSOR") {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_TEACHER(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarProfessor(
+            enrollment?.toString() || "",
+            payload
+          );
         } else {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_EMPLOYEE(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarFuncionario(
+            enrollment?.toString() || "",
+            payload
+          );
         }
-
-        await api.patch(updateEndpoint, payload);
         toast.success("Usuário atualizado com sucesso!");
       } else {
         // Mapear dados do formulário para o formato que o backend espera
@@ -163,10 +152,7 @@ export function UsuarioForm({
         }
         // FUNCIONARIO não precisa de campos adicionais
 
-        await api.post(
-          API_ENDPOINTS.USUARIOS.CREATE,
-          backendPayload
-        );
+        await usuariosService.criar(backendPayload);
         toast.success("Usuário cadastrado com sucesso!");
         form.reset();
       }
@@ -181,7 +167,8 @@ export function UsuarioForm({
         // Detecta erro de foreign key para código de curso
         if (
           message.includes("foreign key constraint") ||
-          message.includes("cod_curso")
+          message.includes("cod_curso") ||
+          message.includes("courseCode")
         ) {
           message =
             "Código do curso inválido! O curso informado não existe no sistema. Deixe em branco ou use um código válido.";
@@ -370,11 +357,11 @@ export function UsuarioForm({
                       <SelectContent>
                         {cursos.map((curso) => (
                           <SelectItem
-                            key={curso.cod_curso}
-                            value={curso.cod_curso.toString()}
+                            key={curso.courseCode}
+                            value={curso.courseCode.toString()}
                           >
-                            {curso.nome} (Cód.{" "}
-                            {curso.cod_curso})
+                            {curso.courseName} (Cód.{" "}
+                            {curso.courseCode})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -462,11 +449,11 @@ export function UsuarioForm({
                         </SelectItem>
                         {cursos.map((curso) => (
                           <SelectItem
-                            key={curso.cod_curso}
-                            value={curso.cod_curso.toString()}
+                            key={curso.courseCode}
+                            value={curso.courseCode.toString()}
                           >
-                            {curso.nome} (Cód.{" "}
-                            {curso.cod_curso})
+                            {curso.courseName} (Cód.{" "}
+                            {curso.courseCode})
                           </SelectItem>
                         ))}
                       </SelectContent>

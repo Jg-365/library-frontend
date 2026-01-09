@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   // Autores (Authors)
   AUTORES: {
     BASE: "/authors",
+    ALL: "/authors/all",
     BY_NAME: "/authors",
     BY_EMAIL: (email: string) => `/authors/${email}`,
     CREATE: "/authors",
@@ -53,6 +54,8 @@ export const API_ENDPOINTS = {
   CATEGORIAS: {
     BASE: "/categories",
     SEARCH: "/categories",
+    SEARCH_BY_DESCRIPTION: (description: string) =>
+      `/categories?description=${encodeURIComponent(description)}`,
     BY_ID: (id: number) => `/categories/${id}`,
     CREATE: "/categories",
     UPDATE: (id: number) => `/categories/${id}`,
@@ -63,6 +66,8 @@ export const API_ENDPOINTS = {
   SUBCATEGORIAS: {
     BASE: "/subcategories",
     BY_ID: (id: number) => `/subcategories/${id}`,
+    BY_CATEGORY: (categoryCode: number) =>
+      `/subcategories?categoryCode=${categoryCode}`,
     SEARCH_BY_NAME: (name: string) =>
       `/subcategories/search/${name}`,
     CREATE: "/subcategories",

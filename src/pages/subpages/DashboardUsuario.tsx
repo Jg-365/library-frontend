@@ -19,10 +19,9 @@ import { ReservaCard } from "@/components/main/reserva-card";
 import { BookDetailsDialog } from "@/components/main/book-details-dialog";
 import type { Livro, Reserva } from "@/types";
 import { toast } from "sonner";
-import api from "@/services/api";
 import { livrosService } from "@/services/livrosService";
 import { reservasService } from "@/services/reservasService";
-import { API_ENDPOINTS } from "@/config/constants";
+import { emprestimosService } from "@/services/emprestimosService";
 import { useAuth } from "@/store/AuthContext";
 
 const quickActions = [
@@ -163,7 +162,7 @@ export function DashboardUsuario() {
         JSON.stringify(payload, null, 2)
       );
 
-      await api.post(API_ENDPOINTS.RESERVAS.BASE, payload);
+      await reservasService.criar(payload);
 
       toast.success("Livro reservado com sucesso!");
       carregarDados(); // Recarregar dados
@@ -191,19 +190,13 @@ export function DashboardUsuario() {
       };
 
       console.log("📚 Criando empréstimo:", payload);
-      console.log(
-        "📍 Endpoint:",
-        API_ENDPOINTS.EMPRESTIMOS.CREATE_USER
-      );
-
-      const response = await api.post(
-        API_ENDPOINTS.EMPRESTIMOS.CREATE_USER,
+      const response = await emprestimosService.criar(
         payload
       );
 
       console.log(
         "✅ Empréstimo criado com sucesso:",
-        response.data
+        response
       );
 
       toast.success("Livro emprestado com sucesso!");
@@ -230,9 +223,7 @@ export function DashboardUsuario() {
     reserva: Reserva
   ) => {
     try {
-      await api.put(
-        API_ENDPOINTS.RESERVAS.CANCELAR(reserva.id)
-      );
+      await reservasService.cancelar(reserva.id);
       toast.success("Reserva cancelada com sucesso!");
       carregarDados();
     } catch (error: any) {

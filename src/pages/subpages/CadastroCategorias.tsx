@@ -15,6 +15,7 @@ import {
   type SubcategoriaTable,
 } from "@/components/main/subcategoriaColumn";
 import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import {
@@ -42,6 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { FolderTree, Plus, List } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +69,8 @@ export function CadastroCategorias() {
     useState<SubcategoriaTable | null>(null);
   const [categoriaToDelete, setCategoriaToDelete] =
     useState<Categoria | null>(null);
+  const [descricaoBusca, setDescricaoBusca] =
+    useState("");
 
   const getPerfil = (): Perfil => {
     if (location.pathname.startsWith("/admin")) {
@@ -90,21 +94,22 @@ export function CadastroCategorias() {
     carregarCategorias();
   }, []);
 
-  const carregarCategorias = async () => {
+  const carregarCategorias = async (
+    description: string = ""
+  ) => {
     try {
       setLoading(true);
 
       // Carregar categorias
-      const categoriasRes = await api.get(
-        `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
-      );
+      const categoriasRes =
+        await categoriasService.listarTodas(description);
 
       // Mapear campos do backend para o frontend
-      const categoriasFormatadas = categoriasRes.data.map(
+      const categoriasFormatadas = categoriasRes.map(
         (cat: any) => ({
-          id: cat.categoryCode || cat.id,
-          codigo: cat.categoryCode || cat.codigo,
-          descricao: cat.description || cat.descricao,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
 
@@ -119,7 +124,19 @@ export function CadastroCategorias() {
         const subcategoriasRes = await api.get(
           API_ENDPOINTS.SUBCATEGORIAS.BASE
         );
-        setSubcategorias(subcategoriasRes.data || []);
+        const subcategoriasFormatadas =
+          subcategoriasRes.data?.map((sub: any) => ({
+            id: sub.id,
+            description:
+              sub.description || sub.nome || sub.descricao,
+            categoryCode:
+              sub.category?.categoryCode ||
+              sub.categoryCode ||
+              sub.categoriaId,
+            category: sub.category,
+          })) || [];
+
+        setSubcategorias(subcategoriasFormatadas);
       } catch (subError: any) {
         console.warn(
           "Erro ao carregar subcategorias:",
@@ -153,7 +170,9 @@ export function CadastroCategorias() {
 
     try {
       await api.delete(
-        API_ENDPOINTS.CATEGORIAS.BY_ID(categoriaToDelete.id)
+        API_ENDPOINTS.CATEGORIAS.BY_ID(
+          categoriaToDelete.categoryCode
+        )
       );
       toast.success("Categoria excluída com sucesso!");
       carregarCategorias();
@@ -183,6 +202,15 @@ export function CadastroCategorias() {
   const handleNovaCategoria = () => {
     setSelectedCategoria(null);
     setIsDialogOpen(true);
+  };
+
+  const handleBuscarCategorias = async () => {
+    await carregarCategorias(descricaoBusca);
+  };
+
+  const handleLimparBusca = async () => {
+    setDescricaoBusca("");
+    await carregarCategorias("");
   };
 
   // Handlers de Subcategoria
@@ -274,6 +302,7 @@ export function CadastroCategorias() {
       // Backend retorna category como objeto completo: { categoryCode, description }
       const categoriaId =
         sub.category?.categoryCode ||
+        sub.categoryCode ||
         sub.cod_categoria_principal;
       const categoriaNome =
         sub.category?.description || "N/A";
@@ -285,7 +314,7 @@ export function CadastroCategorias() {
           sub.codigo ||
           String(sub.id),
         descricao:
-          sub.description || sub.nome || sub.descricao,
+          sub.description,
         cod_categoria_principal: categoriaId,
         categoria_nome: categoriaNome,
       };
@@ -353,6 +382,31 @@ export function CadastroCategorias() {
                 ? "categoria encontrada"
                 : "categorias encontradas"}
             </CardDescription>
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
+              <Input
+                placeholder="Buscar por descrição"
+                value={descricaoBusca}
+                onChange={(event) =>
+                  setDescricaoBusca(event.target.value)
+                }
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBuscarCategorias}
+                >
+                  Buscar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleLimparBusca}
+                >
+                  Limpar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <DataTable
@@ -453,7 +507,15 @@ export function CadastroCategorias() {
             </CustomModalHeader>
             <SubcategoriaForm
               subcategoria={
-                selectedSubcategoria || undefined
+                selectedSubcategoria
+                  ? {
+                      id: selectedSubcategoria.id,
+                      description:
+                        selectedSubcategoria.descricao,
+                      categoryCode:
+                        selectedSubcategoria.cod_categoria_principal,
+                    }
+                  : undefined
               }
               onSuccess={() => {
                 setIsSubcategoriaDialogOpen(false);
@@ -479,7 +541,7 @@ export function CadastroCategorias() {
               <AlertDialogDescription>
                 Tem certeza que deseja excluir a categoria{" "}
                 <span className="font-semibold text-gray-900">
-                  {categoriaToDelete?.descricao}
+                  {categoriaToDelete?.description}
                 </span>
                 ? Esta ação não pode ser desfeita.
               </AlertDialogDescription>

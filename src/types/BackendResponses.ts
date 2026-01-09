@@ -9,9 +9,16 @@ export interface BookResponse {
   releaseYear: number;
   publisher: string;
   availableCopies: number; // Backend retorna availableCopies, não numberOfCopies
-  category: string; // Backend retorna category (nome), não subCategoryId
-  author: string; // Backend retorna author (nome completo), não emailAuthor
-  // Nota: Backend não retorna coAuthorsEmails no GET /books
+  numberOfCopies?: number;
+  category?: string; // Backend retorna category (nome), não subCategoryId
+  categoryId?: number;
+  subCategory?: string;
+  subCategoryId?: number;
+  author?: string; // Backend retorna author (nome completo), não emailAuthor
+  emailAuthor?: string;
+  coAuthorsEmails?: string[];
+  description?: string;
+  imageUrl?: string;
 }
 
 export interface ReserveResponse {
@@ -43,6 +50,14 @@ export interface FineResponse {
   value: number;
   daysOverdue: number;
   paymentDate: string | null; // ISO Date
+  loanId: number;
+  bookTitles: string[];
+}
+
+export interface PendingFineResponse {
+  id: number;
+  value: number;
+  daysOverdue: number;
   loanId: number;
   bookTitles: string[];
 }
