@@ -118,28 +118,45 @@ export const livrosService = {
   ): Promise<ResultadoFiltroLivros> {
     const params = new URLSearchParams();
 
-    if (filtros.categoriaId)
+    if (filtros.category)
       params.append(
-        "categoriaId",
-        filtros.categoriaId.toString()
+        "category",
+        filtros.category
       );
-    if (filtros.subcategoriaId)
+    if (filtros.subCategory)
       params.append(
-        "subcategoriaId",
-        filtros.subcategoriaId.toString()
+        "subCategory",
+        filtros.subCategory
       );
-    if (filtros.autorId)
-      params.append("autorId", filtros.autorId.toString());
-    if (filtros.editora)
-      params.append("editora", filtros.editora);
-    if (filtros.anoMin)
-      params.append("anoMin", filtros.anoMin.toString());
-    if (filtros.anoMax)
-      params.append("anoMax", filtros.anoMax.toString());
-    if (filtros.disponivelApenas)
-      params.append("disponivelApenas", "true");
-    if (filtros.termo)
-      params.append("termo", filtros.termo);
+    if (filtros.author)
+      params.append("author", filtros.author);
+    if (filtros.publisher)
+      params.append("publisher", filtros.publisher);
+    if (filtros.title)
+      params.append("title", filtros.title);
+    if (filtros.isbn) params.append("isbn", filtros.isbn);
+    if (filtros.releaseYearMin)
+      params.append(
+        "releaseYearMin",
+        filtros.releaseYearMin.toString()
+      );
+    if (filtros.releaseYearMax)
+      params.append(
+        "releaseYearMax",
+        filtros.releaseYearMax.toString()
+      );
+    if (filtros.availableOnly)
+      params.append("availableOnly", "true");
+    if (filtros.term) params.append("term", filtros.term);
+
+    params.append(
+      "page",
+      (filtros.page ?? 0).toString()
+    );
+    params.append(
+      "size",
+      (filtros.size ?? 10).toString()
+    );
 
     const response = await api.get<ResultadoFiltroLivros>(
       `${API_ENDPOINTS.LIVROS.SEARCH}?${params.toString()}`
