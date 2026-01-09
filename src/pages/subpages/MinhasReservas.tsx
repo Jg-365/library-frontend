@@ -28,13 +28,12 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { reservasService } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
 import { useAuth } from "@/store/AuthContext";
+import { reservasService } from "@/services/reservasService";
 
 export default function MinhasReservas() {
-  const { user } = useAuth();
   const location = useLocation();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,15 +69,8 @@ export default function MinhasReservas() {
   const fetchReservas = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.RESERVAS.BY_USER
-      );
-
-      // Verificar se data é array ou se está dentro de content (paginação)
-      const reservasArray = Array.isArray(response.data)
-        ? response.data
-        : response.data?.content || [];
-
+      const reservasArray =
+        await reservasService.listarPorUsuario();
       setReservas(reservasArray);
     } catch (error: any) {
       toast.error("Erro ao carregar reservas");
@@ -100,10 +92,8 @@ export default function MinhasReservas() {
     if (!reservaSelecionada) return;
 
     try {
-      await api.put(
-        API_ENDPOINTS.RESERVAS.CANCELAR(
-          reservaSelecionada.id
-        )
+      await reservasService.deletar(
+        reservaSelecionada.id
       );
       toast.success("Reserva cancelada com sucesso!");
       setReservaSelecionada(null);

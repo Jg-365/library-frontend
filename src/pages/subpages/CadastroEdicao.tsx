@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { api } from "@/services/api";
+import { livrosService } from "@/services";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import type { Livro, Perfil } from "@/types";
 import { createBooksColumn } from "@/components/ui/columns/booksColumn";
@@ -12,7 +12,6 @@ import {
 import { filterBooks } from "@/components/main/book-filters";
 import { BookDetailsDialog } from "@/components/main/book-details-dialog";
 import { BookForm } from "@/components/forms/BookForm.tsx";
-import { API_ENDPOINTS } from "@/config";
 import { PageLayout } from "@/components/layouts";
 import {
   Card,
@@ -97,58 +96,8 @@ export function CadastroEdicao() {
   const carregarLivros = async () => {
     try {
       setLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.LIVROS.BASE
-      );
-      console.log("📚 Response completo:", response);
-      console.log("📚 Response.data:", response.data);
-
-      // Backend retorna paginação: {content: [], totalElements: n, ...}
-      const livrosArray =
-        response.data.content || response.data;
-
-      console.log("📚 Livros extraídos:", livrosArray);
-      console.log(
-        "📚 Exemplo de livro raw:",
-        livrosArray[0]
-      );
-
-      // Mapear campos do backend para o formato do frontend
-      const livrosMapeados = livrosArray.map(
-        (livro: any) => ({
-          id: livro.id || livro.isbn,
-          isbn: livro.isbn,
-          titulo: livro.title || livro.titulo,
-          ano:
-            livro.releaseYear ||
-            livro.year ||
-            livro.ano_lancamento ||
-            livro.ano,
-          editora: livro.publisher || livro.editora,
-          imagemCapa: livro.imagemCapa,
-          descricao: livro.descricao,
-          imagemUrl: livro.imagemUrl,
-          autores: livro.author
-            ? [
-                {
-                  id: 1,
-                  nome: livro.author,
-                  email: livro.authorEmail || "",
-                },
-              ]
-            : livro.autores || [],
-          quantidadeExemplares:
-            livro.availableCopies !== undefined
-              ? livro.availableCopies
-              : livro.qtd_copias ||
-                livro.quantidadeExemplares ||
-                0,
-        })
-      );
-
-      console.log("📚 Livros mapeados:", livrosMapeados);
-      console.log("📚 Exemplo mapeado:", livrosMapeados[0]);
-
+      const livrosMapeados =
+        await livrosService.listarTodos();
       setLivros(livrosMapeados);
     } catch (error: any) {
       toast.error("Erro ao carregar livros", {
@@ -195,9 +144,7 @@ export function CadastroEdicao() {
     if (!livroToDelete) return;
 
     try {
-      await api.delete(
-        API_ENDPOINTS.LIVROS.DELETE(livroToDelete.isbn)
-      );
+      await livrosService.deletar(livroToDelete.isbn);
       toast.success("Livro excluído com sucesso!");
       carregarLivros();
     } catch (error: any) {

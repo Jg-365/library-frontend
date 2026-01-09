@@ -26,11 +26,24 @@ const normalizeSubcategoriasResponse = (
 
 export const subcategoriasService = {
   /**
+   * Listar subcategorias por categoria
+   * GET /subcategories?categoryCode=...
+   */
+  async listarPorCategoria(
+    categoryCode: number
+  ): Promise<Subcategoria[]> {
+    const response = await api.get<Subcategoria[]>(
+      API_ENDPOINTS.SUBCATEGORIAS.BY_CATEGORY(categoryCode)
+    );
+    return response.data;
+  },
+
+  /**
    * Criar nova subcategoria
    * POST /subcategories
    */
   async criar(
-    dados: Omit<Subcategoria, "id">
+    dados: Pick<Subcategoria, "description" | "categoryCode">
   ): Promise<Subcategoria> {
     const response = await api.post<SubCategoryResponse>(
       API_ENDPOINTS.SUBCATEGORIAS.CREATE,
@@ -71,7 +84,9 @@ export const subcategoriasService = {
    */
   async atualizar(
     id: number,
-    dados: Partial<Subcategoria>
+    dados: Partial<
+      Pick<Subcategoria, "description" | "categoryCode">
+    >
   ): Promise<Subcategoria> {
     const response = await api.patch<SubCategoryResponse>(
       API_ENDPOINTS.SUBCATEGORIAS.UPDATE(id),

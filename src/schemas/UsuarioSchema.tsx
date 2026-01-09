@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const telefoneSchema = z.object({
-  numero: z
+  number: z
     .string()
     .min(10, "Telefone deve ter no mínimo 10 dígitos"),
   tipo: z

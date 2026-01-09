@@ -8,6 +8,28 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Usuario } from "@/types";
+import type { MyPage } from "@/types/BackendResponses";
+
+const normalizeUsuariosPage = (
+  data: MyPage<Usuario> | Usuario[]
+): MyPage<Usuario> => {
+  if (Array.isArray(data)) {
+    return {
+      content: data,
+      totalElements: data.length,
+      currentPage: 0,
+      totalPages: 1,
+    };
+  }
+
+  return {
+    content: data.content || [],
+    totalElements:
+      data.totalElements ?? data.content?.length ?? 0,
+    currentPage: data.currentPage ?? 0,
+    totalPages: data.totalPages ?? 1,
+  };
+};
 
 export const usuariosService = {
   /**
@@ -15,7 +37,7 @@ export const usuariosService = {
    * POST /users/create
    */
   async criar(
-    dados: Omit<Usuario, "id">
+    dados: CreateUsuarioPayload
   ): Promise<Usuario> {
     const response = await api.post<Usuario>(
       API_ENDPOINTS.USUARIOS.CREATE,
@@ -41,11 +63,13 @@ export const usuariosService = {
    * Listar todos os usuários
    * GET /users/all
    */
-  async listarTodos(): Promise<Usuario[]> {
-    const response = await api.get<Usuario[]>(
+  async listarTodos(): Promise<MyPage<Usuario>> {
+    const response = await api.get<
+      MyPage<Usuario> | Usuario[]
+    >(
       API_ENDPOINTS.USUARIOS.ALL
     );
-    return response.data;
+    return normalizeUsuariosPage(response.data);
   },
 
   /**
@@ -54,7 +78,7 @@ export const usuariosService = {
    */
   async atualizarProfessor(
     enrollment: string,
-    dados: Partial<Usuario>
+    dados: Partial<CreateUsuarioPayload>
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_TEACHER(enrollment),
@@ -69,7 +93,7 @@ export const usuariosService = {
    */
   async atualizarAluno(
     enrollment: string,
-    dados: Partial<Usuario>
+    dados: Partial<CreateUsuarioPayload>
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_STUDENT(enrollment),
@@ -84,7 +108,7 @@ export const usuariosService = {
    */
   async atualizarFuncionario(
     enrollment: string,
-    dados: Partial<Usuario>
+    dados: Partial<CreateUsuarioPayload>
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_EMPLOYEE(enrollment),
@@ -105,14 +129,16 @@ export const usuariosService = {
 
   /**
    * Listar professores por curso
-   * GET /users/teachers/by-course
+   * GET /users/teachers/by-course?course=<nome>
    */
   async listarProfessoresPorCurso(
     cursoId: number
-  ): Promise<Usuario[]> {
-    const response = await api.get<Usuario[]>(
+  ): Promise<MyPage<Usuario>> {
+    const response = await api.get<
+      MyPage<Usuario> | Usuario[]
+    >(
       `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?cursoId=${cursoId}`
     );
-    return response.data;
+    return normalizeUsuariosPage(response.data);
   },
 };

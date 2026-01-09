@@ -13,7 +13,9 @@ export function setupCursosHandlers(mock: MockAdapter) {
   // GET /cursos/:id - Buscar curso por ID
   mock.onGet(/\/cursos\/\d+/).reply((config) => {
     const id = Number(config.url?.split("/").pop());
-    const curso = cursos.find((c) => c.id === id);
+    const curso = cursos.find(
+      (c) => c.courseCode === id
+    );
 
     if (!curso) {
       return [404, { message: "Curso não encontrado" }];
@@ -32,8 +34,8 @@ export function setupCursosHandlers(mock: MockAdapter) {
       // Verifica se o nome já existe
       const nomeExiste = cursos.some(
         (c) =>
-          c.nome.toLowerCase() ===
-          dadosValidados.nome.toLowerCase()
+          c.courseName.toLowerCase() ===
+          dadosValidados.courseName.toLowerCase()
       );
 
       if (nomeExiste) {
@@ -44,7 +46,8 @@ export function setupCursosHandlers(mock: MockAdapter) {
       }
 
       const novoCurso = {
-        id: Math.max(...cursos.map((c) => c.id)) + 1,
+        courseCode:
+          Math.max(...cursos.map((c) => c.courseCode)) + 1,
         codigo: `CUR${String(cursos.length + 1).padStart(3, "0")}`,
         ...dadosValidados,
       };
@@ -71,7 +74,9 @@ export function setupCursosHandlers(mock: MockAdapter) {
     try {
       const id = Number(config.url?.split("/").pop());
       const dadosFormulario = JSON.parse(config.data);
-      const indice = cursos.findIndex((c) => c.id === id);
+      const indice = cursos.findIndex(
+        (c) => c.courseCode === id
+      );
 
       if (indice === -1) {
         return [404, { message: "Curso não encontrado" }];
@@ -83,9 +88,9 @@ export function setupCursosHandlers(mock: MockAdapter) {
       // Verifica se o nome já existe em outro curso
       const nomeExiste = cursos.some(
         (c) =>
-          c.id !== id &&
-          c.nome.toLowerCase() ===
-            dadosValidados.nome.toLowerCase()
+          c.courseCode !== id &&
+          c.courseName.toLowerCase() ===
+            dadosValidados.courseName.toLowerCase()
       );
 
       if (nomeExiste) {
@@ -121,7 +126,9 @@ export function setupCursosHandlers(mock: MockAdapter) {
   // DELETE /cursos/:id - Excluir curso
   mock.onDelete(/\/cursos\/\d+/).reply((config) => {
     const id = Number(config.url?.split("/").pop());
-    const indice = cursos.findIndex((c) => c.id === id);
+    const indice = cursos.findIndex(
+      (c) => c.courseCode === id
+    );
 
     if (indice === -1) {
       return [404, { message: "Curso não encontrado" }];

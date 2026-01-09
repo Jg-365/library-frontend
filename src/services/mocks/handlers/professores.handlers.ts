@@ -28,7 +28,7 @@ export function setupProfessoresHandlers(
       // Adicionar informações do curso se existir
       if (professor.cursoId) {
         const curso = mockCursos.find(
-          (c) => c.id === professor.cursoId
+          (c) => c.courseCode === professor.cursoId
         );
         const professorComCurso: Professor = {
           ...professor,
@@ -53,7 +53,7 @@ export function setupProfessoresHandlers(
       );
 
       const curso = mockCursos.find(
-        (c) => c.id === cursoId
+        (c) => c.courseCode === cursoId
       );
 
       const resultado: ProfessoresPorCurso = {

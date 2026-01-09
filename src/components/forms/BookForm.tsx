@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,13 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/services/api";
+import { autoresService } from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
+import type {
+  BookRequest,
+  BookRequestUpdate,
+} from "@/types/BackendRequests";
 import {
   livroFormSchema,
   type LivroFormValues,
 } from "@/schemas";
 import { API_ENDPOINTS } from "@/config";
+import { livrosService } from "@/services/livrosService";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +59,8 @@ export function BookForm({
   const [selectedAutores, setSelectedAutores] = useState<
     Autor[]
   >([]);
+  const [coautoresParaRemover, setCoautoresParaRemover] =
+    useState<string[]>([]);
 
   const form = useForm<LivroFormValues>({
     resolver: zodResolver(livroFormSchema),
@@ -71,6 +80,7 @@ export function BookForm({
     carregarCategorias();
     if (livro) {
       setSelectedAutores(livro.autores || []);
+      setCoautoresParaRemover([]);
     }
 
     // Recarregar autores quando a janela volta a ter foco
@@ -88,24 +98,8 @@ export function BookForm({
 
   const carregarAutores = async () => {
     try {
-      const response = await api.get(
-        `${API_ENDPOINTS.AUTORES.BASE}/all`
-      );
-      console.log("Autores carregados:", response.data);
-      console.log("Primeiro autor:", response.data[0]);
-
-      // Mapear name para nome e criar id se não existir
-      const autoresFormatados = response.data.map(
-        (autor: any, index: number) => ({
-          id: autor.id || autor.authorId || index + 1, // Tentar id, authorId ou usar índice
-          nome: autor.name || autor.nome,
-          email: autor.email,
-          nacionalidade:
-            autor.nationality || autor.nacionalidade,
-        })
-      );
-
-      console.log("Autores formatados:", autoresFormatados);
+      const autoresFormatados =
+        await autoresService.listarTodos();
       setAutores(autoresFormatados);
     } catch (error) {
       toast.error("Erro ao carregar autores");
@@ -121,19 +115,19 @@ export function BookForm({
       console.log("Categorias carregadas:", response.data);
       console.log("Primeira categoria:", response.data[0]);
 
-      // Mapear categoryCode para id
+      // Mapear resposta para o formato usado no frontend
       const categoriasFormatadas = response.data.map(
         (cat: any) => ({
-          id: cat.categoryCode,
-          descricao: cat.description,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
-
       console.log(
-        "Categorias formatadas:",
-        categoriasFormatadas
+        "Primeira categoria:",
+        categoriasCarregadas[0]
       );
-      setCategorias(categoriasFormatadas);
+      setCategorias(categoriasCarregadas);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
       console.error("Erro ao carregar categorias:", error);
@@ -148,31 +142,33 @@ export function BookForm({
         "🔍 Carregando subcategorias para categoria:",
         categoriaId
       );
-      const url = `${API_ENDPOINTS.SUBCATEGORIAS.BASE}?categoryCode=${categoriaId}`;
-      console.log("🔍 URL:", url);
+      const response =
+        await subcategoriasService.listarPorCategoria(
+          categoriaId
+        );
 
-      const response = await api.get(url);
       console.log(
         "✅ Subcategorias carregadas (raw):",
-        response.data
+        response
       );
 
-      const subcategoriasFormatadas = response.data
+      const subcategoriasFormatadas = response
         .map((sub: any) => {
           console.log("🔍 Mapeando subcategoria:", sub);
           return {
             id: sub.id || sub.subcategoryCode,
-            nome: sub.description || sub.name || sub.nome,
-            categoriaId:
+            description:
+              sub.description || sub.name || sub.nome,
+            categoryCode:
               sub.category?.categoryCode ||
               sub.categoryCode ||
               sub.categoriaId,
           };
         })
         .filter((sub: any) => {
-          const isValid = sub.id && sub.nome;
+          const isValid = sub.id && sub.description;
           console.log(
-            `🔍 Subcategoria ${sub.nome} válida?`,
+            `🔍 Subcategoria ${sub.description} válida?`,
             isValid
           );
           return isValid;
@@ -223,6 +219,58 @@ export function BookForm({
     );
   };
 
+  const handleToggleCoautor = (email: string) => {
+    setCoautoresParaRemover((prev) =>
+      prev.includes(email)
+        ? prev.filter((item) => item !== email)
+        : [...prev, email]
+    );
+  };
+
+  const handleRemoverCoautores = async () => {
+    if (!livro) return;
+
+    const emailsValidos = coautoresParaRemover.filter(
+      (email) => email && email.includes("@")
+    );
+
+    if (emailsValidos.length === 0) {
+      toast.error("Selecione ao menos um coautor válido");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await livrosService.removerCoautores(
+        livro.isbn,
+        emailsValidos
+      );
+
+      const autoresAtualizados = selectedAutores.filter(
+        (autor, index) =>
+          index === 0 ||
+          !emailsValidos.includes(autor.email || "")
+      );
+
+      setSelectedAutores(autoresAtualizados);
+      form.setValue(
+        "autores",
+        autoresAtualizados.map((autor) => autor.id)
+      );
+      setCoautoresParaRemover([]);
+      toast.success("Coautores removidos com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao remover coautores", {
+        description:
+          error.response?.data?.message ||
+          error.message ||
+          "Tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onSubmit = async (data: LivroFormValues) => {
     try {
       setIsLoading(true);
@@ -230,20 +278,36 @@ export function BookForm({
       console.log("📚 Dados do formulário:", data);
 
       // Transformar dados para o formato que o backend espera
-      const autorPrincipal = autores.find(
-        (a) => a.id === data.autores[0]
+      const autoresSelecionados = selectedAutores.filter(
+        (autor) => data.autores.includes(autor.id)
+      );
+      const [autorPrincipal, ...coAutores] =
+        autoresSelecionados;
+
+      const emailAuthor = autorPrincipal?.email || "";
+      const coAuthorsEmails = Array.from(
+        new Set(
+          coAutores
+            .map((autor) => autor.email)
+            .filter(
+              (email): email is string =>
+                typeof email === "string" &&
+                email.length > 0 &&
+                email !== emailAuthor
+            )
+        )
       );
 
       if (livro) {
         // Editar livro existente
         // Nota: ISBN não pode ser alterado (chave primária imutável)
-        // BookRequestUpdate aceita: title, releaseYear, publisher, subCategoryId, emailAuthor
-        const updatePayload = {
+        const updatePayload: BookRequestUpdate = {
           title: data.titulo,
           releaseYear: data.ano,
           publisher: data.editora,
           subCategoryId: data.subcategoriaId,
-          emailAuthor: autorPrincipal?.email || "",
+          emailAuthor,
+          coAuthorsEmails,
         };
 
         console.log(
@@ -255,22 +319,21 @@ export function BookForm({
           JSON.stringify(updatePayload, null, 2)
         );
 
-        await api.patch(
-          API_ENDPOINTS.LIVROS.UPDATE(livro.isbn),
+        await livrosService.atualizar(
+          livro.isbn,
           updatePayload
         );
         toast.success("Livro atualizado com sucesso!");
       } else {
         // Criar novo livro
-        // BookRequest aceita: isbn, title, releaseYear, publisher, subCategoryId, emailAuthor, coAuthorsEmails
-        const createPayload = {
+        const createPayload: BookRequest = {
           isbn: data.isbn,
           title: data.titulo,
           releaseYear: data.ano,
           publisher: data.editora,
-          idSubCategory: data.subcategoriaId, // Backend espera idSubCategory, não subCategoryId
-          emailAuthor: autorPrincipal?.email || "",
-          coAuthorsEmails: [], // Lista vazia por enquanto
+          subCategoryId: data.subcategoriaId,
+          emailAuthor,
+          coAuthorsEmails,
         };
 
         console.log("\u2795 Criando novo livro");
@@ -279,10 +342,7 @@ export function BookForm({
           JSON.stringify(createPayload, null, 2)
         );
 
-        await api.post(
-          API_ENDPOINTS.LIVROS.BASE,
-          createPayload
-        );
+        await livrosService.criar(createPayload);
         toast.success("Livro cadastrado com sucesso!");
       }
 
@@ -316,6 +376,8 @@ export function BookForm({
       setIsLoading(false);
     }
   };
+
+  const coautoresDisponiveis = selectedAutores.slice(1);
 
   return (
     <Form {...form}>
@@ -444,7 +506,7 @@ export function BookForm({
               );
               console.log("Field value:", field.value);
               const categoriasValidas = categorias.filter(
-                (categoria) => categoria?.id
+                (categoria) => categoria?.categoryCode
               );
               console.log(
                 "Categorias após filtro:",
@@ -486,10 +548,10 @@ export function BookForm({
                         categoriasValidas.map(
                           (categoria) => (
                             <SelectItem
-                              key={categoria.id}
-                              value={categoria.id.toString()}
+                              key={categoria.categoryCode}
+                              value={categoria.categoryCode.toString()}
                             >
-                              {categoria.descricao}
+                              {categoria.description}
                             </SelectItem>
                           )
                         )
@@ -522,7 +584,7 @@ export function BookForm({
                     !form.watch("categoriaId") ||
                     subcategorias.filter(
                       (s) =>
-                        s.categoriaId ===
+                        s.categoryCode ===
                         form.watch("categoriaId")
                     ).length === 0
                   }
@@ -535,7 +597,7 @@ export function BookForm({
                             ? "Selecione uma categoria primeiro"
                             : subcategorias.filter(
                                 (s) =>
-                                  s.categoriaId ===
+                                  s.categoryCode ===
                                   form.watch("categoriaId")
                               ).length === 0
                             ? "Nenhuma subcategoria cadastrada. Cadastre uma nova."
@@ -556,7 +618,7 @@ export function BookForm({
                         .filter(
                           (sub) =>
                             sub?.id &&
-                            sub.categoriaId ===
+                            sub.categoryCode ===
                               form.watch("categoriaId")
                         )
                         .map((subcategoria) => (
@@ -564,7 +626,7 @@ export function BookForm({
                             key={subcategoria.id}
                             value={subcategoria.id.toString()}
                           >
-                            {subcategoria.nome}
+                            {subcategoria.description}
                           </SelectItem>
                         ))
                     )}
@@ -656,6 +718,54 @@ export function BookForm({
               </p>
             )}
           </div>
+
+          {livro && coautoresDisponiveis.length > 0 && (
+            <div className="md:col-span-2 space-y-3 rounded-lg border border-dashed p-4">
+              <FormLabel>Remover coautores</FormLabel>
+              <div className="space-y-2">
+                {coautoresDisponiveis.map((autor) => {
+                  const email = autor.email || "";
+                  const isDisabled = !email;
+                  return (
+                    <label
+                      key={autor.id}
+                      className="flex items-center gap-3 text-sm"
+                    >
+                      <Checkbox
+                        checked={
+                          !isDisabled &&
+                          coautoresParaRemover.includes(email)
+                        }
+                        disabled={isDisabled}
+                        onCheckedChange={() => {
+                          if (!isDisabled) {
+                            handleToggleCoautor(email);
+                          }
+                        }}
+                      />
+                      <span className="font-medium">
+                        {autor.nome}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {email || "Email não informado"}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRemoverCoautores}
+                disabled={
+                  isLoading ||
+                  coautoresParaRemover.length === 0
+                }
+              >
+                Remover coautores selecionados
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Botões */}

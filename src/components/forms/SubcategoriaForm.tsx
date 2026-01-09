@@ -18,13 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/services/api";
 import type { Categoria } from "@/types";
 import {
   subcategoriaFormSchema,
   type SubcategoriaFormValues,
 } from "@/schemas/SubcategoriaSchema";
-import { API_ENDPOINTS } from "@/config";
+import {
+  categoriasService,
+  subcategoriasService,
+} from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -66,16 +68,7 @@ export function SubcategoriaForm({
         `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
       );
 
-      const categoriasFormatadas = response.data.map(
-        (cat: any) => ({
-          id: cat.categoryCode || cat.id,
-          codigo: cat.categoryCode || cat.codigo,
-          nome: cat.description || cat.nome,
-          descricao: cat.description || cat.descricao,
-        })
-      );
-
-      setCategorias(categoriasFormatadas);
+      setCategorias(response.data);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
     }
@@ -93,10 +86,8 @@ export function SubcategoriaForm({
 
       if (subcategoria) {
         // Editar
-        await api.patch(
-          `${API_ENDPOINTS.SUBCATEGORIAS.BY_ID(
-            subcategoria.id
-          )}`,
+        await subcategoriasService.atualizar(
+          subcategoria.id,
           payload
         );
         toast.success(
@@ -104,10 +95,7 @@ export function SubcategoriaForm({
         );
       } else {
         // Criar - código da subcategoria é auto-gerado pelo backend
-        await api.post(
-          API_ENDPOINTS.SUBCATEGORIAS.BASE,
-          payload
-        );
+        await subcategoriasService.criar(payload);
         toast.success("Subcategoria criada com sucesso!");
       }
 
@@ -179,11 +167,10 @@ export function SubcategoriaForm({
                 <SelectContent>
                   {categorias.map((categoria) => (
                     <SelectItem
-                      key={categoria.id}
-                      value={categoria.id.toString()}
+                      key={categoria.categoryCode}
+                      value={categoria.categoryCode.toString()}
                     >
-                      {categoria.descricao ||
-                        categoria.nome}
+                      {categoria.description}
                     </SelectItem>
                   ))}
                 </SelectContent>
