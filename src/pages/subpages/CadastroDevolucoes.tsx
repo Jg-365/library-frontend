@@ -27,9 +27,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
 import { emprestimosService } from "@/services/emprestimosService";
-import { API_ENDPOINTS } from "@/config/constants";
 import type { Emprestimo } from "@/types";
 
 export function CadastroDevolucoes() {
@@ -43,14 +41,9 @@ export function CadastroDevolucoes() {
   const fetchEmprestimos = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
-      // Filtra apenas empréstimos não devolvidos
-      const ativos = response.data.filter(
-        (e: Emprestimo) => e.status === "ATIVO"
-      );
-      setEmprestimos(ativos);
+      const response =
+        await emprestimosService.listarTodos();
+      setEmprestimos(response);
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");
       console.error("Erro ao buscar empréstimos:", error);
@@ -97,10 +90,48 @@ export function CadastroDevolucoes() {
         );
       }
 
-      await emprestimosService.devolver({ isbnCodes });
-      toast.success("Devolução registrada com sucesso!");
+      const response = await emprestimosService.devolver({
+        isbnCodes,
+      });
+      const successIsbn = response?.successIsbn ?? [];
+      const failedIsbn = response?.failedIsbn ?? [];
+      const hasSuccess = successIsbn.length > 0;
+      const hasFailed = failedIsbn.length > 0;
+      const detalhes = [
+        hasSuccess
+          ? `${successIsbn.length} devolvido(s)`
+          : null,
+        hasFailed
+          ? `${failedIsbn.length} falha(s)`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" • ");
+      const mensagem = [response?.message, detalhes]
+        .filter(Boolean)
+        .join(" ");
+
+      if (hasSuccess && hasFailed) {
+        toast.info(
+          mensagem ||
+            "Devolução parcial registrada."
+        );
+      } else if (hasSuccess) {
+        toast.success(
+          mensagem ||
+            "Devolução registrada com sucesso!"
+        );
+      } else {
+        toast.error(
+          mensagem ||
+            "Nenhuma devolução foi registrada."
+        );
+      }
+
       setEmprestimoSelecionado(null);
-      fetchEmprestimos();
+      if (hasSuccess) {
+        fetchEmprestimos();
+      }
     } catch (error: any) {
       const message =
         error.response?.data?.message ||

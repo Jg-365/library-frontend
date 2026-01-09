@@ -3,11 +3,13 @@ import type { Emprestimo } from "./Emprestimo";
 
 export interface Multa {
   id: number;
-  usuarioId: number;
+  usuarioId?: number;
   emprestimoId: number;
   valor: number;
+  diasAtraso?: number;
+  titulosLivros?: string[];
   motivoMulta: string; // Ex: "Atraso de 6 dias"
-  dataCriacao: string; // YYYY-MM-DD
+  dataCriacao?: string; // YYYY-MM-DD
   pago: boolean;
   dataPagamento?: string; // YYYY-MM-DD
 
