@@ -202,6 +202,31 @@ export const authService = {
       role: data.role,
     });
 
-    await api.post(API_ENDPOINTS.AUTH.REGISTER, data);
+    const payload: RegisterRequest = {
+      name: data.name,
+      username: data.username,
+      password: data.password,
+      address: data.address,
+      userType: data.userType,
+      role: data.role,
+    };
+
+    if (data.userType === "ALUNO") {
+      if (data.courseCode) {
+        payload.courseCode = data.courseCode;
+      }
+      payload.ingressDate = data.ingressDate;
+      payload.graduationDate = data.graduationDate;
+    }
+
+    if (data.userType === "PROFESSOR") {
+      if (data.courseCode) {
+        payload.courseCode = data.courseCode;
+      }
+      payload.hireDate = data.hireDate;
+      payload.workRegime = data.workRegime;
+    }
+
+    await api.post(API_ENDPOINTS.AUTH.REGISTER, payload);
   },
 };
