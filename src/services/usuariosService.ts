@@ -9,6 +9,24 @@ import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Usuario } from "@/types";
 
+const resolveCourseName = async (
+  course: string | number
+): Promise<string> => {
+  if (typeof course === "string") {
+    return course;
+  }
+
+  const response = await api.get(
+    API_ENDPOINTS.CURSOS.BY_ID(course)
+  );
+  return (
+    response.data?.courseName ||
+    response.data?.nome ||
+    response.data?.name ||
+    ""
+  );
+};
+
 export const usuariosService = {
   /**
    * Criar novo usuário
@@ -105,13 +123,16 @@ export const usuariosService = {
 
   /**
    * Listar professores por curso
-   * GET /users/teachers/by-course
+   * GET /users/teachers/by-course?course=<nome>
    */
   async listarProfessoresPorCurso(
-    cursoId: number
+    course: string | number
   ): Promise<Usuario[]> {
+    const courseName = await resolveCourseName(course);
     const response = await api.get<Usuario[]>(
-      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?cursoId=${cursoId}`
+      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?course=${encodeURIComponent(
+        courseName
+      )}`
     );
     return response.data;
   },
