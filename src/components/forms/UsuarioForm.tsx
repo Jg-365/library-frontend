@@ -28,8 +28,8 @@ import { cursosService, usuariosService } from "@/services";
 import type { Usuario } from "@/types";
 
 interface Curso {
-  cod_curso: number;
-  nome: string;
+  courseCode: number;
+  courseName: string;
 }
 
 interface UsuarioFormProps {
@@ -72,9 +72,10 @@ export function UsuarioForm({
     const fetchCursos = async () => {
       try {
         setIsLoadingCursos(true);
-        const cursosMapeados =
-          await cursosService.listarTodos();
-        setCursos(cursosMapeados);
+        const response = await api.get<Curso[]>(
+          API_ENDPOINTS.CURSOS.BASE
+        );
+        setCursos(response.data || []);
       } catch (error) {
         console.error("Erro ao buscar cursos:", error);
         toast.error("Erro ao carregar lista de cursos");
@@ -166,7 +167,8 @@ export function UsuarioForm({
         // Detecta erro de foreign key para código de curso
         if (
           message.includes("foreign key constraint") ||
-          message.includes("cod_curso")
+          message.includes("cod_curso") ||
+          message.includes("courseCode")
         ) {
           message =
             "Código do curso inválido! O curso informado não existe no sistema. Deixe em branco ou use um código válido.";
@@ -355,11 +357,11 @@ export function UsuarioForm({
                       <SelectContent>
                         {cursos.map((curso) => (
                           <SelectItem
-                            key={curso.cod_curso}
-                            value={curso.cod_curso.toString()}
+                            key={curso.courseCode}
+                            value={curso.courseCode.toString()}
                           >
-                            {curso.nome} (Cód.{" "}
-                            {curso.cod_curso})
+                            {curso.courseName} (Cód.{" "}
+                            {curso.courseCode})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -447,11 +449,11 @@ export function UsuarioForm({
                         </SelectItem>
                         {cursos.map((curso) => (
                           <SelectItem
-                            key={curso.cod_curso}
-                            value={curso.cod_curso.toString()}
+                            key={curso.courseCode}
+                            value={curso.courseCode.toString()}
                           >
-                            {curso.nome} (Cód.{" "}
-                            {curso.cod_curso})
+                            {curso.courseName} (Cód.{" "}
+                            {curso.courseCode})
                           </SelectItem>
                         ))}
                       </SelectContent>

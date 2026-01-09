@@ -41,9 +41,10 @@ export function CadastroCursos() {
   const fetchCursos = async () => {
     try {
       setIsLoading(true);
-      const cursosMapeados =
-        await cursosService.listarTodos();
-      setCursos(cursosMapeados);
+      const response = await api.get(
+        API_ENDPOINTS.CURSOS.BASE
+      );
+      setCursos(response.data);
     } catch (error: any) {
       toast.error("Erro ao carregar cursos");
       console.error("Erro ao buscar cursos:", error);
@@ -70,7 +71,9 @@ export function CadastroCursos() {
     if (!cursoToDelete) return;
 
     try {
-      await cursosService.deletar(cursoToDelete.cod_curso);
+      await api.delete(
+        `${API_ENDPOINTS.CURSOS.BASE}/${cursoToDelete.courseCode}`
+      );
       toast.success("Curso excluído com sucesso!");
       fetchCursos();
     } catch (error: any) {
@@ -175,7 +178,7 @@ export function CadastroCursos() {
               <AlertDialogDescription>
                 Tem certeza que deseja excluir o curso{" "}
                 <span className="font-semibold">
-                  {cursoToDelete?.nome}
+                  {cursoToDelete?.courseName}
                 </span>
                 ? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
