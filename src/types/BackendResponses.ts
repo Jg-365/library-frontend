@@ -19,6 +19,7 @@ export interface ReserveResponse {
   userEnrollment: number;
   bookIsbn: string;
   reserveDate: string; // ISO DateTime
+  status?: "ATIVA" | "CONCLUIDA" | "CANCELADA";
 }
 
 export interface CategoryResponse {
