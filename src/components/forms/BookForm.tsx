@@ -18,14 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/services/api";
-import {
-  autoresService,
-  categoriasService,
-  subcategoriasService,
-} from "@/services";
+import { api, livrosService } from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
+import type {
+  BookRequest,
+  BookRequestUpdate,
+} from "@/types/BackendRequests";
 import {
   livroFormSchema,
   type LivroFormValues,
@@ -223,20 +222,36 @@ export function BookForm({
       console.log("📚 Dados do formulário:", data);
 
       // Transformar dados para o formato que o backend espera
-      const autorPrincipal = autores.find(
-        (a) => a.id === data.autores[0]
+      const autoresSelecionados = selectedAutores.filter(
+        (autor) => data.autores.includes(autor.id)
+      );
+      const [autorPrincipal, ...coAutores] =
+        autoresSelecionados;
+
+      const emailAuthor = autorPrincipal?.email || "";
+      const coAuthorsEmails = Array.from(
+        new Set(
+          coAutores
+            .map((autor) => autor.email)
+            .filter(
+              (email): email is string =>
+                typeof email === "string" &&
+                email.length > 0 &&
+                email !== emailAuthor
+            )
+        )
       );
 
       if (livro) {
         // Editar livro existente
         // Nota: ISBN não pode ser alterado (chave primária imutável)
-        // BookRequestUpdate aceita: title, releaseYear, publisher, subCategoryId, emailAuthor
-        const updatePayload = {
+        const updatePayload: BookRequestUpdate = {
           title: data.titulo,
           releaseYear: data.ano,
           publisher: data.editora,
           subCategoryId: data.subcategoriaId,
-          emailAuthor: autorPrincipal?.email || "",
+          emailAuthor,
+          coAuthorsEmails,
         };
 
         console.log(
@@ -248,22 +263,21 @@ export function BookForm({
           JSON.stringify(updatePayload, null, 2)
         );
 
-        await api.patch(
-          API_ENDPOINTS.LIVROS.UPDATE(livro.isbn),
+        await livrosService.atualizar(
+          livro.isbn,
           updatePayload
         );
         toast.success("Livro atualizado com sucesso!");
       } else {
         // Criar novo livro
-        // BookRequest aceita: isbn, title, releaseYear, publisher, subCategoryId, emailAuthor, coAuthorsEmails
-        const createPayload = {
+        const createPayload: BookRequest = {
           isbn: data.isbn,
           title: data.titulo,
           releaseYear: data.ano,
           publisher: data.editora,
-          idSubCategory: data.subcategoriaId, // Backend espera idSubCategory, não subCategoryId
-          emailAuthor: autorPrincipal?.email || "",
-          coAuthorsEmails: [], // Lista vazia por enquanto
+          subCategoryId: data.subcategoriaId,
+          emailAuthor,
+          coAuthorsEmails,
         };
 
         console.log("\u2795 Criando novo livro");
@@ -272,10 +286,7 @@ export function BookForm({
           JSON.stringify(createPayload, null, 2)
         );
 
-        await api.post(
-          API_ENDPOINTS.LIVROS.BASE,
-          createPayload
-        );
+        await livrosService.criar(createPayload);
         toast.success("Livro cadastrado com sucesso!");
       }
 
