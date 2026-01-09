@@ -58,9 +58,27 @@ export function filterBooks(
     }
 
     // Filtro por categoria
-    if (filters.categoriaId) {
+    if (filters.category) {
+      const categoria = (book.categoria || "")
+        .toLowerCase()
+        .trim();
       if (
-        book.categoriaId.toString() !== filters.categoriaId
+        !categoria ||
+        !categoria.includes(filters.category.toLowerCase())
+      )
+        return false;
+    }
+
+    // Filtro por subcategoria
+    if (filters.subCategory) {
+      const subcategoria = (book.subcategoria || "")
+        .toLowerCase()
+        .trim();
+      if (
+        !subcategoria ||
+        !subcategoria.includes(
+          filters.subCategory.toLowerCase()
+        )
       )
         return false;
     }

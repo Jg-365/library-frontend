@@ -12,38 +12,12 @@ import type {
   FiltroLivros,
   ResultadoFiltroLivros,
 } from "@/types";
+import type {
+  BookRequest,
+  BookRequestUpdate,
+} from "@/types/BackendRequests";
 import type { BookResponse } from "@/types/BackendResponses";
-
-/**
- * Converte BookResponse do backend para Livro do frontend
- * Backend retorna: {author, availableCopies, category, isbn, publisher, releaseYear, title}
- */
-function mapBookResponseToLivro(book: any): Livro {
-  // Backend retorna author como nome completo
-  const autores = [];
-
-  if (book.author) {
-    autores.push({
-      id: 0,
-      nome: book.author,
-      email: "",
-    });
-  }
-
-  return {
-    id: 0,
-    isbn: book.isbn || "",
-    titulo: book.title || "Título não informado",
-    ano: book.releaseYear || 0,
-    editora: book.publisher || "",
-    categoriaId: 0,
-    subcategoriaId: 0,
-    categoria: book.category || "Categoria não informada", // Backend retorna nome da categoria
-    subcategoria: "", // Backend não retorna subcategoria
-    autores: autores.length > 0 ? autores : [],
-    quantidadeExemplares: book.availableCopies || 0,
-  };
-}
+import { mapBookResponseToLivro } from "./mappers/bookMapper";
 
 export const livrosService = {
   /**
@@ -118,28 +92,45 @@ export const livrosService = {
   ): Promise<ResultadoFiltroLivros> {
     const params = new URLSearchParams();
 
-    if (filtros.categoriaId)
+    if (filtros.category)
       params.append(
-        "categoriaId",
-        filtros.categoriaId.toString()
+        "category",
+        filtros.category
       );
-    if (filtros.subcategoriaId)
+    if (filtros.subCategory)
       params.append(
-        "subcategoriaId",
-        filtros.subcategoriaId.toString()
+        "subCategory",
+        filtros.subCategory
       );
-    if (filtros.autorId)
-      params.append("autorId", filtros.autorId.toString());
-    if (filtros.editora)
-      params.append("editora", filtros.editora);
-    if (filtros.anoMin)
-      params.append("anoMin", filtros.anoMin.toString());
-    if (filtros.anoMax)
-      params.append("anoMax", filtros.anoMax.toString());
-    if (filtros.disponivelApenas)
-      params.append("disponivelApenas", "true");
-    if (filtros.termo)
-      params.append("termo", filtros.termo);
+    if (filtros.author)
+      params.append("author", filtros.author);
+    if (filtros.publisher)
+      params.append("publisher", filtros.publisher);
+    if (filtros.title)
+      params.append("title", filtros.title);
+    if (filtros.isbn) params.append("isbn", filtros.isbn);
+    if (filtros.releaseYearMin)
+      params.append(
+        "releaseYearMin",
+        filtros.releaseYearMin.toString()
+      );
+    if (filtros.releaseYearMax)
+      params.append(
+        "releaseYearMax",
+        filtros.releaseYearMax.toString()
+      );
+    if (filtros.availableOnly)
+      params.append("availableOnly", "true");
+    if (filtros.term) params.append("term", filtros.term);
+
+    params.append(
+      "page",
+      (filtros.page ?? 0).toString()
+    );
+    params.append(
+      "size",
+      (filtros.size ?? 10).toString()
+    );
 
     const response = await api.get<ResultadoFiltroLivros>(
       `${API_ENDPOINTS.LIVROS.SEARCH}?${params.toString()}`
@@ -151,12 +142,12 @@ export const livrosService = {
    * Criar novo livro
    * POST /books
    */
-  async criar(livro: Omit<Livro, "isbn">): Promise<Livro> {
-    const response = await api.post<Livro>(
+  async criar(payload: BookRequest): Promise<Livro> {
+    const response = await api.post<BookResponse>(
       API_ENDPOINTS.LIVROS.CREATE,
-      livro
+      payload
     );
-    return response.data;
+    return mapBookResponseToLivro(response.data);
   },
 
   /**
@@ -165,13 +156,13 @@ export const livrosService = {
    */
   async atualizar(
     isbn: string,
-    livro: Partial<Livro>
+    payload: BookRequestUpdate
   ): Promise<Livro> {
-    const response = await api.patch<Livro>(
+    const response = await api.patch<BookResponse>(
       API_ENDPOINTS.LIVROS.UPDATE(isbn),
-      livro
+      payload
     );
-    return response.data;
+    return mapBookResponseToLivro(response.data);
   },
 
   /**
