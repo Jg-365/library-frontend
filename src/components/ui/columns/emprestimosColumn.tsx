@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Emprestimo } from "@/types";
+import type { Emprestimo, Multa } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import {
   format,
@@ -246,11 +246,21 @@ export const emprestimosColumn: ColumnDef<Emprestimo>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const multa = row.getValue("multa") as
+      const multaValue = row.getValue("multa") as
         | number
+        | Multa
         | undefined;
+      const multa =
+        typeof multaValue === "object" &&
+        multaValue !== null
+          ? multaValue
+          : undefined;
+      const valorMulta =
+        typeof multaValue === "number"
+          ? multaValue
+          : multa?.valor;
 
-      if (!multa || multa === 0) {
+      if (!valorMulta || valorMulta === 0) {
         return (
           <div className="text-center text-muted-foreground">
             R$ 0,00
@@ -259,10 +269,22 @@ export const emprestimosColumn: ColumnDef<Emprestimo>[] = [
       }
 
       return (
-        <div className="text-center">
+        <div className="text-center space-y-1">
           <span className="font-semibold text-red-600">
-            R$ {multa.toFixed(2).replace(".", ",")}
+            R$ {valorMulta.toFixed(2).replace(".", ",")}
           </span>
+          {multa?.pago !== undefined && (
+            <div className="flex justify-center">
+              <Badge
+                variant={
+                  multa.pago ? "secondary" : "destructive"
+                }
+                className="text-xs"
+              >
+                {multa.pago ? "Paga" : "Pendente"}
+              </Badge>
+            </div>
+          )}
         </div>
       );
     },

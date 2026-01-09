@@ -26,20 +26,20 @@ export function createCursoColumn({
 }: CreateCursoColumnProps): ColumnDef<Curso>[] {
   return [
     {
-      accessorKey: "cod_curso",
+      accessorKey: "courseCode",
       header: "ID",
       cell: ({ row }) => (
         <div className="font-medium">
-          #{row.getValue("cod_curso")}
+          #{row.getValue("courseCode")}
         </div>
       ),
     },
     {
-      accessorKey: "nome",
+      accessorKey: "courseName",
       header: "Nome",
       cell: ({ row }) => (
         <div className="font-medium">
-          {row.getValue("nome")}
+          {row.getValue("courseName")}
         </div>
       ),
     },

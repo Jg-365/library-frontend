@@ -24,8 +24,7 @@ import { UsuarioForm } from "@/components/forms/UsuarioForm";
 import { createUsuarioColumn } from "@/components/ui/columns/usuariosColumn";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { usuariosService } from "@/services";
 import type { Usuario } from "@/types";
 
 interface UsuarioData extends Usuario {
@@ -46,12 +45,7 @@ export function CadastroUsuarios() {
 
   const fetchUsuarios = async () => {
     try {
-      const response = await api.get(
-        API_ENDPOINTS.USUARIOS.ALL
-      );
-      // Backend retorna MyPage<UserEntity> com estrutura: {content, totalElements, currentPage, totalPages}
-      const usuarios =
-        response.data.content || response.data;
+      const usuarios = await usuariosService.listarTodos();
       setUsuarios(usuarios);
     } catch (error: any) {
       toast.error("Erro ao carregar usuários");
@@ -78,10 +72,8 @@ export function CadastroUsuarios() {
 
     try {
       // Backend espera enrollment no path
-      await api.delete(
-        API_ENDPOINTS.USUARIOS.DELETE(
-          usuarioToDelete.enrollment?.toString() || ""
-        )
+      await usuariosService.deletar(
+        usuarioToDelete.enrollment?.toString() || ""
       );
       toast.success("Usuário excluído com sucesso!");
       fetchUsuarios();

@@ -11,7 +11,7 @@ export function setupCategoriasHandlers(mock: MockAdapter) {
       config.url?.split("/").pop() || "0"
     );
     const categoria = mockCategorias.find(
-      (c) => c.id === id
+      (c) => c.categoryCode === id
     );
 
     if (!categoria) {
@@ -26,7 +26,7 @@ export function setupCategoriasHandlers(mock: MockAdapter) {
     const novaCategoria = JSON.parse(config.data);
     const categoriaComId = {
       ...novaCategoria,
-      id: mockCategorias.length + 1,
+      categoryCode: mockCategorias.length + 1,
     };
 
     mockCategorias.push(categoriaComId);
@@ -39,7 +39,7 @@ export function setupCategoriasHandlers(mock: MockAdapter) {
       config.url?.split("/").pop() || "0"
     );
     const categoriaIndex = mockCategorias.findIndex(
-      (c) => c.id === id
+      (c) => c.categoryCode === id
     );
 
     if (categoriaIndex === -1) {
@@ -62,7 +62,7 @@ export function setupCategoriasHandlers(mock: MockAdapter) {
       config.url?.split("/").pop() || "0"
     );
     const categoriaIndex = mockCategorias.findIndex(
-      (c) => c.id === id
+      (c) => c.categoryCode === id
     );
 
     if (categoriaIndex === -1) {

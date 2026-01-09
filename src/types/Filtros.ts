@@ -3,6 +3,18 @@ import type { Autor } from "./Autor";
 import type { Categoria } from "./Categoria";
 
 export interface FiltroLivros {
+  category?: string;
+  subCategory?: string;
+  author?: string;
+  publisher?: string;
+  title?: string;
+  isbn?: string;
+  releaseYearMin?: number;
+  releaseYearMax?: number;
+  availableOnly?: boolean;
+  term?: string;
+  page?: number;
+  size?: number;
   categoriaId?: number;
   subcategoriaId?: number;
   autorId?: number;
@@ -21,12 +33,9 @@ export interface ResultadoFiltroLivros {
 
 export interface Subcategoria {
   id: number;
-  nome: string;
-  categoriaId: number;
-  descricao?: string;
+  description: string;
+  categoryCode: number;
+  category?: Categoria;
 }
 
-export interface SubcategoriaComCategoria
-  extends Subcategoria {
-  categoria?: Categoria;
-}
+export interface SubcategoriaComCategoria extends Subcategoria {}

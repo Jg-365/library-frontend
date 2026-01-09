@@ -142,10 +142,25 @@ export const authService = {
   },
 
   logout: async () => {
-    // JWT logout é feito apenas no frontend removendo o token
-    // Não há endpoint de logout no backend
+    try {
+      await api.post(API_ENDPOINTS.AUTH.LOGOUT);
+    } catch (error) {
+      console.warn(
+        "Falha ao chamar endpoint de logout:",
+        error
+      );
+    }
+
+    // JWT logout é feito no frontend removendo o token
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+  },
+
+  refresh: async (): Promise<{ accessToken: string }> => {
+    const response = await api.post<{
+      accessToken: string;
+    }>(API_ENDPOINTS.AUTH.REFRESH);
+    return response.data;
   },
 
   saveAuth: (token: string, user: Usuario) => {

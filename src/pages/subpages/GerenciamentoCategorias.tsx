@@ -7,6 +7,7 @@ import type {
   Perfil,
 } from "@/types";
 import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import {
@@ -81,12 +82,11 @@ export function GerenciamentoCategorias() {
   ] = useState<SubcategoriaTable | null>(null);
   const [expandedCategorias, setExpandedCategorias] =
     useState<Set<number>>(new Set());
+  const [descricaoBusca, setDescricaoBusca] =
+    useState("");
 
   // Form states
-  const [nomeCategoria, setNomeCategoria] = useState("");
   const [descricaoCategoria, setDescricaoCategoria] =
-    useState("");
-  const [nomeSubcategoria, setNomeSubcategoria] =
     useState("");
   const [descricaoSubcategoria, setDescricaoSubcategoria] =
     useState("");
@@ -119,26 +119,25 @@ export function GerenciamentoCategorias() {
     carregarDados();
   }, []);
 
-  const carregarDados = async () => {
+  const carregarDados = async (
+    description: string = ""
+  ) => {
     try {
       setLoading(true);
       const [categoriasRes, subcategoriasRes] =
         await Promise.all([
-          api.get<Categoria[]>(
-            `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
-          ),
+          categoriasService.listarTodas(description),
           api.get<Subcategoria[]>(
             API_ENDPOINTS.SUBCATEGORIAS.BASE
           ),
         ]);
 
       // Mapear campos do backend para o frontend
-      const categoriasFormatadas = categoriasRes.data.map(
+      const categoriasFormatadas = categoriasRes.map(
         (cat: any) => ({
-          id: cat.categoryCode || cat.id,
-          codigo: cat.categoryCode || cat.codigo,
-          nome: cat.description || cat.nome,
-          descricao: cat.description || cat.descricao,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
 
@@ -147,7 +146,19 @@ export function GerenciamentoCategorias() {
         categoriasFormatadas
       );
       setCategorias(categoriasFormatadas);
-      setSubcategorias(subcategoriasRes.data);
+      const subcategoriasFormatadas =
+        subcategoriasRes.data?.map((sub: any) => ({
+          id: sub.id,
+          description:
+            sub.description || sub.nome || sub.descricao,
+          categoryCode:
+            sub.category?.categoryCode ||
+            sub.categoryCode ||
+            sub.categoriaId,
+          category: sub.category,
+        })) || [];
+
+      setSubcategorias(subcategoriasFormatadas);
     } catch (error: any) {
       toast.error("Erro ao carregar dados", {
         description:
@@ -169,18 +180,26 @@ export function GerenciamentoCategorias() {
     setExpandedCategorias(newExpanded);
   };
 
+  const handleBuscarCategorias = async () => {
+    await carregarDados(descricaoBusca);
+  };
+
+  const handleLimparBusca = async () => {
+    setDescricaoBusca("");
+    await carregarDados("");
+  };
+
   const getSubcategoriasPorCategoria = (
     categoriaId: number
   ) => {
     return subcategorias.filter(
-      (sub) => sub.categoriaId === categoriaId
+      (sub) => sub.categoryCode === categoriaId
     );
   };
 
   // Handlers de Categoria
   const handleNovaCategoria = () => {
     setDialogMode("criar");
-    setNomeCategoria("");
     setDescricaoCategoria("");
     setSelectedCategoria(null);
     setIsDialogOpen(true);
@@ -189,32 +208,29 @@ export function GerenciamentoCategorias() {
   const handleEditarCategoria = (categoria: Categoria) => {
     setDialogMode("editar");
     setSelectedCategoria(categoria);
-    setNomeCategoria(categoria.nome);
-    setDescricaoCategoria(categoria.descricao || "");
+    setDescricaoCategoria(categoria.description);
     setIsDialogOpen(true);
   };
 
   const handleSalvarCategoria = async () => {
-    if (!nomeCategoria.trim()) {
-      toast.error("Nome da categoria é obrigatório");
+    if (!descricaoCategoria.trim()) {
+      toast.error("Descrição da categoria é obrigatória");
       return;
     }
 
     try {
       if (dialogMode === "criar") {
         await api.post(API_ENDPOINTS.CATEGORIAS.BASE, {
-          nome: nomeCategoria,
-          descricao: descricaoCategoria,
+          description: descricaoCategoria,
         });
         toast.success("Categoria criada com sucesso!");
       } else if (selectedCategoria) {
         await api.put(
           API_ENDPOINTS.CATEGORIAS.BY_ID(
-            selectedCategoria.id
+            selectedCategoria.categoryCode
           ),
           {
-            nome: nomeCategoria,
-            descricao: descricaoCategoria,
+            description: descricaoCategoria,
           }
         );
         toast.success("Categoria atualizada com sucesso!");
@@ -231,7 +247,9 @@ export function GerenciamentoCategorias() {
   const handleDeletarCategoria = async (
     categoria: Categoria
   ) => {
-    const subs = getSubcategoriasPorCategoria(categoria.id);
+    const subs = getSubcategoriasPorCategoria(
+      categoria.categoryCode
+    );
     if (subs.length > 0) {
       toast.error(
         "Não é possível deletar categoria com subcategorias",
@@ -245,7 +263,7 @@ export function GerenciamentoCategorias() {
 
     if (
       !confirm(
-        `Tem certeza que deseja deletar a categoria "${categoria.nome}"?`
+        `Tem certeza que deseja deletar a categoria "${categoria.description}"?`
       )
     ) {
       return;
@@ -253,7 +271,9 @@ export function GerenciamentoCategorias() {
 
     try {
       await api.delete(
-        API_ENDPOINTS.CATEGORIAS.BY_ID(categoria.id)
+        API_ENDPOINTS.CATEGORIAS.BY_ID(
+          categoria.categoryCode
+        )
       );
       toast.success("Categoria deletada com sucesso!");
       carregarDados();
@@ -267,7 +287,6 @@ export function GerenciamentoCategorias() {
   // Handlers de Subcategoria
   const handleNovaSubcategoria = (categoriaId?: number) => {
     setDialogMode("criar");
-    setNomeSubcategoria("");
     setDescricaoSubcategoria("");
     setCategoriaIdSubcategoria(categoriaId || null);
     setSelectedSubcategoria(null);
@@ -279,15 +298,14 @@ export function GerenciamentoCategorias() {
   ) => {
     setDialogMode("editar");
     setSelectedSubcategoria(subcategoria);
-    setNomeSubcategoria(subcategoria.nome);
-    setDescricaoSubcategoria(subcategoria.descricao || "");
-    setCategoriaIdSubcategoria(subcategoria.categoriaId);
+    setDescricaoSubcategoria(subcategoria.description);
+    setCategoriaIdSubcategoria(subcategoria.categoryCode);
     setIsSubcategoriaDialogOpen(true);
   };
 
   const handleSalvarSubcategoria = async () => {
-    if (!nomeSubcategoria.trim()) {
-      toast.error("Nome da subcategoria é obrigatório");
+    if (!descricaoSubcategoria.trim()) {
+      toast.error("Descrição da subcategoria é obrigatória");
       return;
     }
     if (!categoriaIdSubcategoria) {
@@ -298,9 +316,8 @@ export function GerenciamentoCategorias() {
     try {
       if (dialogMode === "criar") {
         await api.post(API_ENDPOINTS.SUBCATEGORIAS.BASE, {
-          nome: nomeSubcategoria,
-          descricao: descricaoSubcategoria,
-          categoriaId: categoriaIdSubcategoria,
+          description: descricaoSubcategoria,
+          categoryCode: categoriaIdSubcategoria,
         });
         toast.success("Subcategoria criada com sucesso!");
       } else if (selectedSubcategoria) {
@@ -309,9 +326,8 @@ export function GerenciamentoCategorias() {
             selectedSubcategoria.id
           ),
           {
-            nome: nomeSubcategoria,
-            descricao: descricaoSubcategoria,
-            categoriaId: categoriaIdSubcategoria,
+            description: descricaoSubcategoria,
+            categoryCode: categoriaIdSubcategoria,
           }
         );
         toast.success(
@@ -332,7 +348,7 @@ export function GerenciamentoCategorias() {
   ) => {
     if (
       !confirm(
-        `Tem certeza que deseja deletar a subcategoria "${subcategoria.nome}"?`
+        `Tem certeza que deseja deletar a subcategoria "${subcategoria.description}"?`
       )
     ) {
       return;
@@ -390,15 +406,15 @@ export function GerenciamentoCategorias() {
   const subcategoriasTableData: SubcategoriaTable[] =
     subcategorias.map((sub) => {
       const categoria = categorias.find(
-        (cat) => cat.id === sub.categoriaId
+        (cat) => cat.categoryCode === sub.categoryCode
       );
       return {
         id: sub.id,
-        cod_subcategoria: sub.codigo || String(sub.id),
-        descricao: sub.nome || sub.descricao,
-        cod_categoria_principal: sub.categoriaId,
+        cod_subcategoria: String(sub.id),
+        descricao: sub.description,
+        cod_categoria_principal: sub.categoryCode,
         categoria_nome:
-          categoria?.nome || categoria?.descricao || "N/A",
+          categoria?.description || "N/A",
       };
     });
   if (loading) {
@@ -458,27 +474,54 @@ export function GerenciamentoCategorias() {
               {subcategorias.length} subcategorias
               cadastradas
             </CardDescription>
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
+              <Input
+                placeholder="Buscar por descrição"
+                value={descricaoBusca}
+                onChange={(event) =>
+                  setDescricaoBusca(event.target.value)
+                }
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBuscarCategorias}
+                >
+                  Buscar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleLimparBusca}
+                >
+                  Limpar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {categorias.map((categoria) => {
                 const subs = getSubcategoriasPorCategoria(
-                  categoria.id
+                  categoria.categoryCode
                 );
                 const isExpanded = expandedCategorias.has(
-                  categoria.id
+                  categoria.categoryCode
                 );
 
                 return (
                   <div
-                    key={categoria.id}
+                    key={categoria.categoryCode}
                     className="border rounded-lg"
                   >
                     <div className="flex items-center justify-between p-4 hover:bg-gray-50">
                       <div className="flex items-center gap-2 flex-1">
                         <button
                           onClick={() =>
-                            toggleCategoria(categoria.id)
+                            toggleCategoria(
+                              categoria.categoryCode
+                            )
                           }
                           className="p-1 hover:bg-gray-200 rounded"
                         >
@@ -491,13 +534,11 @@ export function GerenciamentoCategorias() {
                         <FolderTree className="h-5 w-5 text-blue-600" />
                         <div>
                           <p className="font-semibold">
-                            {categoria.nome}
+                            {categoria.description}
                           </p>
-                          {categoria.descricao && (
-                            <p className="text-sm text-gray-500">
-                              {categoria.descricao}
-                            </p>
-                          )}
+                          <p className="text-sm text-gray-500">
+                            Código: {categoria.categoryCode}
+                          </p>
                           <p className="text-xs text-gray-400 mt-1">
                             {subs.length} subcategoria
                             {subs.length !== 1 ? "s" : ""}
@@ -510,7 +551,7 @@ export function GerenciamentoCategorias() {
                           variant="outline"
                           onClick={() =>
                             handleNovaSubcategoria(
-                              categoria.id
+                              categoria.categoryCode
                             )
                           }
                         >
@@ -549,13 +590,11 @@ export function GerenciamentoCategorias() {
                           >
                             <div>
                               <p className="font-medium">
-                                {sub.nome}
+                                {sub.description}
                               </p>
-                              {sub.descricao && (
-                                <p className="text-sm text-gray-500">
-                                  {sub.descricao}
-                                </p>
-                              )}
+                              <p className="text-sm text-gray-500">
+                                Categoria: {categoria.description}
+                              </p>
                             </div>
                             <div className="flex gap-2">
                               <Button
@@ -646,25 +685,14 @@ export function GerenciamentoCategorias() {
             </CustomModalHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="nome">Nome *</Label>
-                <Input
-                  id="nome"
-                  value={nomeCategoria}
-                  onChange={(e) =>
-                    setNomeCategoria(e.target.value)
-                  }
-                  placeholder="Ex: Tecnologia"
-                />
-              </div>
-              <div>
-                <Label htmlFor="descricao">Descrição</Label>
+                <Label htmlFor="descricao">Descrição *</Label>
                 <Input
                   id="descricao"
                   value={descricaoCategoria}
                   onChange={(e) =>
                     setDescricaoCategoria(e.target.value)
                   }
-                  placeholder="Descrição da categoria"
+                  placeholder="Ex: Tecnologia"
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -724,29 +752,18 @@ export function GerenciamentoCategorias() {
                   <SelectContent>
                     {categorias.map((cat) => (
                       <SelectItem
-                        key={cat.id}
-                        value={cat.id.toString()}
+                        key={cat.categoryCode}
+                        value={cat.categoryCode.toString()}
                       >
-                        {cat.nome}
+                        {cat.description}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="nomeSub">Nome *</Label>
-                <Input
-                  id="nomeSub"
-                  value={nomeSubcategoria}
-                  onChange={(e) =>
-                    setNomeSubcategoria(e.target.value)
-                  }
-                  placeholder="Ex: Programação"
-                />
-              </div>
-              <div>
                 <Label htmlFor="descricaoSub">
-                  Descrição
+                  Descrição *
                 </Label>
                 <Input
                   id="descricaoSub"
@@ -754,7 +771,7 @@ export function GerenciamentoCategorias() {
                   onChange={(e) =>
                     setDescricaoSubcategoria(e.target.value)
                   }
-                  placeholder="Descrição da subcategoria"
+                  placeholder="Ex: Programação"
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -799,7 +816,15 @@ export function GerenciamentoCategorias() {
             </CustomModalHeader>
             <SubcategoriaForm
               subcategoria={
-                selectedSubcategoriaTable || undefined
+                selectedSubcategoriaTable
+                  ? {
+                      id: selectedSubcategoriaTable.id,
+                      description:
+                        selectedSubcategoriaTable.descricao,
+                      categoryCode:
+                        selectedSubcategoriaTable.cod_categoria_principal,
+                    }
+                  : undefined
               }
               onSuccess={() => {
                 setIsSubcategoriaTableDialogOpen(false);

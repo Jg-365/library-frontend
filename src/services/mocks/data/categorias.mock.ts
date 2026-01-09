@@ -2,43 +2,35 @@ import type { Categoria } from "@/types/Categoria";
 
 export const mockCategorias: Categoria[] = [
   {
-    id: 1,
-    codigo: "FIC",
-    descricao: "Ficção",
+    categoryCode: 1,
+    description: "Ficção",
   },
   {
-    id: 2,
-    codigo: "NAO-FIC",
-    descricao: "Não-ficção",
+    categoryCode: 2,
+    description: "Não-ficção",
   },
   {
-    id: 3,
-    codigo: "ROM",
-    descricao: "Romance",
+    categoryCode: 3,
+    description: "Romance",
   },
   {
-    id: 4,
-    codigo: "TEC",
-    descricao: "Técnico",
+    categoryCode: 4,
+    description: "Técnico",
   },
   {
-    id: 5,
-    codigo: "INF",
-    descricao: "Infantil",
+    categoryCode: 5,
+    description: "Infantil",
   },
   {
-    id: 6,
-    codigo: "BIO",
-    descricao: "Biografia",
+    categoryCode: 6,
+    description: "Biografia",
   },
   {
-    id: 7,
-    codigo: "HIS",
-    descricao: "História",
+    categoryCode: 7,
+    description: "História",
   },
   {
-    id: 8,
-    codigo: "CIE",
-    descricao: "Ciência",
+    categoryCode: 8,
+    description: "Ciência",
   },
 ];

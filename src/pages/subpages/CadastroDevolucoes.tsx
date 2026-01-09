@@ -27,9 +27,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
 import { emprestimosService } from "@/services/emprestimosService";
-import { API_ENDPOINTS } from "@/config/constants";
 import type { Emprestimo } from "@/types";
 
 export function CadastroDevolucoes() {
@@ -43,14 +41,9 @@ export function CadastroDevolucoes() {
   const fetchEmprestimos = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
-      // Filtra apenas empréstimos não devolvidos
-      const ativos = response.data.filter(
-        (e: Emprestimo) => e.status === "ATIVO"
-      );
-      setEmprestimos(ativos);
+      const response =
+        await emprestimosService.listarTodos();
+      setEmprestimos(response);
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");
       console.error("Erro ao buscar empréstimos:", error);
