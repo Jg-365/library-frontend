@@ -186,9 +186,17 @@ export const livrosService = {
    * Remover coautores de um livro
    * DELETE /books/{isbn}/co-authors
    */
-  async removerCoautores(isbn: string): Promise<void> {
+  async removerCoautores(
+    isbn: string,
+    emails: string[]
+  ): Promise<void> {
     await api.delete(
-      API_ENDPOINTS.LIVROS.REMOVE_CO_AUTHORS(isbn)
+      API_ENDPOINTS.LIVROS.REMOVE_CO_AUTHORS(isbn),
+      {
+        data: {
+          coAuthorsEmails: emails,
+        },
+      }
     );
   },
 };

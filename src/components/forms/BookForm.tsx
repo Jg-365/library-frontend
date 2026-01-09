@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import {
   type LivroFormValues,
 } from "@/schemas";
 import { API_ENDPOINTS } from "@/config";
+import { livrosService } from "@/services/livrosService";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +54,8 @@ export function BookForm({
   const [selectedAutores, setSelectedAutores] = useState<
     Autor[]
   >([]);
+  const [coautoresParaRemover, setCoautoresParaRemover] =
+    useState<string[]>([]);
 
   const form = useForm<LivroFormValues>({
     resolver: zodResolver(livroFormSchema),
@@ -71,6 +75,7 @@ export function BookForm({
     carregarCategorias();
     if (livro) {
       setSelectedAutores(livro.autores || []);
+      setCoautoresParaRemover([]);
     }
 
     // Recarregar autores quando a janela volta a ter foco
@@ -223,6 +228,58 @@ export function BookForm({
     );
   };
 
+  const handleToggleCoautor = (email: string) => {
+    setCoautoresParaRemover((prev) =>
+      prev.includes(email)
+        ? prev.filter((item) => item !== email)
+        : [...prev, email]
+    );
+  };
+
+  const handleRemoverCoautores = async () => {
+    if (!livro) return;
+
+    const emailsValidos = coautoresParaRemover.filter(
+      (email) => email && email.includes("@")
+    );
+
+    if (emailsValidos.length === 0) {
+      toast.error("Selecione ao menos um coautor válido");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await livrosService.removerCoautores(
+        livro.isbn,
+        emailsValidos
+      );
+
+      const autoresAtualizados = selectedAutores.filter(
+        (autor, index) =>
+          index === 0 ||
+          !emailsValidos.includes(autor.email || "")
+      );
+
+      setSelectedAutores(autoresAtualizados);
+      form.setValue(
+        "autores",
+        autoresAtualizados.map((autor) => autor.id)
+      );
+      setCoautoresParaRemover([]);
+      toast.success("Coautores removidos com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao remover coautores", {
+        description:
+          error.response?.data?.message ||
+          error.message ||
+          "Tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onSubmit = async (data: LivroFormValues) => {
     try {
       setIsLoading(true);
@@ -316,6 +373,8 @@ export function BookForm({
       setIsLoading(false);
     }
   };
+
+  const coautoresDisponiveis = selectedAutores.slice(1);
 
   return (
     <Form {...form}>
@@ -656,6 +715,54 @@ export function BookForm({
               </p>
             )}
           </div>
+
+          {livro && coautoresDisponiveis.length > 0 && (
+            <div className="md:col-span-2 space-y-3 rounded-lg border border-dashed p-4">
+              <FormLabel>Remover coautores</FormLabel>
+              <div className="space-y-2">
+                {coautoresDisponiveis.map((autor) => {
+                  const email = autor.email || "";
+                  const isDisabled = !email;
+                  return (
+                    <label
+                      key={autor.id}
+                      className="flex items-center gap-3 text-sm"
+                    >
+                      <Checkbox
+                        checked={
+                          !isDisabled &&
+                          coautoresParaRemover.includes(email)
+                        }
+                        disabled={isDisabled}
+                        onCheckedChange={() => {
+                          if (!isDisabled) {
+                            handleToggleCoautor(email);
+                          }
+                        }}
+                      />
+                      <span className="font-medium">
+                        {autor.nome}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {email || "Email não informado"}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRemoverCoautores}
+                disabled={
+                  isLoading ||
+                  coautoresParaRemover.length === 0
+                }
+              >
+                Remover coautores selecionados
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Botões */}
