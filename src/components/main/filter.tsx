@@ -24,7 +24,8 @@ export interface BookFilterValues {
   editora?: string;
   ano?: string;
   isbn?: string;
-  categoriaId?: string;
+  category?: string;
+  subCategory?: string;
 }
 
 interface BookFiltersProps {
@@ -39,7 +40,8 @@ const filterLabels: Record<keyof BookFilterValues, string> =
     editora: "Editora",
     ano: "Ano",
     isbn: "ISBN",
-    categoriaId: "Categoria",
+    category: "Categoria",
+    subCategory: "Subcategoria",
   };
 
 export function BookFilters({
@@ -276,10 +278,10 @@ export function BookFilters({
                       Categoria
                     </Label>
                     <Select
-                      value={filters.categoriaId}
+                      value={filters.category}
                       onValueChange={(value) =>
                         handleFilterChange(
-                          "categoriaId",
+                          "category",
                           value
                         )
                       }
@@ -288,23 +290,43 @@ export function BookFilters({
                         <SelectValue placeholder="Todas as categorias" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">
+                        <SelectItem value="Tecnologia">
                           Tecnologia
                         </SelectItem>
-                        <SelectItem value="2">
+                        <SelectItem value="Programação">
                           Programação
                         </SelectItem>
-                        <SelectItem value="3">
+                        <SelectItem value="Design">
                           Design
                         </SelectItem>
-                        <SelectItem value="4">
+                        <SelectItem value="Negócios">
                           Negócios
                         </SelectItem>
-                        <SelectItem value="5">
+                        <SelectItem value="Ciências">
                           Ciências
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="subcategoria"
+                      className="text-xs"
+                    >
+                      Subcategoria
+                    </Label>
+                    <Input
+                      id="subcategoria"
+                      placeholder="Nome da subcategoria..."
+                      value={filters.subCategory || ""}
+                      onChange={(e) =>
+                        handleFilterChange(
+                          "subCategory",
+                          e.target.value
+                        )
+                      }
+                    />
                   </div>
                 </div>
 
@@ -347,20 +369,10 @@ export function BookFilters({
             {Object.entries(filters).map(([key, value]) => {
               if (!value) return null;
 
-              const categorias: Record<string, string> = {
-                "1": "Tecnologia",
-                "2": "Programação",
-                "3": "Design",
-                "4": "Negócios",
-                "5": "Ciências",
-              };
-
               const displayValue =
-                key === "categoriaId"
-                  ? categorias[value] || value
-                  : key === "ano" && value === "older"
-                    ? "< 2015"
-                    : value;
+                key === "ano" && value === "older"
+                  ? "< 2015"
+                  : value;
 
               return (
                 <Badge
