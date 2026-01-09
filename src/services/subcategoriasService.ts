@@ -8,6 +8,21 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Subcategoria } from "@/types";
+import type { SubCategoryResponse } from "@/types/BackendResponses";
+
+const mapSubcategoriaResponse = (
+  subcategoria: SubCategoryResponse
+): Subcategoria => ({
+  id: subcategoria.id,
+  nome: subcategoria.description,
+  descricao: subcategoria.description,
+  categoriaId: subcategoria.category?.categoryCode ?? 0,
+});
+
+const normalizeSubcategoriasResponse = (
+  data: SubCategoryResponse[] | { content?: SubCategoryResponse[] }
+): SubCategoryResponse[] =>
+  Array.isArray(data) ? data : data?.content || [];
 
 export const subcategoriasService = {
   /**
@@ -17,11 +32,11 @@ export const subcategoriasService = {
   async criar(
     dados: Omit<Subcategoria, "id">
   ): Promise<Subcategoria> {
-    const response = await api.post<Subcategoria>(
+    const response = await api.post<SubCategoryResponse>(
       API_ENDPOINTS.SUBCATEGORIAS.CREATE,
       dados
     );
-    return response.data;
+    return mapSubcategoriaResponse(response.data);
   },
 
   /**
@@ -29,10 +44,10 @@ export const subcategoriasService = {
    * GET /subcategories/{id}
    */
   async buscarPorId(id: number): Promise<Subcategoria> {
-    const response = await api.get<Subcategoria>(
+    const response = await api.get<SubCategoryResponse>(
       API_ENDPOINTS.SUBCATEGORIAS.BY_ID(id)
     );
-    return response.data;
+    return mapSubcategoriaResponse(response.data);
   },
 
   /**
@@ -42,10 +57,12 @@ export const subcategoriasService = {
   async buscarPorNome(
     name: string
   ): Promise<Subcategoria[]> {
-    const response = await api.get<Subcategoria[]>(
+    const response = await api.get<SubCategoryResponse[]>(
       API_ENDPOINTS.SUBCATEGORIAS.SEARCH_BY_NAME(name)
     );
-    return response.data;
+    return normalizeSubcategoriasResponse(response.data).map(
+      mapSubcategoriaResponse
+    );
   },
 
   /**
@@ -56,11 +73,11 @@ export const subcategoriasService = {
     id: number,
     dados: Partial<Subcategoria>
   ): Promise<Subcategoria> {
-    const response = await api.patch<Subcategoria>(
+    const response = await api.patch<SubCategoryResponse>(
       API_ENDPOINTS.SUBCATEGORIAS.UPDATE(id),
       dados
     );
-    return response.data;
+    return mapSubcategoriaResponse(response.data);
   },
 
   /**
