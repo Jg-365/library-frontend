@@ -28,12 +28,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { reservasService } from "@/services";
+import { reservasService } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
-import { useAuth } from "@/store/AuthContext";
 
 export default function MinhasReservas() {
-  const { user } = useAuth();
   const location = useLocation();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +90,9 @@ export default function MinhasReservas() {
     if (!reservaSelecionada) return;
 
     try {
-      await reservasService.cancelar(reservaSelecionada.id);
+      await reservasService.deletar(
+        reservaSelecionada.id
+      );
       toast.success("Reserva cancelada com sucesso!");
       setReservaSelecionada(null);
       fetchReservas();

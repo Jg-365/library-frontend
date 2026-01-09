@@ -26,6 +26,8 @@ export interface ReserveResponse {
   userEnrollment: number;
   bookIsbn: string;
   reserveDate: string; // ISO DateTime
+  status?: string;
+  pickupDeadline?: string;
 }
 
 export interface CategoryResponse {

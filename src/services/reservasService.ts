@@ -20,12 +20,38 @@ import { mapBookResponseToLivro } from "./mappers/bookMapper";
 async function mapReserveResponseToReserva(
   reserve: ReserveResponse
 ): Promise<Reserva> {
+  const normalizeStatus = (
+    status?: string
+  ): Reserva["status"] | undefined => {
+    if (!status) return undefined;
+    const normalized = status.trim().toUpperCase();
+    if (["ATIVA", "ATIVO", "ACTIVE"].includes(normalized)) {
+      return "ATIVA";
+    }
+    if (
+      ["CONCLUIDA", "CONCLUIDO", "FINALIZADA", "COMPLETED"].includes(
+        normalized
+      )
+    ) {
+      return "CONCLUIDA";
+    }
+    if (
+      ["CANCELADA", "CANCELADO", "CANCELLED", "CANCELED"].includes(
+        normalized
+      )
+    ) {
+      return "CANCELADA";
+    }
+    return undefined;
+  };
+
   const reserva: Partial<Reserva> = {
     id: reserve.id,
     usuarioId: reserve.userEnrollment,
     livroIsbn: reserve.bookIsbn,
     dataReserva: reserve.reserveDate,
-    status: "ATIVA",
+    prazoRetirada: reserve.pickupDeadline,
+    status: normalizeStatus(reserve.status) ?? "ATIVA",
   };
 
   // Tentar popular o objeto `livro` para evitar undefined em componentes
