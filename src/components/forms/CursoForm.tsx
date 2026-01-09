@@ -16,8 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { cursosService } from "@/services";
 import type { Curso } from "@/types";
 
 interface CursoFormProps {
@@ -49,7 +48,7 @@ export function CursoForm({
         });
         toast.success("Curso atualizado com sucesso!");
       } else {
-        await api.post(API_ENDPOINTS.CURSOS.BASE, data);
+        await cursosService.criar(data);
         toast.success("Curso cadastrado com sucesso!");
         form.reset();
       }

@@ -9,16 +9,60 @@ import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Categoria } from "@/types";
 
+function mapCategoriaResponse(
+  categoria: any,
+  index: number
+): Categoria {
+  const id =
+    categoria?.id ?? categoria?.categoryCode ?? index;
+  const descricao =
+    categoria?.description ?? categoria?.descricao ?? "";
+  return {
+    id,
+    codigo: categoria?.codigo ?? String(id),
+    nome: categoria?.nome ?? descricao,
+    descricao,
+  };
+}
+
 export const categoriasService = {
   /**
    * Listar/Buscar todas as categorias
    * GET /categories
    */
-  async listarTodas(): Promise<Categoria[]> {
+  async listarTodas(
+    description: string = ""
+  ): Promise<Categoria[]> {
     const response = await api.get<Categoria[]>(
-      API_ENDPOINTS.CATEGORIAS.SEARCH
+      API_ENDPOINTS.CATEGORIAS.SEARCH,
+      {
+        params: {
+          description,
+        },
+      }
     );
-    return response.data;
+    return (response.data || []).map(
+      (categoria: any, index: number) =>
+        mapCategoriaResponse(categoria, index)
+    );
+  },
+
+  /**
+   * Buscar categorias por descrição
+   * GET /categories?description=...
+   */
+  async buscarPorDescricao(
+    description: string
+  ): Promise<Categoria[]> {
+    const response = await api.get(
+      API_ENDPOINTS.CATEGORIAS.SEARCH_BY_DESCRIPTION(
+        description
+      )
+    );
+    return (response.data || []).map(
+      (categoria: any, index: number) =>
+        mapCategoriaResponse(categoria, index)
+    );
   },
 
   /**
@@ -26,24 +70,24 @@ export const categoriasService = {
    * GET /categories/{id}
    */
   async buscarPorId(id: number): Promise<Categoria> {
-    const response = await api.get<Categoria>(
+    const response = await api.get(
       API_ENDPOINTS.CATEGORIAS.BY_ID(id)
     );
-    return response.data;
+    return mapCategoriaResponse(response.data, 0);
   },
 
   /**
    * Criar nova categoria
    * POST /categories
    */
-  async criar(
-    dados: Omit<Categoria, "id">
-  ): Promise<Categoria> {
-    const response = await api.post<Categoria>(
+  async criar(dados: {
+    description: string;
+  }): Promise<Categoria> {
+    const response = await api.post(
       API_ENDPOINTS.CATEGORIAS.CREATE,
       dados
     );
-    return response.data;
+    return mapCategoriaResponse(response.data, 0);
   },
 
   /**
@@ -52,13 +96,13 @@ export const categoriasService = {
    */
   async atualizar(
     id: number,
-    dados: Partial<Categoria>
+    dados: { description?: string }
   ): Promise<Categoria> {
-    const response = await api.patch<Categoria>(
+    const response = await api.patch(
       API_ENDPOINTS.CATEGORIAS.UPDATE(id),
       dados
     );
-    return response.data;
+    return mapCategoriaResponse(response.data, 0);
   },
 
   /**

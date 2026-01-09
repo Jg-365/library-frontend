@@ -24,8 +24,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { cursosService, usuariosService } from "@/services";
 import type { Usuario } from "@/types";
 
 interface Curso {
@@ -102,25 +101,22 @@ export function UsuarioForm({
         const userType = usuario.userType;
 
         // Escolher endpoint correto baseado no tipo de usuário
-        let updateEndpoint;
         if (userType === "ALUNO") {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_STUDENT(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarAluno(
+            enrollment?.toString() || "",
+            payload
+          );
         } else if (userType === "PROFESSOR") {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_TEACHER(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarProfessor(
+            enrollment?.toString() || "",
+            payload
+          );
         } else {
-          updateEndpoint =
-            API_ENDPOINTS.USUARIOS.UPDATE_EMPLOYEE(
-              enrollment?.toString() || ""
-            );
+          await usuariosService.atualizarFuncionario(
+            enrollment?.toString() || "",
+            payload
+          );
         }
-
-        await api.patch(updateEndpoint, payload);
         toast.success("Usuário atualizado com sucesso!");
       } else {
         // Mapear dados do formulário para o formato que o backend espera
@@ -156,10 +152,7 @@ export function UsuarioForm({
         }
         // FUNCIONARIO não precisa de campos adicionais
 
-        await api.post(
-          API_ENDPOINTS.USUARIOS.CREATE,
-          backendPayload
-        );
+        await usuariosService.criar(backendPayload);
         toast.success("Usuário cadastrado com sucesso!");
         form.reset();
       }

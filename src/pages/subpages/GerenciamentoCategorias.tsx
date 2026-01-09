@@ -7,6 +7,7 @@ import type {
   Perfil,
 } from "@/types";
 import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import {
@@ -81,6 +82,8 @@ export function GerenciamentoCategorias() {
   ] = useState<SubcategoriaTable | null>(null);
   const [expandedCategorias, setExpandedCategorias] =
     useState<Set<number>>(new Set());
+  const [descricaoBusca, setDescricaoBusca] =
+    useState("");
 
   // Form states
   const [nomeCategoria, setNomeCategoria] = useState("");
@@ -119,21 +122,21 @@ export function GerenciamentoCategorias() {
     carregarDados();
   }, []);
 
-  const carregarDados = async () => {
+  const carregarDados = async (
+    description: string = ""
+  ) => {
     try {
       setLoading(true);
       const [categoriasRes, subcategoriasRes] =
         await Promise.all([
-          api.get<Categoria[]>(
-            `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
-          ),
+          categoriasService.listarTodas(description),
           api.get<Subcategoria[]>(
             API_ENDPOINTS.SUBCATEGORIAS.BASE
           ),
         ]);
 
       // Mapear campos do backend para o frontend
-      const categoriasFormatadas = categoriasRes.data.map(
+      const categoriasFormatadas = categoriasRes.map(
         (cat: any) => ({
           id: cat.categoryCode || cat.id,
           codigo: cat.categoryCode || cat.codigo,
@@ -167,6 +170,15 @@ export function GerenciamentoCategorias() {
       newExpanded.add(categoriaId);
     }
     setExpandedCategorias(newExpanded);
+  };
+
+  const handleBuscarCategorias = async () => {
+    await carregarDados(descricaoBusca);
+  };
+
+  const handleLimparBusca = async () => {
+    setDescricaoBusca("");
+    await carregarDados("");
   };
 
   const getSubcategoriasPorCategoria = (
@@ -458,6 +470,31 @@ export function GerenciamentoCategorias() {
               {subcategorias.length} subcategorias
               cadastradas
             </CardDescription>
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
+              <Input
+                placeholder="Buscar por descrição"
+                value={descricaoBusca}
+                onChange={(event) =>
+                  setDescricaoBusca(event.target.value)
+                }
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBuscarCategorias}
+                >
+                  Buscar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleLimparBusca}
+                >
+                  Limpar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

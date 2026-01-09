@@ -24,8 +24,7 @@ import { CursoForm } from "@/components/forms/CursoForm";
 import { createCursoColumn } from "@/components/ui/columns/cursosColumn";
 import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { cursosService } from "@/services";
 import type { Curso } from "@/types";
 
 export function CadastroCursos() {
