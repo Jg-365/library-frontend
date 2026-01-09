@@ -64,9 +64,11 @@ export function SubcategoriaForm({
 
   const carregarCategorias = async () => {
     try {
-      const categoriasCarregadas =
-        await categoriasService.buscarPorDescricao("");
-      setCategorias(categoriasCarregadas);
+      const response = await api.get<Categoria[]>(
+        `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
+      );
+
+      setCategorias(response.data);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
     }
@@ -165,11 +167,10 @@ export function SubcategoriaForm({
                 <SelectContent>
                   {categorias.map((categoria) => (
                     <SelectItem
-                      key={categoria.id}
-                      value={categoria.id.toString()}
+                      key={categoria.categoryCode}
+                      value={categoria.categoryCode.toString()}
                     >
-                      {categoria.descricao ||
-                        categoria.nome}
+                      {categoria.description}
                     </SelectItem>
                   ))}
                 </SelectContent>

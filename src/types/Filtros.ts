@@ -33,12 +33,9 @@ export interface ResultadoFiltroLivros {
 
 export interface Subcategoria {
   id: number;
-  nome: string;
-  categoriaId: number;
-  descricao?: string;
+  description: string;
+  categoryCode: number;
+  category?: Categoria;
 }
 
-export interface SubcategoriaComCategoria
-  extends Subcategoria {
-  categoria?: Categoria;
-}
+export interface SubcategoriaComCategoria extends Subcategoria {}

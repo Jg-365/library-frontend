@@ -3,40 +3,32 @@ import type { Subcategoria } from "@/types/Filtros";
 export const mockSubcategorias: Subcategoria[] = [
   {
     id: 1,
-    nome: "Engenharia de Software",
-    categoriaId: 1,
-    descricao:
-      "Livros sobre metodologias e processos de desenvolvimento",
+    description: "Engenharia de Software",
+    categoryCode: 1,
   },
   {
     id: 2,
-    nome: "Arquitetura e Padrões",
-    categoriaId: 1,
-    descricao:
-      "Padrões de design e arquitetura de software",
+    description: "Arquitetura e Padrões",
+    categoryCode: 1,
   },
   {
     id: 3,
-    nome: "Clean Code",
-    categoriaId: 1,
-    descricao: "Boas práticas e código limpo",
+    description: "Clean Code",
+    categoryCode: 1,
   },
   {
     id: 4,
-    nome: "Frontend",
-    categoriaId: 2,
-    descricao: "Desenvolvimento web client-side",
+    description: "Frontend",
+    categoryCode: 2,
   },
   {
     id: 5,
-    nome: "Backend",
-    categoriaId: 2,
-    descricao: "Desenvolvimento web server-side",
+    description: "Backend",
+    categoryCode: 2,
   },
   {
     id: 6,
-    nome: "Full Stack",
-    categoriaId: 2,
-    descricao: "Desenvolvimento web completo",
+    description: "Full Stack",
+    categoryCode: 2,
   },
 ];
