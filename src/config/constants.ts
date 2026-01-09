@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   // Autores (Authors)
   AUTORES: {
     BASE: "/authors",
+    ALL: "/authors/all",
     BY_NAME: "/authors",
     BY_EMAIL: (email: string) => `/authors/${email}`,
     CREATE: "/authors",

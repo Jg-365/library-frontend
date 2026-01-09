@@ -11,6 +11,22 @@ import type { Autor } from "@/types";
 
 export const autoresService = {
   /**
+   * Listar todos os autores
+   * GET /authors/all
+   */
+  async listarTodos(): Promise<Autor[]> {
+    const response = await api.get<Autor[]>(
+      API_ENDPOINTS.AUTORES.ALL
+    );
+    return response.data.map((autor, index) => ({
+      id: autor.id || (autor as any).authorId || index + 1,
+      nome: autor.nome || (autor as any).name,
+      email: autor.email,
+      nacionalidade:
+        autor.nacionalidade || (autor as any).nationality,
+    }));
+  },
+  /**
    * Buscar autores por nome
    * GET /authors?name=...
    */
