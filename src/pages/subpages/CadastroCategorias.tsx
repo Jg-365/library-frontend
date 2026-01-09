@@ -15,6 +15,7 @@ import {
   type SubcategoriaTable,
 } from "@/components/main/subcategoriaColumn";
 import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import {
@@ -42,6 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { FolderTree, Plus, List } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +69,8 @@ export function CadastroCategorias() {
     useState<SubcategoriaTable | null>(null);
   const [categoriaToDelete, setCategoriaToDelete] =
     useState<Categoria | null>(null);
+  const [descricaoBusca, setDescricaoBusca] =
+    useState("");
 
   const getPerfil = (): Perfil => {
     if (location.pathname.startsWith("/admin")) {
@@ -90,17 +94,18 @@ export function CadastroCategorias() {
     carregarCategorias();
   }, []);
 
-  const carregarCategorias = async () => {
+  const carregarCategorias = async (
+    description: string = ""
+  ) => {
     try {
       setLoading(true);
 
       // Carregar categorias
-      const categoriasRes = await api.get(
-        `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
-      );
+      const categoriasRes =
+        await categoriasService.listarTodas(description);
 
       // Mapear campos do backend para o frontend
-      const categoriasFormatadas = categoriasRes.data.map(
+      const categoriasFormatadas = categoriasRes.map(
         (cat: any) => ({
           categoryCode: cat.categoryCode ?? cat.id,
           description:
@@ -197,6 +202,15 @@ export function CadastroCategorias() {
   const handleNovaCategoria = () => {
     setSelectedCategoria(null);
     setIsDialogOpen(true);
+  };
+
+  const handleBuscarCategorias = async () => {
+    await carregarCategorias(descricaoBusca);
+  };
+
+  const handleLimparBusca = async () => {
+    setDescricaoBusca("");
+    await carregarCategorias("");
   };
 
   // Handlers de Subcategoria
@@ -368,6 +382,31 @@ export function CadastroCategorias() {
                 ? "categoria encontrada"
                 : "categorias encontradas"}
             </CardDescription>
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
+              <Input
+                placeholder="Buscar por descrição"
+                value={descricaoBusca}
+                onChange={(event) =>
+                  setDescricaoBusca(event.target.value)
+                }
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBuscarCategorias}
+                >
+                  Buscar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleLimparBusca}
+                >
+                  Limpar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <DataTable

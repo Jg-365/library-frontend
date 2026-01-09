@@ -159,4 +159,14 @@ export const reservasService = {
   async deletar(id: number): Promise<void> {
     await api.delete(API_ENDPOINTS.RESERVAS.DELETE(id));
   },
+
+  /**
+   * Cancelar reserva
+   * DELETE /reserves/{id}
+   */
+  async cancelar(id: number): Promise<void> {
+    await api.delete(
+      API_ENDPOINTS.RESERVAS.CANCELAR(id)
+    );
+  },
 };

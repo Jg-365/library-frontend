@@ -19,6 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/services/api";
+import {
+  autoresService,
+  categoriasService,
+  subcategoriasService,
+} from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
 import {
@@ -88,25 +93,11 @@ export function BookForm({
 
   const carregarAutores = async () => {
     try {
-      const response = await api.get(
-        `${API_ENDPOINTS.AUTORES.BASE}/all`
-      );
-      console.log("Autores carregados:", response.data);
-      console.log("Primeiro autor:", response.data[0]);
-
-      // Mapear name para nome e criar id se não existir
-      const autoresFormatados = response.data.map(
-        (autor: any, index: number) => ({
-          id: autor.id || autor.authorId || index + 1, // Tentar id, authorId ou usar índice
-          nome: autor.name || autor.nome,
-          email: autor.email,
-          nacionalidade:
-            autor.nationality || autor.nacionalidade,
-        })
-      );
-
-      console.log("Autores formatados:", autoresFormatados);
-      setAutores(autoresFormatados);
+      const autoresCarregados =
+        await autoresService.listarTodos();
+      console.log("Autores carregados:", autoresCarregados);
+      console.log("Primeiro autor:", autoresCarregados[0]);
+      setAutores(autoresCarregados);
     } catch (error) {
       toast.error("Erro ao carregar autores");
       console.error("Erro ao carregar autores:", error);
@@ -129,12 +120,11 @@ export function BookForm({
             cat.description || cat.descricao || cat.nome,
         })
       );
-
       console.log(
-        "Categorias formatadas:",
-        categoriasFormatadas
+        "Primeira categoria:",
+        categoriasCarregadas[0]
       );
-      setCategorias(categoriasFormatadas);
+      setCategorias(categoriasCarregadas);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
       console.error("Erro ao carregar categorias:", error);
@@ -149,16 +139,17 @@ export function BookForm({
         "🔍 Carregando subcategorias para categoria:",
         categoriaId
       );
-      const url = `${API_ENDPOINTS.SUBCATEGORIAS.BASE}?categoryCode=${categoriaId}`;
-      console.log("🔍 URL:", url);
+      const response =
+        await subcategoriasService.listarPorCategoria(
+          categoriaId
+        );
 
-      const response = await api.get(url);
       console.log(
         "✅ Subcategorias carregadas (raw):",
-        response.data
+        response
       );
 
-      const subcategoriasFormatadas = response.data
+      const subcategoriasFormatadas = response
         .map((sub: any) => {
           console.log("🔍 Mapeando subcategoria:", sub);
           return {

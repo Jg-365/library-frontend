@@ -33,6 +33,19 @@ const mapSubcategoriaResponse = (
 
 export const subcategoriasService = {
   /**
+   * Listar subcategorias por categoria
+   * GET /subcategories?categoryCode=...
+   */
+  async listarPorCategoria(
+    categoryCode: number
+  ): Promise<Subcategoria[]> {
+    const response = await api.get<Subcategoria[]>(
+      API_ENDPOINTS.SUBCATEGORIAS.BY_CATEGORY(categoryCode)
+    );
+    return response.data;
+  },
+
+  /**
    * Criar nova subcategoria
    * POST /subcategories
    */
