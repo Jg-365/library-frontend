@@ -43,11 +43,7 @@ export function CadastroDevolucoes() {
       setIsLoading(true);
       const response =
         await emprestimosService.listarTodos();
-      // Filtra apenas empréstimos não devolvidos
-      const ativos = response.filter(
-        (e: Emprestimo) => e.status === "ATIVO"
-      );
-      setEmprestimos(ativos);
+      setEmprestimos(response);
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");
       console.error("Erro ao buscar empréstimos:", error);
@@ -94,10 +90,33 @@ export function CadastroDevolucoes() {
         );
       }
 
-      await emprestimosService.devolver({ isbnCodes });
-      toast.success("Devolução registrada com sucesso!");
-      setEmprestimoSelecionado(null);
-      fetchEmprestimos();
+      const response =
+        await emprestimosService.devolver({
+          isbnCodes,
+        });
+      const successIsbn = response.successIsbn ?? [];
+      const failedIsbn = response.failedIsbn ?? [];
+
+      if (successIsbn.length > 0) {
+        toast.success(
+          `Devolução registrada: ${successIsbn.join(
+            ", "
+          )}`
+        );
+      }
+
+      if (failedIsbn.length > 0) {
+        toast.error(
+          `Não foi possível devolver: ${failedIsbn.join(
+            ", "
+          )}`
+        );
+      }
+
+      if (successIsbn.length > 0) {
+        setEmprestimoSelecionado(null);
+        fetchEmprestimos();
+      }
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
