@@ -35,7 +35,7 @@ export function CursoForm({
   const form = useForm<CursoFormData>({
     resolver: zodResolver(cursoFormSchema),
     defaultValues: {
-      courseName: curso?.nome || "",
+      courseName: curso?.courseName || "",
     },
   });
 
@@ -44,7 +44,7 @@ export function CursoForm({
     try {
       if (isEditing) {
         await api.patch(API_ENDPOINTS.CURSOS.BASE, {
-          courseCode: curso.cod_curso,
+          courseCode: curso.courseCode,
           courseName: data.courseName,
         });
         toast.success("Curso atualizado com sucesso!");

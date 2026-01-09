@@ -14,7 +14,9 @@ export const cursosService = {
    * Criar novo curso
    * POST /courses
    */
-  async criar(dados: Omit<Curso, "id">): Promise<Curso> {
+  async criar(
+    dados: Omit<Curso, "courseCode">
+  ): Promise<Curso> {
     const response = await api.post<Curso>(
       API_ENDPOINTS.CURSOS.CREATE,
       dados
