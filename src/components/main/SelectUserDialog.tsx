@@ -51,6 +51,8 @@ export function SelectUserDialog({
     useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [totalUsuarios, setTotalUsuarios] =
+    useState(0);
 
   useEffect(() => {
     if (open) {
@@ -80,10 +82,10 @@ export function SelectUserDialog({
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const usersArray =
-        await usuariosService.listarTodos();
-      setUsuarios(usersArray);
-      setFilteredUsuarios(usersArray);
+      const page = await usuariosService.listarTodos();
+      setUsuarios(page.content);
+      setFilteredUsuarios(page.content);
+      setTotalUsuarios(page.totalElements);
     } catch (error: any) {
       toast.error("Erro ao carregar usuários");
       console.error("Erro ao buscar usuários:", error);
@@ -144,6 +146,9 @@ export function SelectUserDialog({
                 className="pl-9"
               />
             </div>
+            <p className="text-xs text-gray-500">
+              Total de usuários: {totalUsuarios}
+            </p>
           </div>
 
           {/* Seletor de usuário */}

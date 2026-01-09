@@ -24,8 +24,8 @@ import { UsuarioForm } from "@/components/forms/UsuarioForm";
 import { createUsuarioColumn } from "@/components/ui/columns/usuariosColumn";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { usuariosService } from "@/services";
 import type { Usuario } from "@/types";
+import { usuariosService } from "@/services";
 
 interface UsuarioData extends Usuario {
   ativo?: boolean;
@@ -35,6 +35,8 @@ export function CadastroUsuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioData[]>(
     []
   );
+  const [totalUsuarios, setTotalUsuarios] =
+    useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] =
     useState(false);
@@ -45,8 +47,9 @@ export function CadastroUsuarios() {
 
   const fetchUsuarios = async () => {
     try {
-      const usuarios = await usuariosService.listarTodos();
-      setUsuarios(usuarios);
+      const page = await usuariosService.listarTodos();
+      setUsuarios(page.content);
+      setTotalUsuarios(page.totalElements);
     } catch (error: any) {
       toast.error("Erro ao carregar usuários");
       console.error("Erro ao buscar usuários:", error);
@@ -71,7 +74,6 @@ export function CadastroUsuarios() {
     if (!usuarioToDelete) return;
 
     try {
-      // Backend espera enrollment no path
       await usuariosService.deletar(
         usuarioToDelete.enrollment?.toString() || ""
       );
@@ -122,6 +124,9 @@ export function CadastroUsuarios() {
             <p className="text-gray-600 mt-1">
               Cadastre e gerencie professores, alunos e
               bibliotecários
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Total de usuários: {totalUsuarios}
             </p>
           </div>
           <Button

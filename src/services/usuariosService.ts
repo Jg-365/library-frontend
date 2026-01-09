@@ -7,24 +7,28 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
-import type { CreateUsuarioPayload, Usuario } from "@/types";
+import type { Usuario } from "@/types";
+import type { MyPage } from "@/types/BackendResponses";
 
-const resolveCourseName = async (
-  course: string | number
-): Promise<string> => {
-  if (typeof course === "string") {
-    return course;
+const normalizeUsuariosPage = (
+  data: MyPage<Usuario> | Usuario[]
+): MyPage<Usuario> => {
+  if (Array.isArray(data)) {
+    return {
+      content: data,
+      totalElements: data.length,
+      currentPage: 0,
+      totalPages: 1,
+    };
   }
 
-  const response = await api.get(
-    API_ENDPOINTS.CURSOS.BY_ID(course)
-  );
-  return (
-    response.data?.courseName ||
-    response.data?.nome ||
-    response.data?.name ||
-    ""
-  );
+  return {
+    content: data.content || [],
+    totalElements:
+      data.totalElements ?? data.content?.length ?? 0,
+    currentPage: data.currentPage ?? 0,
+    totalPages: data.totalPages ?? 1,
+  };
 };
 
 export const usuariosService = {
@@ -59,14 +63,13 @@ export const usuariosService = {
    * Listar todos os usuários
    * GET /users/all
    */
-  async listarTodos(): Promise<Usuario[]> {
-    const response = await api.get(
+  async listarTodos(): Promise<MyPage<Usuario>> {
+    const response = await api.get<
+      MyPage<Usuario> | Usuario[]
+    >(
       API_ENDPOINTS.USUARIOS.ALL
     );
-    const usersArray = Array.isArray(response.data)
-      ? response.data
-      : response.data?.content || [];
-    return usersArray;
+    return normalizeUsuariosPage(response.data);
   },
 
   /**
@@ -129,14 +132,13 @@ export const usuariosService = {
    * GET /users/teachers/by-course?course=<nome>
    */
   async listarProfessoresPorCurso(
-    course: string | number
-  ): Promise<Usuario[]> {
-    const courseName = await resolveCourseName(course);
-    const response = await api.get<Usuario[]>(
-      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?course=${encodeURIComponent(
-        courseName
-      )}`
+    cursoId: number
+  ): Promise<MyPage<Usuario>> {
+    const response = await api.get<
+      MyPage<Usuario> | Usuario[]
+    >(
+      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?cursoId=${cursoId}`
     );
-    return response.data;
+    return normalizeUsuariosPage(response.data);
   },
 };
