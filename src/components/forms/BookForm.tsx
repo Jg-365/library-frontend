@@ -121,11 +121,12 @@ export function BookForm({
       console.log("Categorias carregadas:", response.data);
       console.log("Primeira categoria:", response.data[0]);
 
-      // Mapear categoryCode para id
+      // Mapear resposta para o formato usado no frontend
       const categoriasFormatadas = response.data.map(
         (cat: any) => ({
-          id: cat.categoryCode,
-          descricao: cat.description,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
 
@@ -162,17 +163,18 @@ export function BookForm({
           console.log("🔍 Mapeando subcategoria:", sub);
           return {
             id: sub.id || sub.subcategoryCode,
-            nome: sub.description || sub.name || sub.nome,
-            categoriaId:
+            description:
+              sub.description || sub.name || sub.nome,
+            categoryCode:
               sub.category?.categoryCode ||
               sub.categoryCode ||
               sub.categoriaId,
           };
         })
         .filter((sub: any) => {
-          const isValid = sub.id && sub.nome;
+          const isValid = sub.id && sub.description;
           console.log(
-            `🔍 Subcategoria ${sub.nome} válida?`,
+            `🔍 Subcategoria ${sub.description} válida?`,
             isValid
           );
           return isValid;
@@ -444,7 +446,7 @@ export function BookForm({
               );
               console.log("Field value:", field.value);
               const categoriasValidas = categorias.filter(
-                (categoria) => categoria?.id
+                (categoria) => categoria?.categoryCode
               );
               console.log(
                 "Categorias após filtro:",
@@ -486,10 +488,10 @@ export function BookForm({
                         categoriasValidas.map(
                           (categoria) => (
                             <SelectItem
-                              key={categoria.id}
-                              value={categoria.id.toString()}
+                              key={categoria.categoryCode}
+                              value={categoria.categoryCode.toString()}
                             >
-                              {categoria.descricao}
+                              {categoria.description}
                             </SelectItem>
                           )
                         )
@@ -522,7 +524,7 @@ export function BookForm({
                     !form.watch("categoriaId") ||
                     subcategorias.filter(
                       (s) =>
-                        s.categoriaId ===
+                        s.categoryCode ===
                         form.watch("categoriaId")
                     ).length === 0
                   }
@@ -535,7 +537,7 @@ export function BookForm({
                             ? "Selecione uma categoria primeiro"
                             : subcategorias.filter(
                                 (s) =>
-                                  s.categoriaId ===
+                                  s.categoryCode ===
                                   form.watch("categoriaId")
                               ).length === 0
                             ? "Nenhuma subcategoria cadastrada. Cadastre uma nova."
@@ -556,7 +558,7 @@ export function BookForm({
                         .filter(
                           (sub) =>
                             sub?.id &&
-                            sub.categoriaId ===
+                            sub.categoryCode ===
                               form.watch("categoriaId")
                         )
                         .map((subcategoria) => (
@@ -564,7 +566,7 @@ export function BookForm({
                             key={subcategoria.id}
                             value={subcategoria.id.toString()}
                           >
-                            {subcategoria.nome}
+                            {subcategoria.description}
                           </SelectItem>
                         ))
                     )}

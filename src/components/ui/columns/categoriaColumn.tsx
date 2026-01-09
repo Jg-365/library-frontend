@@ -26,19 +26,19 @@ export function createCategoriaColumn(
 ): ColumnDef<Categoria>[] {
   return [
     {
-      accessorKey: "id",
-      header: "ID",
+      accessorKey: "categoryCode",
+      header: "Código",
       cell: ({ row }) => (
         <div className="font-medium">
-          {row.getValue("id")}
+          {row.getValue("categoryCode")}
         </div>
       ),
     },
     {
-      accessorKey: "descricao",
+      accessorKey: "description",
       header: "Descrição",
       cell: ({ row }) => (
-        <div>{row.getValue("descricao")}</div>
+        <div>{row.getValue("description")}</div>
       ),
     },
     {

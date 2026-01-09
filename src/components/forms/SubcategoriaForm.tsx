@@ -66,16 +66,7 @@ export function SubcategoriaForm({
         `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
       );
 
-      const categoriasFormatadas = response.data.map(
-        (cat: any) => ({
-          id: cat.categoryCode || cat.id,
-          codigo: cat.categoryCode || cat.codigo,
-          nome: cat.description || cat.nome,
-          descricao: cat.description || cat.descricao,
-        })
-      );
-
-      setCategorias(categoriasFormatadas);
+      setCategorias(response.data);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
     }
@@ -179,11 +170,10 @@ export function SubcategoriaForm({
                 <SelectContent>
                   {categorias.map((categoria) => (
                     <SelectItem
-                      key={categoria.id}
-                      value={categoria.id.toString()}
+                      key={categoria.categoryCode}
+                      value={categoria.categoryCode.toString()}
                     >
-                      {categoria.descricao ||
-                        categoria.nome}
+                      {categoria.description}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -102,9 +102,9 @@ export function CadastroCategorias() {
       // Mapear campos do backend para o frontend
       const categoriasFormatadas = categoriasRes.data.map(
         (cat: any) => ({
-          id: cat.categoryCode || cat.id,
-          codigo: cat.categoryCode || cat.codigo,
-          descricao: cat.description || cat.descricao,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
 
@@ -119,7 +119,19 @@ export function CadastroCategorias() {
         const subcategoriasRes = await api.get(
           API_ENDPOINTS.SUBCATEGORIAS.BASE
         );
-        setSubcategorias(subcategoriasRes.data || []);
+        const subcategoriasFormatadas =
+          subcategoriasRes.data?.map((sub: any) => ({
+            id: sub.id,
+            description:
+              sub.description || sub.nome || sub.descricao,
+            categoryCode:
+              sub.category?.categoryCode ||
+              sub.categoryCode ||
+              sub.categoriaId,
+            category: sub.category,
+          })) || [];
+
+        setSubcategorias(subcategoriasFormatadas);
       } catch (subError: any) {
         console.warn(
           "Erro ao carregar subcategorias:",
@@ -153,7 +165,9 @@ export function CadastroCategorias() {
 
     try {
       await api.delete(
-        API_ENDPOINTS.CATEGORIAS.BY_ID(categoriaToDelete.id)
+        API_ENDPOINTS.CATEGORIAS.BY_ID(
+          categoriaToDelete.categoryCode
+        )
       );
       toast.success("Categoria excluída com sucesso!");
       carregarCategorias();
@@ -274,6 +288,7 @@ export function CadastroCategorias() {
       // Backend retorna category como objeto completo: { categoryCode, description }
       const categoriaId =
         sub.category?.categoryCode ||
+        sub.categoryCode ||
         sub.cod_categoria_principal;
       const categoriaNome =
         sub.category?.description || "N/A";
@@ -285,7 +300,7 @@ export function CadastroCategorias() {
           sub.codigo ||
           String(sub.id),
         descricao:
-          sub.description || sub.nome || sub.descricao,
+          sub.description,
         cod_categoria_principal: categoriaId,
         categoria_nome: categoriaNome,
       };
@@ -453,7 +468,15 @@ export function CadastroCategorias() {
             </CustomModalHeader>
             <SubcategoriaForm
               subcategoria={
-                selectedSubcategoria || undefined
+                selectedSubcategoria
+                  ? {
+                      id: selectedSubcategoria.id,
+                      description:
+                        selectedSubcategoria.descricao,
+                      categoryCode:
+                        selectedSubcategoria.cod_categoria_principal,
+                    }
+                  : undefined
               }
               onSuccess={() => {
                 setIsSubcategoriaDialogOpen(false);
@@ -479,7 +502,7 @@ export function CadastroCategorias() {
               <AlertDialogDescription>
                 Tem certeza que deseja excluir a categoria{" "}
                 <span className="font-semibold text-gray-900">
-                  {categoriaToDelete?.descricao}
+                  {categoriaToDelete?.description}
                 </span>
                 ? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
