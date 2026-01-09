@@ -54,6 +54,14 @@ export interface FineResponse {
   bookTitles: string[];
 }
 
+export interface PendingFineResponse {
+  id: number;
+  value: number;
+  daysOverdue: number;
+  loanId: number;
+  bookTitles: string[];
+}
+
 /**
  * Loan (Empréstimo) Responses
  */

@@ -10,7 +10,7 @@ import { API_ENDPOINTS } from "@/config/constants";
 
 interface Telefone {
   id: number;
-  numero: string;
+  number: string;
   tipo?: string;
   usuarioId?: string;
   // Adicione outros campos conforme necessário
@@ -22,7 +22,7 @@ export const telefonesService = {
    * POST /phones
    */
   async criar(dados: {
-    numero: string;
+    number: string;
     tipo?: string;
     usuarioId?: string;
   }): Promise<Telefone> {
@@ -39,7 +39,7 @@ export const telefonesService = {
    */
   async atualizar(
     id: number,
-    dados: { numero?: string; tipo?: string }
+    dados: { number?: string; tipo?: string }
   ): Promise<Telefone> {
     const response = await api.patch<Telefone>(
       API_ENDPOINTS.TELEFONES.UPDATE(id),

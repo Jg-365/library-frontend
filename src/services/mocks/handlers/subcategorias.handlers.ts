@@ -38,7 +38,7 @@ export function setupSubcategoriasHandlers(
         config.url?.split("/").pop() || "0"
       );
       const subcategorias = mockSubcategorias.filter(
-        (s) => s.categoriaId === categoriaId
+        (s) => s.categoryCode === categoriaId
       );
 
       return [200, subcategorias];

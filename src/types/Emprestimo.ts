@@ -1,4 +1,4 @@
-import type { Usuario, Livro } from "./index.ts";
+import type { Usuario, Livro, Multa } from "./index.ts";
 
 /**
  * Empréstimo (Loan) - Formato Frontend
@@ -17,7 +17,7 @@ export interface Emprestimo {
   // Campos opcionais/expandidos
   livros?: Livro[]; // Para exibição (buscados separadamente)
   usuario?: Usuario; // Para exibição (buscados separadamente)
-  multa?: number; // Se houver multa associada
+  multa?: number | Multa; // Se houver multa associada
 }
 
 /**

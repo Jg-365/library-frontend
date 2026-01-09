@@ -92,25 +92,11 @@ export function BookForm({
 
   const carregarAutores = async () => {
     try {
-      const response = await api.get(
-        `${API_ENDPOINTS.AUTORES.BASE}/all`
-      );
-      console.log("Autores carregados:", response.data);
-      console.log("Primeiro autor:", response.data[0]);
-
-      // Mapear name para nome e criar id se não existir
-      const autoresFormatados = response.data.map(
-        (autor: any, index: number) => ({
-          id: autor.id || autor.authorId || index + 1, // Tentar id, authorId ou usar índice
-          nome: autor.name || autor.nome,
-          email: autor.email,
-          nacionalidade:
-            autor.nationality || autor.nacionalidade,
-        })
-      );
-
-      console.log("Autores formatados:", autoresFormatados);
-      setAutores(autoresFormatados);
+      const autoresCarregados =
+        await autoresService.listarTodos();
+      console.log("Autores carregados:", autoresCarregados);
+      console.log("Primeiro autor:", autoresCarregados[0]);
+      setAutores(autoresCarregados);
     } catch (error) {
       toast.error("Erro ao carregar autores");
       console.error("Erro ao carregar autores:", error);
@@ -125,19 +111,19 @@ export function BookForm({
       console.log("Categorias carregadas:", response.data);
       console.log("Primeira categoria:", response.data[0]);
 
-      // Mapear categoryCode para id
+      // Mapear resposta para o formato usado no frontend
       const categoriasFormatadas = response.data.map(
         (cat: any) => ({
-          id: cat.categoryCode,
-          descricao: cat.description,
+          categoryCode: cat.categoryCode ?? cat.id,
+          description:
+            cat.description || cat.descricao || cat.nome,
         })
       );
-
       console.log(
-        "Categorias formatadas:",
-        categoriasFormatadas
+        "Primeira categoria:",
+        categoriasCarregadas[0]
       );
-      setCategorias(categoriasFormatadas);
+      setCategorias(categoriasCarregadas);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
       console.error("Erro ao carregar categorias:", error);
@@ -152,31 +138,33 @@ export function BookForm({
         "🔍 Carregando subcategorias para categoria:",
         categoriaId
       );
-      const url = `${API_ENDPOINTS.SUBCATEGORIAS.BASE}?categoryCode=${categoriaId}`;
-      console.log("🔍 URL:", url);
+      const response =
+        await subcategoriasService.listarPorCategoria(
+          categoriaId
+        );
 
-      const response = await api.get(url);
       console.log(
         "✅ Subcategorias carregadas (raw):",
-        response.data
+        response
       );
 
-      const subcategoriasFormatadas = response.data
+      const subcategoriasFormatadas = response
         .map((sub: any) => {
           console.log("🔍 Mapeando subcategoria:", sub);
           return {
             id: sub.id || sub.subcategoryCode,
-            nome: sub.description || sub.name || sub.nome,
-            categoriaId:
+            description:
+              sub.description || sub.name || sub.nome,
+            categoryCode:
               sub.category?.categoryCode ||
               sub.categoryCode ||
               sub.categoriaId,
           };
         })
         .filter((sub: any) => {
-          const isValid = sub.id && sub.nome;
+          const isValid = sub.id && sub.description;
           console.log(
-            `🔍 Subcategoria ${sub.nome} válida?`,
+            `🔍 Subcategoria ${sub.description} válida?`,
             isValid
           );
           return isValid;
@@ -460,7 +448,7 @@ export function BookForm({
               );
               console.log("Field value:", field.value);
               const categoriasValidas = categorias.filter(
-                (categoria) => categoria?.id
+                (categoria) => categoria?.categoryCode
               );
               console.log(
                 "Categorias após filtro:",
@@ -502,10 +490,10 @@ export function BookForm({
                         categoriasValidas.map(
                           (categoria) => (
                             <SelectItem
-                              key={categoria.id}
-                              value={categoria.id.toString()}
+                              key={categoria.categoryCode}
+                              value={categoria.categoryCode.toString()}
                             >
-                              {categoria.descricao}
+                              {categoria.description}
                             </SelectItem>
                           )
                         )
@@ -538,7 +526,7 @@ export function BookForm({
                     !form.watch("categoriaId") ||
                     subcategorias.filter(
                       (s) =>
-                        s.categoriaId ===
+                        s.categoryCode ===
                         form.watch("categoriaId")
                     ).length === 0
                   }
@@ -551,7 +539,7 @@ export function BookForm({
                             ? "Selecione uma categoria primeiro"
                             : subcategorias.filter(
                                 (s) =>
-                                  s.categoriaId ===
+                                  s.categoryCode ===
                                   form.watch("categoriaId")
                               ).length === 0
                             ? "Nenhuma subcategoria cadastrada. Cadastre uma nova."
@@ -572,7 +560,7 @@ export function BookForm({
                         .filter(
                           (sub) =>
                             sub?.id &&
-                            sub.categoriaId ===
+                            sub.categoryCode ===
                               form.watch("categoriaId")
                         )
                         .map((subcategoria) => (
@@ -580,7 +568,7 @@ export function BookForm({
                             key={subcategoria.id}
                             value={subcategoria.id.toString()}
                           >
-                            {subcategoria.nome}
+                            {subcategoria.description}
                           </SelectItem>
                         ))
                     )}

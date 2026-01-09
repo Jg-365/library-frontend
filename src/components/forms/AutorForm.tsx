@@ -11,13 +11,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
 import type { Autor } from "@/types";
 import {
   autorFormSchema,
   type AutorFormValues,
 } from "@/schemas";
-import { API_ENDPOINTS } from "@/config";
+import {
+  autoresService,
+  type AutorPayload,
+} from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -50,20 +52,20 @@ export function AutorForm({
       setIsLoading(true);
 
       // Mapear para o formato do backend
-      const payload = {
+      const payload: AutorPayload = {
         name: data.nome,
         email: data.email,
         nationality: data.nacionalidade,
       };
 
       if (autor) {
-        await api.put(
-          API_ENDPOINTS.AUTORES.BY_ID(autor.id),
+        await autoresService.atualizar(
+          autor.email,
           payload
         );
         toast.success("Autor atualizado com sucesso!");
       } else {
-        await api.post(API_ENDPOINTS.AUTORES.BASE, payload);
+        await autoresService.criar(payload);
         toast.success("Autor cadastrado com sucesso!");
       }
 
