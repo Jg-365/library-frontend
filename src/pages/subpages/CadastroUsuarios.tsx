@@ -1,0 +1,211 @@
+import { useState, useEffect } from "react";
+import { PageLayout } from "@/components/layouts";
+import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
+import { DataTable } from "@/components/main/data-table";
+import { Button } from "@/components/ui/button";
+import {
+  CustomModal,
+  CustomModalContent,
+  CustomModalDescription,
+  CustomModalHeader,
+  CustomModalTitle,
+} from "@/components/ui/custom-modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { UsuarioForm } from "@/components/forms/UsuarioForm";
+import { createUsuarioColumn } from "@/components/ui/columns/usuariosColumn";
+import { UserPlus } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/services/api";
+import { API_ENDPOINTS } from "@/config/constants";
+import type { Usuario } from "@/types";
+
+interface UsuarioData extends Usuario {
+  ativo?: boolean;
+}
+
+export function CadastroUsuarios() {
+  const [usuarios, setUsuarios] = useState<UsuarioData[]>(
+    []
+  );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] =
+    useState(false);
+  const [selectedUsuario, setSelectedUsuario] =
+    useState<UsuarioData | null>(null);
+  const [usuarioToDelete, setUsuarioToDelete] =
+    useState<UsuarioData | null>(null);
+
+  const fetchUsuarios = async () => {
+    try {
+      const response = await api.get(
+        API_ENDPOINTS.USUARIOS.ALL
+      );
+      // Backend retorna MyPage<UserEntity> com estrutura: {content, totalElements, currentPage, totalPages}
+      const usuarios =
+        response.data.content || response.data;
+      setUsuarios(usuarios);
+    } catch (error: any) {
+      toast.error("Erro ao carregar usuários");
+      console.error("Erro ao buscar usuários:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsuarios();
+  }, []);
+
+  const handleEdit = (usuario: UsuarioData) => {
+    setSelectedUsuario(usuario);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = (usuario: UsuarioData) => {
+    setUsuarioToDelete(usuario);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!usuarioToDelete) return;
+
+    try {
+      // Backend espera enrollment no path
+      await api.delete(
+        API_ENDPOINTS.USUARIOS.DELETE(
+          usuarioToDelete.enrollment?.toString() || ""
+        )
+      );
+      toast.success("Usuário excluído com sucesso!");
+      fetchUsuarios();
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        "Erro ao excluir usuário";
+      toast.error(message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setUsuarioToDelete(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    setDialogOpen(false);
+    setSelectedUsuario(null);
+    fetchUsuarios();
+  };
+
+  const handleNewUsuario = () => {
+    setSelectedUsuario(null);
+    setDialogOpen(true);
+  };
+
+  const columns = createUsuarioColumn({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+  });
+
+  return (
+    <PageLayout perfil="ADMIN">
+      <div className="px-4 md:px-6 lg:px-8">
+        <PageBreadcrumb
+          items={[
+            { label: "Início", href: "/admin/dashboard" },
+            { label: "Usuários" },
+          ]}
+          backTo="/admin/dashboard"
+        />
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Gerenciamento de Usuários
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Cadastre e gerencie professores, alunos e
+              bibliotecários
+            </p>
+          </div>
+          <Button
+            onClick={handleNewUsuario}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+          >
+            <UserPlus className="h-5 w-5 mr-2" />
+            Novo Usuário
+          </Button>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg">
+          <DataTable columns={columns} data={usuarios} />
+        </div>
+
+        {/* Dialog de Cadastro/Edição */}
+        <CustomModal
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+        >
+          <CustomModalContent
+            className="max-w-2xl max-h-[90vh] overflow-y-auto"
+            showCloseButton
+            onClose={() => setDialogOpen(false)}
+          >
+            <CustomModalHeader>
+              <CustomModalTitle>
+                {selectedUsuario
+                  ? "Editar Usuário"
+                  : "Novo Usuário"}
+              </CustomModalTitle>
+              <CustomModalDescription>
+                {selectedUsuario
+                  ? "Atualize as informações do usuário"
+                  : "Preencha os dados para cadastrar um novo usuário"}
+              </CustomModalDescription>
+            </CustomModalHeader>
+            <UsuarioForm
+              usuario={selectedUsuario || undefined}
+              onSuccess={handleSuccess}
+            />
+          </CustomModalContent>
+        </CustomModal>
+
+        {/* Dialog de Confirmação de Exclusão */}
+        <AlertDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Confirmar Exclusão
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o usuário{" "}
+                <span className="font-semibold">
+                  {usuarioToDelete?.nome}
+                </span>
+                ? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </PageLayout>
+  );
+}

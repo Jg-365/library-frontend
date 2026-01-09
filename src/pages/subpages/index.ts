@@ -1,0 +1,14 @@
+export { default as DashboardUsuario } from "./DashboardUsuario";
+export { default as CatalogoLivros } from "./CatalogoLivros";
+export { default as MeusEmprestimos } from "./MeusEmprestimos";
+export { default as MinhasReservas } from "./MinhasReservas";
+export { CadastroAutores } from "./CadastroAutores";
+export { CadastroEdicao } from "./CadastroEdicao";
+export { CadastroCategorias } from "./CadastroCategorias";
+export { CadastroUsuarios } from "./CadastroUsuarios";
+export { CadastroCursos } from "./CadastroCursos";
+export { CadastroEmprestimos } from "./CadastroEmprestimos";
+export { CadastroDevolucoes } from "./CadastroDevolucoes";
+export { default as Relatorios } from "./Relatorios";
+export { default as Seguranca } from "./Seguranca";
+export { default as Configuracoes } from "./Configuracoes";
