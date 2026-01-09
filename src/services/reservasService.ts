@@ -50,8 +50,7 @@ async function mapReserveResponseToReserva(
     usuarioId: reserve.userEnrollment,
     livroIsbn: reserve.bookIsbn,
     dataReserva: reserve.reserveDate,
-    prazoRetirada: reserve.pickupDeadline,
-    status: normalizeStatus(reserve.status) ?? "ATIVA",
+    status: reserve.status ?? "ATIVA",
   };
 
   // Tentar popular o objeto `livro` para evitar undefined em componentes
