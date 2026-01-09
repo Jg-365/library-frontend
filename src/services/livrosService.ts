@@ -12,38 +12,12 @@ import type {
   FiltroLivros,
   ResultadoFiltroLivros,
 } from "@/types";
+import type {
+  BookRequest,
+  BookRequestUpdate,
+} from "@/types/BackendRequests";
 import type { BookResponse } from "@/types/BackendResponses";
-
-/**
- * Converte BookResponse do backend para Livro do frontend
- * Backend retorna: {author, availableCopies, category, isbn, publisher, releaseYear, title}
- */
-function mapBookResponseToLivro(book: any): Livro {
-  // Backend retorna author como nome completo
-  const autores = [];
-
-  if (book.author) {
-    autores.push({
-      id: 0,
-      nome: book.author,
-      email: "",
-    });
-  }
-
-  return {
-    id: 0,
-    isbn: book.isbn || "",
-    titulo: book.title || "Título não informado",
-    ano: book.releaseYear || 0,
-    editora: book.publisher || "",
-    categoriaId: 0,
-    subcategoriaId: 0,
-    categoria: book.category || "Categoria não informada", // Backend retorna nome da categoria
-    subcategoria: "", // Backend não retorna subcategoria
-    autores: autores.length > 0 ? autores : [],
-    quantidadeExemplares: book.availableCopies || 0,
-  };
-}
+import { mapBookResponseToLivro } from "./mappers/bookMapper";
 
 export const livrosService = {
   /**
@@ -151,12 +125,12 @@ export const livrosService = {
    * Criar novo livro
    * POST /books
    */
-  async criar(livro: Omit<Livro, "isbn">): Promise<Livro> {
-    const response = await api.post<Livro>(
+  async criar(payload: BookRequest): Promise<Livro> {
+    const response = await api.post<BookResponse>(
       API_ENDPOINTS.LIVROS.CREATE,
-      livro
+      payload
     );
-    return response.data;
+    return mapBookResponseToLivro(response.data);
   },
 
   /**
@@ -165,13 +139,13 @@ export const livrosService = {
    */
   async atualizar(
     isbn: string,
-    livro: Partial<Livro>
+    payload: BookRequestUpdate
   ): Promise<Livro> {
-    const response = await api.patch<Livro>(
+    const response = await api.patch<BookResponse>(
       API_ENDPOINTS.LIVROS.UPDATE(isbn),
-      livro
+      payload
     );
-    return response.data;
+    return mapBookResponseToLivro(response.data);
   },
 
   /**
