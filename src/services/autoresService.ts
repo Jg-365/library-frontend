@@ -9,6 +9,29 @@ import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Autor } from "@/types";
 
+export interface AutorPayload {
+  name: string;
+  email: string;
+  nationality: string;
+}
+
+function mapAutorResponse(
+  autor: any,
+  index: number
+): Autor {
+  return {
+    id:
+      autor?.id ??
+      autor?.authorId ??
+      autor?.codigo ??
+      index,
+    nome: autor?.name ?? autor?.nome ?? "",
+    email: autor?.email ?? "",
+    nacionalidade:
+      autor?.nationality ?? autor?.nacionalidade ?? "",
+  };
+}
+
 export const autoresService = {
   /**
    * Listar todos os autores
@@ -34,10 +57,13 @@ export const autoresService = {
     const params = name
       ? `?name=${encodeURIComponent(name)}`
       : "";
-    const response = await api.get<Autor[]>(
+    const response = await api.get(
       `${API_ENDPOINTS.AUTORES.BY_NAME}${params}`
     );
-    return response.data;
+    return (response.data || []).map(
+      (autor: any, index: number) =>
+        mapAutorResponse(autor, index)
+    );
   },
 
   /**
@@ -45,22 +71,22 @@ export const autoresService = {
    * GET /authors/{email}
    */
   async buscarPorEmail(email: string): Promise<Autor> {
-    const response = await api.get<Autor>(
+    const response = await api.get(
       API_ENDPOINTS.AUTORES.BY_EMAIL(email)
     );
-    return response.data;
+    return mapAutorResponse(response.data, 0);
   },
 
   /**
    * Criar novo autor
    * POST /authors
    */
-  async criar(dados: Omit<Autor, "id">): Promise<Autor> {
-    const response = await api.post<Autor>(
+  async criar(dados: AutorPayload): Promise<Autor> {
+    const response = await api.post(
       API_ENDPOINTS.AUTORES.CREATE,
       dados
     );
-    return response.data;
+    return mapAutorResponse(response.data, 0);
   },
 
   /**
@@ -69,13 +95,13 @@ export const autoresService = {
    */
   async atualizar(
     email: string,
-    dados: Partial<Autor>
+    dados: Partial<AutorPayload>
   ): Promise<Autor> {
-    const response = await api.patch<Autor>(
+    const response = await api.patch(
       API_ENDPOINTS.AUTORES.UPDATE(email),
       dados
     );
-    return response.data;
+    return mapAutorResponse(response.data, 0);
   },
 
   /**

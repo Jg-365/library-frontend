@@ -8,6 +8,41 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Multa } from "@/types";
+import type {
+  FineResponse,
+  PendingFineResponse,
+} from "@/types/BackendResponses";
+
+const formatMotivoMulta = (diasAtraso: number) =>
+  `Atraso de ${diasAtraso} ${
+    diasAtraso === 1 ? "dia" : "dias"
+  }`;
+
+const mapFineResponseToMulta = (
+  fine: FineResponse | PendingFineResponse,
+  options?: { pago?: boolean }
+): Multa => {
+  const paymentDate =
+    "paymentDate" in fine ? fine.paymentDate : null;
+  const pago =
+    options?.pago !== undefined
+      ? options.pago
+      : Boolean(paymentDate);
+
+  return {
+    id: fine.id,
+    emprestimoId: fine.loanId,
+    valor: fine.value,
+    diasAtraso: fine.daysOverdue,
+    titulosLivros: fine.bookTitles,
+    motivoMulta: formatMotivoMulta(fine.daysOverdue),
+    dataCriacao:
+      paymentDate ||
+      new Date().toISOString().split("T")[0],
+    pago,
+    dataPagamento: paymentDate || undefined,
+  };
+};
 
 export const multasService = {
   /**
@@ -15,10 +50,10 @@ export const multasService = {
    * GET /fines/{id}
    */
   async buscarPorId(id: number): Promise<Multa> {
-    const response = await api.get<Multa>(
+    const response = await api.get<FineResponse>(
       API_ENDPOINTS.MULTAS.BY_ID(id)
     );
-    return response.data;
+    return mapFineResponseToMulta(response.data);
   },
 
   /**
@@ -26,10 +61,12 @@ export const multasService = {
    * PATCH /fines/pay/{id}
    */
   async pagar(id: number): Promise<Multa> {
-    const response = await api.patch<Multa>(
+    const response = await api.patch<FineResponse>(
       API_ENDPOINTS.MULTAS.PAY(id)
     );
-    return response.data;
+    return mapFineResponseToMulta(response.data, {
+      pago: true,
+    });
   },
 
   /**
@@ -37,10 +74,12 @@ export const multasService = {
    * GET /fines/user/pending
    */
   async obterPendentes(): Promise<Multa[]> {
-    const response = await api.get<Multa[]>(
+    const response = await api.get<PendingFineResponse[]>(
       API_ENDPOINTS.MULTAS.USER_PENDING
     );
-    return response.data;
+    return response.data.map((fine) =>
+      mapFineResponseToMulta(fine, { pago: false })
+    );
   },
 
   /**
@@ -50,10 +89,12 @@ export const multasService = {
   async obterPendentesPorUsuario(
     userId: string
   ): Promise<Multa[]> {
-    const response = await api.get<Multa[]>(
+    const response = await api.get<PendingFineResponse[]>(
       API_ENDPOINTS.MULTAS.USER_PENDING_BY_ID(userId)
     );
-    return response.data;
+    return response.data.map((fine) =>
+      mapFineResponseToMulta(fine, { pago: false })
+    );
   },
 
   /**
@@ -61,10 +102,12 @@ export const multasService = {
    * GET /fines/user/paid
    */
   async obterPagas(): Promise<Multa[]> {
-    const response = await api.get<Multa[]>(
+    const response = await api.get<FineResponse[]>(
       API_ENDPOINTS.MULTAS.USER_PAID
     );
-    return response.data;
+    return response.data.map((fine) =>
+      mapFineResponseToMulta(fine, { pago: true })
+    );
   },
 
   /**
@@ -74,9 +117,11 @@ export const multasService = {
   async obterPagasPorUsuario(
     userId: string
   ): Promise<Multa[]> {
-    const response = await api.get<Multa[]>(
+    const response = await api.get<FineResponse[]>(
       API_ENDPOINTS.MULTAS.USER_PAID_BY_ID(userId)
     );
-    return response.data;
+    return response.data.map((fine) =>
+      mapFineResponseToMulta(fine, { pago: true })
+    );
   },
 };

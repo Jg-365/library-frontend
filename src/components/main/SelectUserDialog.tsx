@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Search, User } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { usuariosService } from "@/services";
 
 interface Usuario {
   id: string;
@@ -52,6 +51,8 @@ export function SelectUserDialog({
     useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [totalUsuarios, setTotalUsuarios] =
+    useState(0);
 
   useEffect(() => {
     if (open) {
@@ -81,17 +82,10 @@ export function SelectUserDialog({
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.USUARIOS.ALL,
-        {
-          params: { page: 0, size: 1000 },
-        }
-      );
-
-      const usersArray =
-        response.data?.content || response.data || [];
-      setUsuarios(usersArray);
-      setFilteredUsuarios(usersArray);
+      const page = await usuariosService.listarTodos();
+      setUsuarios(page.content);
+      setFilteredUsuarios(page.content);
+      setTotalUsuarios(page.totalElements);
     } catch (error: any) {
       toast.error("Erro ao carregar usuários");
       console.error("Erro ao buscar usuários:", error);
@@ -152,6 +146,9 @@ export function SelectUserDialog({
                 className="pl-9"
               />
             </div>
+            <p className="text-xs text-gray-500">
+              Total de usuários: {totalUsuarios}
+            </p>
           </div>
 
           {/* Seletor de usuário */}

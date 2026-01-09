@@ -11,13 +11,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
 import type { Categoria } from "@/types";
 import {
   categoriaFormSchema,
   type CategoriaFormValues,
 } from "@/schemas";
-import { API_ENDPOINTS } from "@/config";
+import { categoriasService } from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -37,7 +36,7 @@ export function CategoriaForm({
   const form = useForm<CategoriaFormValues>({
     resolver: zodResolver(categoriaFormSchema),
     defaultValues: {
-      descricao: categoria?.descricao || "",
+      description: categoria?.description || "",
     },
   });
 
@@ -47,28 +46,27 @@ export function CategoriaForm({
 
       // Mapear campos do frontend para o backend
       const payload = {
-        description: data.descricao,
+        description: data.description,
       };
 
       if (categoria) {
         // Editar categoria existente
         console.log(
           "Tentando atualizar categoria:",
-          categoria.id,
+          categoria.categoryCode,
           payload
         );
         await api.patch(
-          API_ENDPOINTS.CATEGORIAS.BY_ID(categoria.id),
+          API_ENDPOINTS.CATEGORIAS.BY_ID(
+            categoria.categoryCode
+          ),
           payload
         );
         toast.success("Categoria atualizada com sucesso!");
       } else {
         // Criar nova categoria
         console.log("Criando nova categoria:", payload);
-        await api.post(
-          API_ENDPOINTS.CATEGORIAS.BASE,
-          payload
-        );
+        await categoriasService.criar(payload);
         toast.success("Categoria cadastrada com sucesso!");
       }
 
@@ -100,7 +98,7 @@ export function CategoriaForm({
         {/* Descrição */}
         <FormField
           control={form.control}
-          name="descricao"
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Descrição *</FormLabel>
