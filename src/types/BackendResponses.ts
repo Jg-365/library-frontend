@@ -48,6 +48,16 @@ export interface FineResponse {
 }
 
 /**
+ * Resposta paginada padrão (MyPage) do backend
+ */
+export interface MyPage<T> {
+  content: T[];
+  totalElements: number;
+  currentPage?: number;
+  totalPages?: number;
+}
+
+/**
  * Loan (Empréstimo) Responses
  */
 export interface LoanResponse {
