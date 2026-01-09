@@ -14,7 +14,10 @@ export { emprestimosService } from "./emprestimosService";
 export { multasService } from "./multasService";
 export { professoresService } from "./professoresService";
 export { subcategoriasService } from "./subcategoriasService";
-export { autoresService } from "./autoresService";
+export {
+  autoresService,
+  type AutorPayload,
+} from "./autoresService";
 export { categoriasService } from "./categoriasService";
 export { cursosService } from "./cursosService";
 export { reservasService } from "./reservasService";
