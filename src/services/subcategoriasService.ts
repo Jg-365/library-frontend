@@ -8,28 +8,21 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Subcategoria } from "@/types";
-import type {
-  CategoryResponse,
-  SubCategoryResponse,
-} from "@/types/BackendResponses";
-
-const mapCategoriaResponse = (
-  categoria: CategoryResponse
-) => ({
-  categoryCode: categoria.categoryCode,
-  description: categoria.description,
-});
+import type { SubCategoryResponse } from "@/types/BackendResponses";
 
 const mapSubcategoriaResponse = (
   subcategoria: SubCategoryResponse
 ): Subcategoria => ({
   id: subcategoria.id,
-  description: subcategoria.description,
-  categoryCode: subcategoria.category?.categoryCode ?? 0,
-  category: subcategoria.category
-    ? mapCategoriaResponse(subcategoria.category)
-    : undefined,
+  nome: subcategoria.description,
+  descricao: subcategoria.description,
+  categoriaId: subcategoria.category?.categoryCode ?? 0,
 });
+
+const normalizeSubcategoriasResponse = (
+  data: SubCategoryResponse[] | { content?: SubCategoryResponse[] }
+): SubCategoryResponse[] =>
+  Array.isArray(data) ? data : data?.content || [];
 
 export const subcategoriasService = {
   /**
@@ -80,7 +73,9 @@ export const subcategoriasService = {
     const response = await api.get<SubCategoryResponse[]>(
       API_ENDPOINTS.SUBCATEGORIAS.SEARCH_BY_NAME(name)
     );
-    return response.data.map(mapSubcategoriaResponse);
+    return normalizeSubcategoriasResponse(response.data).map(
+      mapSubcategoriaResponse
+    );
   },
 
   /**
