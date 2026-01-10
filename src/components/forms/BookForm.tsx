@@ -39,6 +39,7 @@ import { livrosService } from "@/services/livrosService";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface BookFormProps {
   livro?: Livro;
@@ -359,9 +360,11 @@ export function BookForm({
     } catch (error: any) {
       toast.error("Erro ao remover coautores", {
         description:
-          error.response?.data?.message ||
-          error.message ||
-          "Tente novamente",
+          getErrorMessage(
+            error.response?.data?.message ||
+              error.message,
+            "Tente novamente"
+          ),
       });
     } finally {
       setIsLoading(false);
@@ -463,9 +466,11 @@ export function BookForm({
           : "Erro ao cadastrar livro",
         {
           description:
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            "Tente novamente",
+            getErrorMessage(
+              error.response?.data?.message ||
+                error.response?.data?.error,
+              "Tente novamente"
+            ),
           duration: 10000,
         }
       );

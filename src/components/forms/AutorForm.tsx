@@ -22,6 +22,7 @@ import {
 } from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface AutorFormProps {
   autor?: Autor;
@@ -71,10 +72,11 @@ export function AutorForm({
 
       onSuccess?.();
     } catch (error: any) {
-      const errorMessage =
+      const errorMessage = getErrorMessage(
         error.response?.data?.error ||
-        error.response?.data?.message ||
-        "Tente novamente";
+          error.response?.data?.message,
+        "Tente novamente"
+      );
 
       toast.error(
         autor

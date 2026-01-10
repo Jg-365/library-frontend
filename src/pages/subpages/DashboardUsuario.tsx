@@ -24,6 +24,7 @@ import { livrosService } from "@/services/livrosService";
 import { reservasService } from "@/services/reservasService";
 import { emprestimosService } from "@/services/emprestimosService";
 import { useAuth } from "@/store/AuthContext";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const quickActions = [
   {
@@ -170,10 +171,11 @@ export function DashboardUsuario() {
     } catch (error: any) {
       console.error("❌ Erro ao reservar:", error);
       console.error("❌ Response:", error.response?.data);
-      const mensagem =
+      const mensagem = getErrorMessage(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erro ao reservar livro";
+          error.response?.data?.error,
+        "Erro ao reservar livro"
+      );
       toast.error(mensagem);
     }
   };
@@ -212,15 +214,30 @@ export function DashboardUsuario() {
         "❌ Response completa:",
         error.response
       );
-      const mensagem =
+      const mensagem = getErrorMessage(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erro ao emprestar livro";
+          error.response?.data?.error,
+        "Erro ao emprestar livro"
+      );
       toast.error(mensagem);
     }
   };
 
-  // Reserva cancel feature removed from UI — cancellation handled by admins/tools
+  const handleCancelarReserva = async (
+    reserva: Reserva
+  ) => {
+    try {
+      await reservasService.cancelar(reserva.id);
+      toast.success("Reserva cancelada com sucesso!");
+      carregarDados();
+    } catch (error: any) {
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao cancelar reserva"
+      );
+      toast.error(mensagem);
+    }
+  };
 
   const handleVerDetalhesReserva = (reserva: Reserva) => {
     if (reserva.livro) {

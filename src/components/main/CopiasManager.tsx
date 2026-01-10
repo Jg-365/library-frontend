@@ -46,6 +46,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface CopiasManagerProps {
   isbn: string;
@@ -86,8 +87,10 @@ export function CopiasManager({
       console.error("❌ Erro ao carregar cópias:", error);
       toast.error("Erro ao carregar cópias", {
         description:
-          error.response?.data?.message ||
-          "Não foi possível carregar as cópias do livro.",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Não foi possível carregar as cópias do livro."
+          ),
       });
     } finally {
       setLoading(false);
@@ -114,8 +117,10 @@ export function CopiasManager({
     } catch (error: any) {
       toast.error("Erro ao adicionar cópia", {
         description:
-          error.response?.data?.message ||
-          "Não foi possível adicionar a cópia.",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Não foi possível adicionar a cópia."
+          ),
       });
     } finally {
       setAdicionando(false);
@@ -135,8 +140,10 @@ export function CopiasManager({
     } catch (error: any) {
       toast.error("Erro ao atualizar status", {
         description:
-          error.response?.data?.message ||
-          "Não foi possível atualizar o status da cópia.",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Não foi possível atualizar o status da cópia."
+          ),
       });
     }
   };
@@ -159,8 +166,10 @@ export function CopiasManager({
     } catch (error: any) {
       toast.error("Erro ao excluir cópia", {
         description:
-          error.response?.data?.message ||
-          "Não foi possível excluir a cópia.",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Não foi possível excluir a cópia."
+          ),
       });
     } finally {
       setIsDeleteDialogOpen(false);

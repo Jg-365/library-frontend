@@ -19,8 +19,7 @@ import {
 import { toast } from "sonner";
 import { reservasService } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
-import { useAuth } from "@/store/AuthContext";
-// import { reservasService } from "@/services/reservasService"; (linha duplicada removida)
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export default function MinhasReservas() {
   const location = useLocation();
@@ -118,7 +117,28 @@ export default function MinhasReservas() {
     fetchReservas();
   }, []);
 
-  // Cancel action removed — cancellation UI handled by backend/admin tools
+  const handleCancelar = (reserva: Reserva) => {
+    setReservaSelecionada(reserva);
+  };
+
+  const confirmarCancelamento = async () => {
+    if (!reservaSelecionada) return;
+
+    try {
+      await reservasService.deletar(
+        reservaSelecionada.id
+      );
+      toast.success("Reserva cancelada com sucesso!");
+      setReservaSelecionada(null);
+      fetchReservas();
+    } catch (error: any) {
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao cancelar reserva"
+      );
+      toast.error(message);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {

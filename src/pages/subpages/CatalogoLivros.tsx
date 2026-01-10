@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/config/constants";
 import { emprestimosService } from "@/services/emprestimosService";
 import { useAuth } from "@/store/AuthContext";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CatalogoLivros() {
   const { user } = useAuth();
@@ -204,9 +205,10 @@ export function CatalogoLivros() {
       setLivros(livrosArray);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
-      const mensagem =
-        error.response?.data?.message ||
-        "Erro ao reservar livro";
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao reservar livro"
+      );
       toast.error(mensagem);
     }
   };
@@ -257,9 +259,10 @@ export function CatalogoLivros() {
       setLivros(livrosArray);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
-      const mensagem =
-        error.response?.data?.message ||
-        "Erro ao realizar empréstimo";
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao realizar empréstimo"
+      );
       toast.error(mensagem);
     }
   };
