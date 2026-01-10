@@ -18,6 +18,7 @@ import {
 } from "@/schemas";
 import { categoriasService } from "@/services";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessage";
 import { Loader2 } from "lucide-react";
 
 interface CategoriaFormProps {
@@ -79,9 +80,11 @@ export function CategoriaForm({
           : "Erro ao cadastrar categoria",
         {
           description:
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            "Tente novamente",
+            getErrorMessage(
+              error.response?.data?.message ||
+                error.response?.data?.error,
+              "Tente novamente"
+            ),
         }
       );
     } finally {

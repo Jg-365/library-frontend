@@ -5,7 +5,9 @@
 // URL base da API - altere aqui para integrar com o backend
 export const API_CONFIG = {
   // Em dev usa proxy do Vite (vite.config.ts), em produção use variável de ambiente VITE_API_URL
-  BASE_URL: import.meta.env.VITE_API_URL || "/library",
+  BASE_URL:
+    import.meta.env.VITE_API_URL ||
+    "https://trabalhobd-20252-equipe-552419-production.up.railway.app",
 
   TIMEOUT: 10000,
 

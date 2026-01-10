@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { CopiasManager } from "./CopiasManager";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 
 interface BookDetailsDialogProps {
   livro: Livro | null;
@@ -35,7 +35,7 @@ export function BookDetailsDialog({
   open,
   onOpenChange,
 }: BookDetailsDialogProps) {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [copied, setCopied] = useState(false);
 
   if (!livro) return null;

@@ -19,22 +19,6 @@ const mapCategoriaResponse = (
   description: categoria.description,
 });
 
-function mapCategoriaResponse(
-  categoria: any,
-  index: number
-): Categoria {
-  const id =
-    categoria?.id ?? categoria?.categoryCode ?? index;
-  const descricao =
-    categoria?.description ?? categoria?.descricao ?? "";
-  return {
-    id,
-    codigo: categoria?.codigo ?? String(id),
-    nome: categoria?.nome ?? descricao,
-    descricao,
-  };
-}
-
 export const categoriasService = {
   /**
    * Listar/Buscar todas as categorias

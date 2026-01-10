@@ -46,6 +46,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FolderTree, Plus, List } from "lucide-react";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CadastroCategorias() {
   const location = useLocation();
@@ -179,8 +180,10 @@ export function CadastroCategorias() {
     } catch (error: any) {
       toast.error("Erro ao excluir categoria", {
         description:
-          error.response?.data?.message ||
-          "Tente novamente",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Tente novamente"
+          ),
       });
     } finally {
       setIsDeleteDialogOpen(false);
@@ -269,11 +272,12 @@ export function CadastroCategorias() {
       console.error("Status:", error.response?.status);
       console.error("Dados do erro:", error.response?.data);
 
-      const errorMessage =
+      const errorMessage = getErrorMessage(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Erro desconhecido";
+          error.response?.data?.error ||
+          error.message,
+        "Erro desconhecido"
+      );
 
       // Evita mostrar toast duplicado se o interceptor já mostrou
       if (

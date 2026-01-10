@@ -1,11 +1,11 @@
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function LogoutButton() {
-  const { logout } = useAuth();
+  const { logout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {

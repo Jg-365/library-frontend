@@ -29,6 +29,7 @@ import {
 } from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface SubcategoriaFormProps {
   subcategoria?: {
@@ -107,9 +108,11 @@ export function SubcategoriaForm({
           : "Erro ao criar subcategoria",
         {
           description:
-            error.response?.data?.message ||
-            error.message ||
-            "Tente novamente mais tarde.",
+            getErrorMessage(
+              error.response?.data?.message ||
+                error.message,
+              "Tente novamente mais tarde."
+            ),
         }
       );
     } finally {
