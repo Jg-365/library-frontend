@@ -26,6 +26,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cursosService, usuariosService } from "@/services";
 import type { Usuario } from "@/types";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface Curso {
   courseCode: number;
@@ -162,7 +163,10 @@ export function UsuarioForm({
       let message = "Erro ao salvar usuário";
 
       if (error.response?.data?.message) {
-        message = error.response.data.message;
+        message = getErrorMessage(
+          error.response.data.message,
+          message
+        );
 
         // Detecta erro de foreign key para código de curso
         if (
@@ -186,7 +190,10 @@ export function UsuarioForm({
       } else if (
         error.response?.data?.errors?.[0]?.message
       ) {
-        message = error.response.data.errors[0].message;
+        message = getErrorMessage(
+          error.response.data.errors[0].message,
+          message
+        );
       }
 
       toast.error(message);
