@@ -34,7 +34,20 @@ export function ProtectedRoute({
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !perfisPermitidos.includes(user.perfil)) {
+  // Normalize profile (backend may return `role` or legacy `perfil`)
+  const currentPerfil =
+    (user && (user.role || (user as any).perfil)) || null;
+
+  // Administrador tem acesso a todas as rotas
+  if (currentPerfil === "ADMIN") {
+    return <>{children}</>;
+  }
+
+  if (
+    user &&
+    currentPerfil &&
+    !perfisPermitidos.includes(currentPerfil)
+  ) {
     if (!showAccessDenied) {
       setShowAccessDenied(true);
     }
@@ -44,7 +57,9 @@ export function ProtectedRoute({
         <AccessDeniedDialog
           open={showAccessDenied}
           onClose={() => setShowAccessDenied(false)}
-          message={`Esta página é restrita a ${perfisPermitidos.join(", ")}. Seu perfil atual é ${user.perfil}.`}
+          message={`Esta página é restrita a ${perfisPermitidos.join(
+            ", "
+          )}. Seu perfil atual é ${currentPerfil}.`}
         />
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
           <div className="text-center">

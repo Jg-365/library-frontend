@@ -91,8 +91,22 @@ export function CadastroDevolucoes() {
         );
       }
 
+      // Determine userId for the return: prefer usuarioId, then usuario.enrollment, then usuario.id
+      const userId =
+        emprestimoSelecionado.usuarioId ||
+        (emprestimoSelecionado.usuario as any)
+          ?.enrollment ||
+        (emprestimoSelecionado.usuario as any)?.id;
+
+      if (!userId) {
+        throw new Error(
+          "Nenhum usuário associado ao empréstimo — não é possível registrar a devolução."
+        );
+      }
+
       const response = await emprestimosService.devolver({
         isbnCodes,
+        userId: Number(userId),
       });
       const successIsbn = response?.successIsbn ?? [];
       const failedIsbn = response?.failedIsbn ?? [];
@@ -102,9 +116,7 @@ export function CadastroDevolucoes() {
         hasSuccess
           ? `${successIsbn.length} devolvido(s)`
           : null,
-        hasFailed
-          ? `${failedIsbn.length} falha(s)`
-          : null,
+        hasFailed ? `${failedIsbn.length} falha(s)` : null,
       ]
         .filter(Boolean)
         .join(" • ");
@@ -114,18 +126,15 @@ export function CadastroDevolucoes() {
 
       if (hasSuccess && hasFailed) {
         toast.info(
-          mensagem ||
-            "Devolução parcial registrada."
+          mensagem || "Devolução parcial registrada."
         );
       } else if (hasSuccess) {
         toast.success(
-          mensagem ||
-            "Devolução registrada com sucesso!"
+          mensagem || "Devolução registrada com sucesso!"
         );
       } else {
         toast.error(
-          mensagem ||
-            "Nenhuma devolução foi registrada."
+          mensagem || "Nenhuma devolução foi registrada."
         );
       }
 

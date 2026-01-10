@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PageLayout } from "@/components/layouts";
 import {
   Card,
   CardContent,
@@ -246,174 +247,176 @@ export function DashboardUsuario() {
 
   if (carregando) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <Card className="shadow-lg">
-          <div className="flex flex-col items-center justify-center py-32">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-xl font-semibold text-gray-600">
-              Carregando dashboard...
-            </p>
-          </div>
-        </Card>
-      </div>
+      <PageLayout perfil={"USUARIO"}>
+        <div className="max-w-7xl mx-auto">
+          <Card className="shadow-lg">
+            <div className="flex flex-col items-center justify-center py-32">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+              <p className="text-xl font-semibold text-gray-600">
+                Carregando dashboard...
+              </p>
+            </div>
+          </Card>
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Título da Página */}
-      <div>
-        {/* Boas vindas direta ao usuário */}
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          Bem-vindo de volta{" "}
-          <span className="font-bold">
-            {user?.nome || "Usuário"}
-          </span>
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Explore nosso acervo e gerencie suas reservas e
-          empréstimos
-        </p>
-      </div>
-      {/* Quick Actions Section */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-gray-700">
-          Ações Rápidas
-        </h3>
-        <div className="grid gap-6 md:grid-cols-2">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <Card
-                key={index}
-                className="hover:shadow-lg transition-all duration-200 cursor-pointer group"
-              >
-                <Link to={action.href}>
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-600 transition-all duration-200">
-                        <Icon className="h-5 w-5 text-blue-600 group-hover:text-white transition-colors duration-200" />
-                      </div>
-                      <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-200">
-                        {action.title}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      {action.description}
-                    </CardDescription>
-                  </CardContent>
-                </Link>
-              </Card>
-            );
-          })}
+    <PageLayout perfil={"USUARIO"}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Título da Página */}
+        <div>
+          {/* Boas vindas direta ao usuário */}
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Bem-vindo de volta{" "}
+            <span className="font-bold">
+              {user?.nome || "Usuário"}
+            </span>
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Explore nosso acervo e gerencie suas reservas e
+            empréstimos
+          </p>
         </div>
-      </div>
+        {/* Quick Actions Section */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">
+            Ações Rápidas
+          </h3>
+          <div className="grid gap-6 md:grid-cols-2">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <Card
+                  key={index}
+                  className="hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                >
+                  <Link to={action.href}>
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-600 transition-all duration-200">
+                          <Icon className="h-5 w-5 text-blue-600 group-hover:text-white transition-colors duration-200" />
+                        </div>
+                        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-200">
+                          {action.title}
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription>
+                        {action.description}
+                      </CardDescription>
+                    </CardContent>
+                  </Link>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Minhas Reservas Ativas */}
-      {reservasAtivas.length > 0 && (
+        {/* Minhas Reservas Ativas */}
+        {reservasAtivas.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-800">
+                  Minhas Reservas Ativas
+                </h3>
+              </div>
+              <Link to="/usuario/reservas">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                >
+                  Ver todas
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {reservasAtivas.slice(0, 3).map((reserva) => (
+                <ReservaCard
+                  key={reserva.id}
+                  reserva={reserva}
+                  onVerDetalhes={handleVerDetalhesReserva}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Livros Disponíveis para Reserva */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-blue-600" />
               <h3 className="text-xl font-bold text-gray-800">
-                Minhas Reservas Ativas
+                Livros Disponíveis
               </h3>
             </div>
-            <Link to="/usuario/reservas">
+            <Link to="/usuario/livros">
               <Button
                 variant="ghost"
                 size="sm"
                 className="gap-2"
               >
-                Ver todas
+                Ver catálogo completo
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {reservasAtivas.slice(0, 3).map((reserva) => (
-              <ReservaCard
-                key={reserva.id}
-                reserva={reserva}
-                onCancelar={handleCancelarReserva}
-                onVerDetalhes={handleVerDetalhesReserva}
-              />
-            ))}
-          </div>
+          {livrosDestaque.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold mb-2">
+                  Nenhum livro disponível no momento
+                </h3>
+                <p className="text-muted-foreground text-center mb-4">
+                  Não há livros disponíveis para reserva no
+                  momento
+                </p>
+                <Link to="/usuario/livros">
+                  <Button variant="outline">
+                    Ir para o catálogo completo
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {livrosDestaque.map((livro) => (
+                <BookCard
+                  key={livro.isbn}
+                  livro={livro}
+                  onDetailsClick={handleVerDetalhes}
+                  onReserveClick={handleReservar}
+                  onBorrowClick={handleEmprestar}
+                  showReserveButton={
+                    livro.quantidadeExemplares === 0
+                  }
+                  showBorrowButton={
+                    (livro.quantidadeExemplares ?? 0) > 0
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Livros Disponíveis para Reserva */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-600" />
-            <h3 className="text-xl font-bold text-gray-800">
-              Livros Disponíveis
-            </h3>
-          </div>
-          <Link to="/usuario/livros">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2"
-            >
-              Ver catálogo completo
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        {livrosDestaque.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">
-                Nenhum livro disponível no momento
-              </h3>
-              <p className="text-muted-foreground text-center mb-4">
-                Não há livros disponíveis para reserva no
-                momento
-              </p>
-              <Link to="/usuario/livros">
-                <Button variant="outline">
-                  Ir para o catálogo completo
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {livrosDestaque.map((livro) => (
-              <BookCard
-                key={livro.isbn}
-                livro={livro}
-                onDetailsClick={handleVerDetalhes}
-                onReserveClick={handleReservar}
-                onBorrowClick={handleEmprestar}
-                showReserveButton={
-                  livro.quantidadeExemplares === 0
-                }
-                showBorrowButton={
-                  livro.quantidadeExemplares &&
-                  livro.quantidadeExemplares > 0
-                }
-              />
-            ))}
-          </div>
-        )}
+        {/* Dialog de Detalhes do Livro */}
+        <BookDetailsDialog
+          livro={livroSelecionado}
+          open={dialogAberto}
+          onOpenChange={setDialogAberto}
+        />
       </div>
-
-      {/* Dialog de Detalhes do Livro */}
-      <BookDetailsDialog
-        livro={livroSelecionado}
-        open={dialogAberto}
-        onOpenChange={setDialogAberto}
-      />
-    </div>
+    </PageLayout>
   );
 }
 

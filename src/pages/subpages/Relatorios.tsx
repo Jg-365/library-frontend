@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import {
   Card,
@@ -21,6 +23,17 @@ import { toast } from "sonner";
 
 export function Relatorios() {
   const [carregando, setCarregando] = useState(false);
+  const location = useLocation();
+
+  const getPerfil = () => {
+    if (location.pathname.startsWith("/admin"))
+      return "ADMIN";
+    if (location.pathname.startsWith("/bibliotecario"))
+      return "BIBLIOTECARIO";
+    return "USUARIO";
+  };
+
+  const perfil = getPerfil();
 
   const relatoriosDisponiveis = [
     {
@@ -88,146 +101,168 @@ export function Relatorios() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <PageBreadcrumb
-        items={[
-          { label: "Início", href: "/usuario" },
-          { label: "Relatórios" },
-        ]}
-        backTo="/usuario"
-      />
-      {/* Título da Página */}
-      <div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-          <BarChart3 className="h-8 w-8 text-blue-600" />
-          Relatórios
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Gere relatórios detalhados sobre o sistema de
-          biblioteca
-        </p>
-      </div>
-
-      {/* Estatísticas Rápidas */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total de Empréstimos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,284</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +12% do mês anterior
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Livros no Acervo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8,592</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +23 novos esta semana
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Usuários Ativos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2,456</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              89% taxa de atividade
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Relatórios Disponíveis */}
-      <div>
-        <h3 className="text-xl font-semibold mb-4">
-          Relatórios Disponíveis
-        </h3>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {relatoriosDisponiveis.map((relatorio) => {
-            const Icon = relatorio.icon;
-            return (
-              <Card
-                key={relatorio.id}
-                className="hover:shadow-lg transition-all duration-200"
-              >
-                <CardHeader>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Icon className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <CardTitle className="text-lg">
-                      {relatorio.titulo}
-                    </CardTitle>
-                  </div>
-                  <CardDescription>
-                    {relatorio.descricao}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    className="w-full gap-2"
-                    onClick={() =>
-                      handleGerarRelatorio(
-                        relatorio.tipo,
-                        relatorio.titulo
-                      )
-                    }
-                    disabled={carregando}
-                  >
-                    <Download className="h-4 w-4" />
-                    {carregando
-                      ? "Gerando..."
-                      : "Gerar Relatório"}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+    <PageLayout perfil={perfil}>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <PageBreadcrumb
+          items={[
+            {
+              label: "Início",
+              href:
+                perfil === "ADMIN"
+                  ? "/admin/dashboard"
+                  : perfil === "BIBLIOTECARIO"
+                  ? "/bibliotecario/dashboard"
+                  : "/usuario",
+            },
+            { label: "Relatórios" },
+          ]}
+          backTo={
+            perfil === "ADMIN"
+              ? "/admin/dashboard"
+              : perfil === "BIBLIOTECARIO"
+              ? "/bibliotecario/dashboard"
+              : "/usuario"
+          }
+        />
+        {/* Título da Página */}
+        <div>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+            <BarChart3 className="h-8 w-8 text-blue-600" />
+            Relatórios
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Gere relatórios detalhados sobre o sistema de
+            biblioteca
+          </p>
         </div>
-      </div>
 
-      {/* Informações Adicionais */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Informações sobre Relatórios
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            • Os relatórios são gerados em formato PDF
-          </p>
-          <p className="text-sm text-muted-foreground">
-            • Você pode filtrar por período na versão
-            completa
-          </p>
-          <p className="text-sm text-muted-foreground">
-            • Relatórios ficam disponíveis para download por
-            30 dias
-          </p>
-          <p className="text-sm text-muted-foreground">
-            • Em caso de dúvidas, entre em contato com o
-            suporte
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Estatísticas Rápidas */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total de Empréstimos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                1,284
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                +12% do mês anterior
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Livros no Acervo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                8,592
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                +23 novos esta semana
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Usuários Ativos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                2,456
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                89% taxa de atividade
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Relatórios Disponíveis */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            Relatórios Disponíveis
+          </h3>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {relatoriosDisponiveis.map((relatorio) => {
+              const Icon = relatorio.icon;
+              return (
+                <Card
+                  key={relatorio.id}
+                  className="hover:shadow-lg transition-all duration-200"
+                >
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Icon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <CardTitle className="text-lg">
+                        {relatorio.titulo}
+                      </CardTitle>
+                    </div>
+                    <CardDescription>
+                      {relatorio.descricao}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full gap-2"
+                      onClick={() =>
+                        handleGerarRelatorio(
+                          relatorio.tipo,
+                          relatorio.titulo
+                        )
+                      }
+                      disabled={carregando}
+                    >
+                      <Download className="h-4 w-4" />
+                      {carregando
+                        ? "Gerando..."
+                        : "Gerar Relatório"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Informações Adicionais */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Informações sobre Relatórios
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              • Os relatórios são gerados em formato PDF
+            </p>
+            <p className="text-sm text-muted-foreground">
+              • Você pode filtrar por período na versão
+              completa
+            </p>
+            <p className="text-sm text-muted-foreground">
+              • Relatórios ficam disponíveis para download
+              por 30 dias
+            </p>
+            <p className="text-sm text-muted-foreground">
+              • Em caso de dúvidas, entre em contato com o
+              suporte
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </PageLayout>
   );
 }
 
