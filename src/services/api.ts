@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { API_CONFIG, STORAGE_KEYS } from "@/config";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export const api = axios.create({
   baseURL: API_CONFIG.BASE_URL,
@@ -77,10 +78,11 @@ api.interceptors.response.use(
   (
     error: AxiosError<{ message: string; error: string }>
   ) => {
-    const errorMessage =
+    const rawErrorMessage =
       error.response?.data?.error ||
       error.response?.data?.message ||
       error.message;
+    const errorMessage = getErrorMessage(rawErrorMessage);
 
     // Tratamento específico por código de status
     switch (error.response?.status) {
