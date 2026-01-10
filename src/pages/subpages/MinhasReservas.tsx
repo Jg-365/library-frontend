@@ -12,39 +12,42 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   BookOpen,
   Calendar,
-  X,
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { reservasService } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
 import { useAuth } from "@/store/AuthContext";
-import { reservasService } from "@/services/reservasService";
+// import { reservasService } from "@/services/reservasService"; (linha duplicada removida)
 
 export default function MinhasReservas() {
   const location = useLocation();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [reservaSelecionada, setReservaSelecionada] =
-    useState<Reserva | null>(null);
 
-  // Formata datas de forma segura
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "-";
+  // Parse and format dates robustly (accepts string | number | Date)
+  const parseToDate = (
+    value?: string | number | Date
+  ): Date | null => {
+    if (value === undefined || value === null) return null;
+    if (value instanceof Date) {
+      if (isNaN(value.getTime())) return null;
+      return value;
+    }
+    // handle numbers (timestamps) and strings
+    const d =
+      typeof value === "number"
+        ? new Date(value)
+        : new Date(String(value));
+    if (isNaN(d.getTime())) return null;
+    return d;
+  };
+
+  const formatDate = (value?: string | number | Date) => {
+    const d = parseToDate(value);
+    if (!d) return "-";
     return d.toLocaleDateString("pt-BR");
   };
 
@@ -66,6 +69,37 @@ export default function MinhasReservas() {
     return "/usuario";
   };
 
+  const perfil = getPerfil();
+  const { user } = useAuth();
+
+  // Normaliza perfis vindos do backend: ALUNO/PROFESSOR => USUARIO
+  const normalizePerfil = (raw?: string | null): Perfil => {
+    if (!raw) return getPerfil();
+    const r = raw.toString().toUpperCase();
+    if (r === "ALUNO" || r === "PROFESSOR")
+      return "USUARIO";
+    if (r === "BIBLIOTECARIO") return "BIBLIOTECARIO";
+    if (r === "ADMIN") return "ADMIN";
+    // fallback to USUARIO for unknown values
+    return "USUARIO";
+  };
+
+  const rawPerfil =
+    (user &&
+      ((user.role as string) ||
+        (user as any).perfil ||
+        (user as any).tipoAcesso)) ||
+    undefined;
+
+  const currentPerfil: Perfil = normalizePerfil(rawPerfil);
+
+  console.debug(
+    "MinhasReservas currentPerfil:",
+    currentPerfil,
+    "raw:",
+    rawPerfil
+  );
+
   const fetchReservas = async () => {
     try {
       setIsLoading(true);
@@ -84,27 +118,7 @@ export default function MinhasReservas() {
     fetchReservas();
   }, []);
 
-  const handleCancelar = (reserva: Reserva) => {
-    setReservaSelecionada(reserva);
-  };
-
-  const confirmarCancelamento = async () => {
-    if (!reservaSelecionada) return;
-
-    try {
-      await reservasService.deletar(
-        reservaSelecionada.id
-      );
-      toast.success("Reserva cancelada com sucesso!");
-      setReservaSelecionada(null);
-      fetchReservas();
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao cancelar reserva";
-      toast.error(message);
-    }
-  };
+  // Cancel action removed — cancellation UI handled by backend/admin tools
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -209,18 +223,7 @@ export default function MinhasReservas() {
                       </p>
                     </div>
                   </div>
-                  {reserva.status === "ATIVA" && (
-                    <Button
-                      onClick={() =>
-                        handleCancelar(reserva)
-                      }
-                      variant="outline"
-                      className="w-full border-red-300 text-red-600 hover:bg-red-50"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancelar Reserva
-                    </Button>
-                  )}
+                  {/* Cancel button removed per UX decision */}
                   {reserva.status === "CONCLUIDA" && (
                     <div className="flex items-center gap-2 text-green-600 text-sm">
                       <CheckCircle className="h-4 w-4" />
@@ -235,36 +238,7 @@ export default function MinhasReservas() {
           </div>
         )}
 
-        <AlertDialog
-          open={!!reservaSelecionada}
-          onOpenChange={() => setReservaSelecionada(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Cancelar Reserva
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja cancelar a reserva do
-                livro{" "}
-                <span className="font-semibold">
-                  {reservaSelecionada?.livro?.titulo ||
-                    reservaSelecionada?.livroIsbn}
-                </span>
-                ? Esta ação não pode ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Voltar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmarCancelamento}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Cancelar Reserva
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Confirmation dialog removed */}
       </div>
     </PageLayout>
   );

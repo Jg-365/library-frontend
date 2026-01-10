@@ -20,7 +20,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/services/api";
-import { autoresService } from "@/services";
+import {
+  autoresService,
+  subcategoriasService,
+} from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
 import type {
@@ -62,6 +65,86 @@ export function BookForm({
   const [coautoresParaRemover, setCoautoresParaRemover] =
     useState<string[]>([]);
 
+  // Google Books suggestions (UX improvement)
+  const [googleSuggestions, setGoogleSuggestions] =
+    useState<any[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] =
+    useState(false);
+
+  async function fetchGoogleBooks(query: string) {
+    try {
+      setSuggestionsLoading(true);
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+          query
+        )}&maxResults=6`
+      );
+      const json = await res.json();
+      const items = json.items || [];
+      const parsed = items.map((it: any) => {
+        const info = it.volumeInfo || {};
+        const industry = info.industryIdentifiers || [];
+        const isbnObj = industry.find((id: any) =>
+          id.type?.toLowerCase().includes("isbn")
+        );
+        return {
+          id: it.id,
+          title: info.title,
+          authors: info.authors || [],
+          publisher: info.publisher,
+          publishedDate: info.publishedDate,
+          isbn: isbnObj ? isbnObj.identifier : undefined,
+        };
+      });
+      setGoogleSuggestions(parsed);
+    } catch (err) {
+      console.error("Erro Google Books:", err);
+      setGoogleSuggestions([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }
+
+  function applySuggestion(suggestion: any) {
+    if (!suggestion) return;
+    form.setValue("titulo", suggestion.title || "");
+    if (suggestion.isbn)
+      form.setValue("isbn", suggestion.isbn);
+    if (suggestion.publisher)
+      form.setValue("editora", suggestion.publisher);
+    if (suggestion.publishedDate) {
+      const year = Number(
+        String(suggestion.publishedDate).slice(0, 4)
+      );
+      if (!isNaN(year)) form.setValue("ano", year);
+    }
+
+    // Try to match authors by name with existing authors list
+    if (
+      suggestion.authors &&
+      suggestion.authors.length > 0
+    ) {
+      const matched = suggestion.authors
+        .map((name: string) =>
+          autores.find(
+            (a) =>
+              a.nome?.toLowerCase() === name.toLowerCase()
+          )
+        )
+        .filter(Boolean) as Autor[];
+      if (matched.length > 0) {
+        setSelectedAutores(matched);
+        form.setValue(
+          "autores",
+          matched.map((m) => m.id)
+        );
+      }
+    }
+
+    // collapse suggestions after apply
+    setGoogleSuggestions([]);
+  }
+
   const form = useForm<LivroFormValues>({
     resolver: zodResolver(livroFormSchema),
     defaultValues: {
@@ -74,6 +157,20 @@ export function BookForm({
       autores: livro?.autores?.map((a) => a.id) || [],
     },
   });
+
+  const tituloValue = form.watch("titulo");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (tituloValue && tituloValue.length >= 3) {
+        fetchGoogleBooks(tituloValue);
+      } else {
+        setGoogleSuggestions([]);
+      }
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [tituloValue]);
 
   useEffect(() => {
     carregarAutores();
@@ -124,10 +221,10 @@ export function BookForm({
         })
       );
       console.log(
-        "Primeira categoria:",
-        categoriasCarregadas[0]
+        "Primeira categoria formatada:",
+        categoriasFormatadas[0]
       );
-      setCategorias(categoriasCarregadas);
+      setCategorias(categoriasFormatadas);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
       console.error("Erro ao carregar categorias:", error);
@@ -411,6 +508,32 @@ export function BookForm({
                     {...field}
                   />
                 </FormControl>
+                {/* Google Books suggestions dropdown */}
+                {suggestionsLoading && (
+                  <div className="mt-2 text-sm text-gray-500">
+                    Buscando sugestões...
+                  </div>
+                )}
+                {googleSuggestions.length > 0 && (
+                  <div className="mt-2 border rounded bg-white shadow-sm max-h-56 overflow-auto">
+                    {googleSuggestions.map((sug) => (
+                      <button
+                        key={sug.id}
+                        type="button"
+                        onClick={() => applySuggestion(sug)}
+                        className="w-full text-left p-2 hover:bg-gray-50"
+                      >
+                        <div className="font-medium">
+                          {sug.title}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {(sug.authors || []).join(", ")}
+                          {sug.isbn ? ` • ${sug.isbn}` : ""}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -734,7 +857,9 @@ export function BookForm({
                       <Checkbox
                         checked={
                           !isDisabled &&
-                          coautoresParaRemover.includes(email)
+                          coautoresParaRemover.includes(
+                            email
+                          )
                         }
                         disabled={isDisabled}
                         onCheckedChange={() => {

@@ -28,6 +28,7 @@ function addAutorIfMissing(
     id: 0,
     nome: nome || email || "Autor desconhecido",
     email: email || "",
+    nacionalidade: "",
   });
 }
 
@@ -39,11 +40,7 @@ export function mapBookResponseToLivro(
 ): Livro {
   const autores: Autor[] = [];
 
-  addAutorIfMissing(
-    autores,
-    book.author,
-    book.emailAuthor
-  );
+  addAutorIfMissing(autores, book.author, book.emailAuthor);
 
   if (book.emailAuthor && !book.author) {
     addAutorIfMissing(
@@ -74,8 +71,6 @@ export function mapBookResponseToLivro(
     imagemUrl: book.imageUrl || undefined,
     autores,
     quantidadeExemplares:
-      book.availableCopies ??
-      book.numberOfCopies ??
-      0,
+      book.availableCopies ?? book.numberOfCopies ?? 0,
   };
 }

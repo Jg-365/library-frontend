@@ -84,6 +84,29 @@ api.interceptors.response.use(
 
     // Tratamento específico por código de status
     switch (error.response?.status) {
+      case 400:
+        console.error("🚨 ERRO 400 - Bad Request:", {
+          url: error.config?.baseURL + error.config?.url,
+          method: error.config?.method,
+          requestData: error.config?.data,
+          requestHeaders: {
+            ...(error.config?.headers || {}),
+            Authorization: error.config?.headers
+              ?.Authorization
+              ? "REDACTED"
+              : undefined,
+          },
+          responseData: error.response?.data,
+          status: error.response?.status,
+        });
+
+        toast.error("Requisição inválida (400)", {
+          description:
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            "Verifique os dados enviados.",
+        });
+        break;
       case 401:
         // Log especial para /users/create
         if (error.config?.url?.includes("/users/create")) {
