@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import {
   dashboardService,
   type DashboardStats,
@@ -27,7 +27,7 @@ import {
 } from "@/services/dashboardService";
 
 function BibliotecarioDashboard() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsuarios: 0,
     totalLivros: 0,

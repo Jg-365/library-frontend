@@ -3,9 +3,16 @@
  */
 
 // URL base da API - altere aqui para integrar com o backend
+const RAW_API_BASE_URL = import.meta.env.VITE_API_URL;
+const NORMALIZED_API_BASE_URL = RAW_API_BASE_URL
+  ? RAW_API_BASE_URL.match(/^https?:\/\//)
+    ? RAW_API_BASE_URL
+    : `https://${RAW_API_BASE_URL}`
+  : "https://trabalhobd-20252-equipe-552419-production.up.railway.app/library";
+
 export const API_CONFIG = {
   // Em dev usa proxy do Vite (vite.config.ts), em produção use variável de ambiente VITE_API_URL
-  BASE_URL: import.meta.env.VITE_API_URL || "/library",
+  BASE_URL: NORMALIZED_API_BASE_URL,
 
   TIMEOUT: 10000,
 

@@ -28,10 +28,9 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { reservasService } from "@/services/reservasService";
+import { reservasService as reservasApi } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
-import { useAuth } from "@/store/AuthContext";
-import { reservasService } from "@/services/reservasService";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export default function MinhasReservas() {
   const location = useLocation();
@@ -70,7 +69,7 @@ export default function MinhasReservas() {
     try {
       setIsLoading(true);
       const reservasArray =
-        await reservasService.listarPorUsuario();
+        await reservasApi.listarPorUsuario();
       setReservas(reservasArray);
     } catch (error: any) {
       toast.error("Erro ao carregar reservas");
@@ -92,16 +91,17 @@ export default function MinhasReservas() {
     if (!reservaSelecionada) return;
 
     try {
-      await reservasService.deletar(
+      await reservasApi.deletar(
         reservaSelecionada.id
       );
       toast.success("Reserva cancelada com sucesso!");
       setReservaSelecionada(null);
       fetchReservas();
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao cancelar reserva";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao cancelar reserva"
+      );
       toast.error(message);
     }
   };

@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { getErrorMessage } from "@/lib/errorMessage";
 import {
   loginSchema,
   type LoginFormValues,
@@ -32,7 +33,7 @@ import {
 
 export function LoginForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuthContext();
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,9 +79,10 @@ export function LoginForm() {
       }
     } catch (err: any) {
       setError(
-        err.response?.data?.message ||
-          err.message ||
+        getErrorMessage(
+          err.response?.data?.message || err.message,
           "Erro ao fazer login"
+        )
       );
     } finally {
       setIsLoading(false);

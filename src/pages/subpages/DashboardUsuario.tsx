@@ -22,7 +22,8 @@ import { toast } from "sonner";
 import { livrosService } from "@/services/livrosService";
 import { reservasService } from "@/services/reservasService";
 import { emprestimosService } from "@/services/emprestimosService";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const quickActions = [
   {
@@ -40,7 +41,7 @@ const quickActions = [
 ];
 
 export function DashboardUsuario() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [livrosDestaque, setLivrosDestaque] = useState<
     Livro[]
   >([]);
@@ -169,10 +170,11 @@ export function DashboardUsuario() {
     } catch (error: any) {
       console.error("❌ Erro ao reservar:", error);
       console.error("❌ Response:", error.response?.data);
-      const mensagem =
+      const mensagem = getErrorMessage(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erro ao reservar livro";
+          error.response?.data?.error,
+        "Erro ao reservar livro"
+      );
       toast.error(mensagem);
     }
   };
@@ -211,10 +213,11 @@ export function DashboardUsuario() {
         "❌ Response completa:",
         error.response
       );
-      const mensagem =
+      const mensagem = getErrorMessage(
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erro ao emprestar livro";
+          error.response?.data?.error,
+        "Erro ao emprestar livro"
+      );
       toast.error(mensagem);
     }
   };
@@ -227,9 +230,10 @@ export function DashboardUsuario() {
       toast.success("Reserva cancelada com sucesso!");
       carregarDados();
     } catch (error: any) {
-      const mensagem =
-        error.response?.data?.message ||
-        "Erro ao cancelar reserva";
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao cancelar reserva"
+      );
       toast.error(mensagem);
     }
   };

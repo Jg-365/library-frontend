@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +23,7 @@ export function AccessDeniedDialog({
   message = "Você não tem permissão para acessar esta página.",
 }: AccessDeniedDialogProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthContext();
 
   const handleGoBack = () => {
     onClose();

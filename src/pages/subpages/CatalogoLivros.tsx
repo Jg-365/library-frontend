@@ -30,10 +30,11 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/config/constants";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CatalogoLivros() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const location = useLocation();
   const [livros, setLivros] = useState<Livro[]>([]);
   const [filteredLivros, setFilteredLivros] = useState<
@@ -203,9 +204,10 @@ export function CatalogoLivros() {
       setLivros(livrosArray);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
-      const mensagem =
-        error.response?.data?.message ||
-        "Erro ao reservar livro";
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao reservar livro"
+      );
       toast.error(mensagem);
     }
   };
@@ -252,9 +254,10 @@ export function CatalogoLivros() {
       setLivros(livrosArray);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
-      const mensagem =
-        error.response?.data?.message ||
-        "Erro ao realizar empréstimo";
+      const mensagem = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao realizar empréstimo"
+      );
       toast.error(mensagem);
     }
   };
