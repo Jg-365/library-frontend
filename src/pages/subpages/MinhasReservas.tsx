@@ -30,8 +30,7 @@ import {
 import { toast } from "sonner";
 import { reservasService } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
-import { useAuth } from "@/store/AuthContext";
-import { reservasService } from "@/services/reservasService";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export default function MinhasReservas() {
   const location = useLocation();
@@ -99,9 +98,10 @@ export default function MinhasReservas() {
       setReservaSelecionada(null);
       fetchReservas();
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao cancelar reserva";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao cancelar reserva"
+      );
       toast.error(message);
     }
   };

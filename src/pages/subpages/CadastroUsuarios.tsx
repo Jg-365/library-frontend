@@ -26,6 +26,7 @@ import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import type { Usuario } from "@/types";
 import { usuariosService } from "@/services";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface UsuarioData extends Usuario {
   ativo?: boolean;
@@ -80,9 +81,10 @@ export function CadastroUsuarios() {
       toast.success("Usuário excluído com sucesso!");
       fetchUsuarios();
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao excluir usuário";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao excluir usuário"
+      );
       toast.error(message);
     } finally {
       setDeleteDialogOpen(false);

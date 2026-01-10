@@ -26,6 +26,7 @@ import { GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { cursosService } from "@/services";
 import type { Curso } from "@/types";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CadastroCursos() {
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -77,9 +78,10 @@ export function CadastroCursos() {
       toast.success("Curso excluído com sucesso!");
       fetchCursos();
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao excluir curso";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao excluir curso"
+      );
       toast.error(message);
     } finally {
       setDeleteDialogOpen(false);

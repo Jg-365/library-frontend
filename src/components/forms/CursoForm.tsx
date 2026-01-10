@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { cursosService } from "@/services";
 import type { Curso } from "@/types";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface CursoFormProps {
   curso?: Curso;
@@ -54,9 +55,10 @@ export function CursoForm({
       }
       onSuccess?.();
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao salvar curso";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao salvar curso"
+      );
       toast.error(message);
     } finally {
       setIsSubmitting(false);

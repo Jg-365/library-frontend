@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { emprestimosService } from "@/services/emprestimosService";
+import { getErrorMessage } from "@/lib/errorMessage";
 import type { Emprestimo } from "@/types";
 
 export function CadastroDevolucoes() {
@@ -133,9 +134,10 @@ export function CadastroDevolucoes() {
         fetchEmprestimos();
       }
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        "Erro ao registrar devolução";
+      const message = getErrorMessage(
+        error.response?.data?.message,
+        "Erro ao registrar devolução"
+      );
       toast.error(message);
     }
   };
