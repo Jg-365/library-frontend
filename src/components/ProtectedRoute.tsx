@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { AccessDeniedDialog } from "@/components/AccessDeniedDialog";
 import type { PerfilUsuario } from "@/types/Usuario";
 
@@ -13,7 +13,7 @@ export function ProtectedRoute({
   children,
   perfisPermitidos,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuthContext();
   const [showAccessDenied, setShowAccessDenied] =
     useState(false);
 

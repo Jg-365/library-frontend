@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { livrosService } from "@/services/livrosService";
 import { reservasService } from "@/services/reservasService";
 import { emprestimosService } from "@/services/emprestimosService";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
 
 const quickActions = [
@@ -42,7 +42,7 @@ const quickActions = [
 ];
 
 export function DashboardUsuario() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [livrosDestaque, setLivrosDestaque] = useState<
     Livro[]
   >([]);

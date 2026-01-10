@@ -20,14 +20,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageLayout } from "@/components/layouts";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import {
   dashboardService,
   type DashboardStats,
   type AtividadeRecente,
 } from "@/services/dashboardService";
 function AdminDashboard() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsuarios: 0,
     totalLivros: 0,

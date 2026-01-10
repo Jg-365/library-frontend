@@ -30,12 +30,11 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/config/constants";
-import { emprestimosService } from "@/services/emprestimosService";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CatalogoLivros() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const location = useLocation();
   const [livros, setLivros] = useState<Livro[]>([]);
   const [filteredLivros, setFilteredLivros] = useState<

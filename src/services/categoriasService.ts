@@ -8,7 +8,16 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Categoria } from "@/types";
-import type { CategoryResponse } from "@/types/BackendResponses";
+import type {
+  CategoryResponse,
+} from "@/types/BackendResponses";
+
+const mapCategoriaResponse = (
+  categoria: CategoryResponse
+): Categoria => ({
+  categoryCode: categoria.categoryCode,
+  description: categoria.description,
+});
 
 export const categoriasService = {
   /**
