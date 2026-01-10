@@ -10,22 +10,6 @@ import { API_ENDPOINTS } from "@/config/constants";
 import type { Categoria } from "@/types";
 import type { CategoryResponse } from "@/types/BackendResponses";
 
-function mapCategoriaResponse(
-  categoria: CategoryResponse,
-  index: number
-): Categoria {
-  const id =
-    categoria?.id ?? categoria?.categoryCode ?? index;
-  const descricao =
-    categoria?.description ?? categoria?.descricao ?? "";
-  return {
-    id,
-    codigo: categoria?.codigo ?? String(id),
-    nome: categoria?.nome ?? descricao,
-    descricao,
-  };
-}
-
 export const categoriasService = {
   /**
    * Listar/Buscar todas as categorias
