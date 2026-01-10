@@ -29,13 +29,18 @@ export function AccessDeniedDialog({
     onClose();
     if (user?.perfil) {
       // Redireciona para o dashboard do usuário
-      const dashboards = {
-        ALUNO: "/user/dashboard",
-        PROFESSOR: "/user/dashboard",
+      const dashboards: Record<string, string> = {
+        USUARIO: "/usuario",
+        ADMIN: "/admin/dashboard",
         BIBLIOTECARIO: "/bibliotecario/dashboard",
-        ADMINISTRADOR: "/admin/dashboard",
       };
-      navigate(dashboards[user.perfil] || "/");
+      // Se o perfil vier em formato legado (por exemplo 'ADMINISTRADOR' ou 'ALUNO'), mapear para os novos valores
+      const normalizedPerfil = (user.perfil as string)
+        .replace("ADMINISTRADOR", "ADMIN")
+        .replace("ALUNO", "USUARIO")
+        .replace("PROFESSOR", "USUARIO");
+
+      navigate(dashboards[normalizedPerfil] || "/");
     } else {
       navigate("/login");
     }

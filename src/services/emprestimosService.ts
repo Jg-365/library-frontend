@@ -7,6 +7,7 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
+import { usuariosService } from "./usuariosService";
 import type {
   Emprestimo,
   CriarEmprestimoRequest,
@@ -128,6 +129,54 @@ async function mapLoanResponseToEmprestimo(
     copyCodes: loan.copyCodes,
     livros: livros,
     status: status,
+    // Try to fetch full user details from the backend when possible. If
+    // the lookup fails, fall back to a minimal placeholder so the UI
+    // doesn't display "Usuário não informado".
+    usuario: await (async () => {
+      if (!loan.userId) return undefined;
+      try {
+        const fetched =
+          await usuariosService.buscarPorEnrollment(
+            String(loan.userId)
+          );
+        return {
+          enrollment: fetched.enrollment || loan.userId,
+          nome:
+            (fetched as any).nome ||
+            fetched.name ||
+            fetched.username ||
+            `Usuário #${loan.userId}`,
+          name:
+            fetched.name ||
+            (fetched as any).nome ||
+            fetched.username ||
+            `Usuário #${loan.userId}`,
+          username:
+            fetched.username ||
+            String(fetched.enrollment ?? loan.userId),
+          address: fetched.address || "",
+          userType:
+            (fetched as any).userType || "FUNCIONARIO",
+          role: (fetched as any).role || "USUARIO",
+          active: fetched.active ?? true,
+        } as any;
+      } catch (err) {
+        console.warn(
+          `[emprestimosService] falha ao buscar usuário ${loan.userId}, usando placeholder`,
+          err
+        );
+        return {
+          enrollment: loan.userId,
+          nome: `Usuário #${loan.userId}`,
+          name: `Usuário #${loan.userId}`,
+          username: String(loan.userId),
+          address: "",
+          userType: "FUNCIONARIO",
+          role: "USUARIO",
+          active: true,
+        } as any;
+      }
+    })(),
   };
 }
 
@@ -142,6 +191,25 @@ export const emprestimosService = {
     const request: LoanRequest = {
       isbnCodes: dados.isbnCodes,
     };
+    // DEBUG: log token/header state to troubleshoot 401 Unauthorized
+    try {
+      const storedToken =
+        localStorage.getItem("auth-token");
+      console.debug(
+        "[emprestimosService.criar] storedToken:",
+        storedToken ? "present" : "missing"
+      );
+      console.debug(
+        "[emprestimosService.criar] api.defaults.headers.common.Authorization:",
+        (api.defaults.headers as any).common
+          ?.Authorization || null
+      );
+    } catch (e) {
+      console.error(
+        "[emprestimosService.criar] erro ao ler token:",
+        e
+      );
+    }
 
     const response = await api.post<LoanResponse>(
       API_ENDPOINTS.EMPRESTIMOS.CREATE_SELF,
@@ -250,10 +318,14 @@ export const emprestimosService = {
    */
   async devolver(dados: {
     isbnCodes: string[];
+    userId?: number;
   }): Promise<LoanReturnResponse> {
+    const payload: any = { isbnCodes: dados.isbnCodes };
+    if (dados.userId !== undefined)
+      payload.userId = dados.userId;
     const response = await api.patch<LoanReturnResponse>(
       API_ENDPOINTS.EMPRESTIMOS.RETURN,
-      dados
+      payload
     );
     return response.data;
   },

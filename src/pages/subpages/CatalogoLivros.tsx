@@ -224,18 +224,22 @@ export function CatalogoLivros() {
         return;
       }
 
-      // Se for admin/bibliotecário emprestando para outro usuário
-      const endpoint =
-        isAdminOrBibliotecario && reservaParaOutroUsuario
-          ? API_ENDPOINTS.EMPRESTIMOS.CREATE_ADMIN(
-              String(enrollment)
-            )
-          : API_ENDPOINTS.EMPRESTIMOS.CREATE_SELF;
-
-      await api.post(endpoint, {
-        userEnrollment: Number(enrollment),
-        bookIsbn: livro.isbn,
-      });
+      // Use emprestimosService so the backend receives `isbnCodes` (and userId when admin)
+      if (
+        isAdminOrBibliotecario &&
+        reservaParaOutroUsuario
+      ) {
+        await emprestimosService.criarParaUsuario(
+          Number(enrollment),
+          {
+            isbnCodes: [livro.isbn],
+          }
+        );
+      } else {
+        await emprestimosService.criar({
+          isbnCodes: [livro.isbn],
+        });
+      }
 
       toast.success("Empréstimo realizado com sucesso!", {
         description: `${

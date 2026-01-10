@@ -3,14 +3,40 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { privateRoutes } from "@/routes/privateRoutes";
 import { publicRoutes } from "@/routes/publicRoutes";
+import { AppHeader } from "@/components/layouts/AppHeader";
+import { useAuth } from "@/store/AuthContext";
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
+      <RouterContent />
+    </BrowserRouter>
+  );
+}
+
+function RouterContent() {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  // Derive perfil from user object with fallbacks
+  const perfil =
+    (user && (user.role || (user as any).perfil)) ||
+    "USUARIO";
+
+  // Hide header on auth pages
+  const hideHeaderPaths = ["/login", "/register"];
+  const showHeader = !hideHeaderPaths.includes(
+    location.pathname
+  );
+
+  return (
+    <>
+      {showHeader && <AppHeader perfil={perfil as any} />}
       <Routes>
         {/* Redirect raiz para login */}
         <Route
@@ -42,6 +68,6 @@ export function AppRoutes() {
           />
         ))}
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }

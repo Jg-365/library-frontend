@@ -51,8 +51,7 @@ export function SelectUserDialog({
     useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [totalUsuarios, setTotalUsuarios] =
-    useState(0);
+  const [totalUsuarios, setTotalUsuarios] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -177,7 +176,10 @@ export function SelectUserDialog({
                         key={usuario.id}
                         value={usuario.id}
                       >
-                        <div className="flex flex-col">
+                        <div
+                          key={usuario.id + "-content"}
+                          className="flex flex-col"
+                        >
                           <span className="font-medium">
                             {usuario.nome}
                           </span>

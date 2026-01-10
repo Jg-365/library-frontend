@@ -6,10 +6,7 @@ import {
   BarChart3,
   FileText,
   Calendar,
-  FolderTree,
-  UserPen,
   BookPlus,
-  UserPlus,
   Tags,
 } from "lucide-react";
 import {
@@ -46,10 +43,18 @@ function BibliotecarioDashboard() {
   const carregarDados = async () => {
     try {
       setLoading(true);
+      const isPrivileged =
+        user?.perfil === "ADMIN" ||
+        user?.perfil === "BIBLIOTECARIO";
+
       const [statsData, atividadesData] = await Promise.all(
         [
-          dashboardService.getStats(),
-          dashboardService.getAtividadesRecentes(),
+          isPrivileged
+            ? dashboardService.getStatsGlobal()
+            : dashboardService.getStats(),
+          isPrivileged
+            ? dashboardService.getAtividadesRecentesGlobal()
+            : dashboardService.getAtividadesRecentes(),
         ]
       );
       setStats(statsData);
@@ -110,12 +115,6 @@ function BibliotecarioDashboard() {
       description: "Organizar categorias e subcategorias",
       icon: Tags,
       href: "/bibliotecario/categorias",
-    },
-    {
-      title: "Cadastrar Usuário",
-      description: "Adicionar novo usuário ao sistema",
-      icon: UserPlus,
-      href: "/bibliotecario/usuarios",
     },
     {
       title: "Ver Empréstimos",
