@@ -18,6 +18,7 @@ export default defineConfig({
           "https://trabalhobd-20252-equipe-552419-production.up.railway.app",
         changeOrigin: true,
         secure: false,
+        // Preserve the path as-is so the backend receives `/library/...`
         rewrite: (path) => path,
       },
     },

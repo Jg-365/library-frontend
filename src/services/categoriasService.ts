@@ -8,16 +8,7 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import type { Categoria } from "@/types";
-import type {
-  CategoryResponse,
-} from "@/types/BackendResponses";
-
-const mapCategoriaResponse = (
-  categoria: CategoryResponse
-): Categoria => ({
-  categoryCode: categoria.categoryCode,
-  description: categoria.description,
-});
+import type { CategoryResponse } from "@/types/BackendResponses";
 
 export const categoriasService = {
   /**
@@ -25,8 +16,10 @@ export const categoriasService = {
    * GET /categories
    */
   async listarTodas(): Promise<Categoria[]> {
+    // Alguns backends exigem o parâmetro `description` mesmo para listagem;
+    // enviar `description=` evita Bad Request quando o parâmetro é obrigatório.
     const response = await api.get<CategoryResponse[]>(
-      API_ENDPOINTS.CATEGORIAS.SEARCH
+      API_ENDPOINTS.CATEGORIAS.SEARCH_BY_DESCRIPTION("")
     );
     return response.data.map(mapCategoriaResponse);
   },
