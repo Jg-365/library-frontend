@@ -32,6 +32,7 @@ import {
 } from "@/schemas/RegisterSchema";
 import { authService } from "@/services/authService";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errorMessage";
 import {
   UserPlus,
   User,
@@ -74,10 +75,10 @@ export function RegisterForm() {
       });
       navigate("/login");
     } catch (err: any) {
-      const errorMsg =
-        err.response?.data?.message ||
-        err.message ||
-        "Erro ao fazer cadastro";
+      const errorMsg = getErrorMessage(
+        err.response?.data?.message || err.message,
+        "Erro ao fazer cadastro"
+      );
       setError(errorMsg);
       toast.error("Erro no cadastro", {
         description: errorMsg,

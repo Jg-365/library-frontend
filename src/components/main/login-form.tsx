@@ -17,6 +17,7 @@ import { useAuth } from "@/store/AuthContext";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { getErrorMessage } from "@/lib/errorMessage";
 import {
   loginSchema,
   type LoginFormValues,
@@ -78,9 +79,10 @@ export function LoginForm() {
       }
     } catch (err: any) {
       setError(
-        err.response?.data?.message ||
-          err.message ||
+        getErrorMessage(
+          err.response?.data?.message || err.message,
           "Erro ao fazer login"
+        )
       );
     } finally {
       setIsLoading(false);

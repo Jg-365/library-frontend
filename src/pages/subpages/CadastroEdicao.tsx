@@ -27,6 +27,7 @@ import {
   CustomModalHeader,
   CustomModalTitle,
 } from "@/components/ui/custom-modal";
+import { getErrorMessage } from "@/lib/errorMessage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -150,8 +151,10 @@ export function CadastroEdicao() {
     } catch (error: any) {
       toast.error("Erro ao excluir livro", {
         description:
-          error.response?.data?.message ||
-          "Tente novamente",
+          getErrorMessage(
+            error.response?.data?.message,
+            "Tente novamente"
+          ),
       });
     } finally {
       setIsDeleteDialogOpen(false);
