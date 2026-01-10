@@ -51,10 +51,16 @@ export function BookDetailsDialog({
     (livro as any).availableCopies ??
     0;
 
+  // Normalize perfil field (backend may use different property names)
+  const perfilUsuario =
+    user?.role ||
+    (user as any).perfil ||
+    (user as any).tipoAcesso;
+
   // Verificar se usuário é admin ou bibliotecário
   const isAdminOrLibrarian =
-    user?.tipoAcesso === "ADMIN" ||
-    user?.tipoAcesso === "BIBLIOTECARIO";
+    perfilUsuario === "ADMIN" ||
+    perfilUsuario === "BIBLIOTECARIO";
 
   const handleCopyISBN = () => {
     navigator.clipboard.writeText(livro.isbn);

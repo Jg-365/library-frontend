@@ -132,10 +132,20 @@ export const authService = {
         id: decoded.sub,
         nome: decoded.name || decoded.sub,
         email: decoded.email || decoded.sub,
-        perfil: perfil,
-        enrollment: undefined,
+        perfil:
+          perfil as import("@/types/Usuario").TipoAcesso,
+        enrollment:
+          typeof decoded.enrollment === "number"
+            ? decoded.enrollment
+            : 0,
         username: decoded.sub,
-      } as Usuario;
+        name: decoded.name || decoded.sub,
+        address: decoded.address || "",
+        userType:
+          perfil as import("@/types/Usuario").TipoUsuario,
+        role: perfil as import("@/types/Usuario").TipoAcesso,
+        active: true,
+      };
 
       return { user, token: accessToken };
     }
@@ -144,11 +154,15 @@ export const authService = {
   logout: async () => {
     try {
       await api.post(API_ENDPOINTS.AUTH.LOGOUT);
-    } catch (error) {
-      console.warn(
-        "Falha ao chamar endpoint de logout:",
-        error
-      );
+    } catch (error: any) {
+      // Se o backend não expõe o endpoint de logout, evitar poluir o console com 404
+      const status = error?.response?.status;
+      if (status && status !== 404) {
+        console.warn(
+          "Falha ao chamar endpoint de logout:",
+          error
+        );
+      }
     }
 
     // JWT logout é feito no frontend removendo o token
