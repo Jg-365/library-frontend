@@ -25,8 +25,10 @@ export const categoriasService = {
    * GET /categories
    */
   async listarTodas(): Promise<Categoria[]> {
+    // Alguns backends exigem o parâmetro `description` mesmo para listagem;
+    // enviar `description=` evita Bad Request quando o parâmetro é obrigatório.
     const response = await api.get<CategoryResponse[]>(
-      API_ENDPOINTS.CATEGORIAS.SEARCH
+      API_ENDPOINTS.CATEGORIAS.SEARCH_BY_DESCRIPTION("")
     );
     return response.data.map(mapCategoriaResponse);
   },

@@ -8,7 +8,7 @@
  */
 
 export { default as api } from "./api";
-export { default as authService } from "./authService";
+export { authService } from "./authService";
 export { livrosService } from "./livrosService";
 export { emprestimosService } from "./emprestimosService";
 export { multasService } from "./multasService";

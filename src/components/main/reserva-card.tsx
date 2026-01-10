@@ -25,6 +25,23 @@ export function ReservaCard({
     useState<string>("");
   const [imageError, setImageError] = useState(false);
 
+  // Robust date parser accepting string | number | Date
+  const parseToDate = (
+    value?: string | number | Date
+  ): Date | null => {
+    if (value === undefined || value === null) return null;
+    if (value instanceof Date) {
+      if (isNaN(value.getTime())) return null;
+      return value;
+    }
+    const d =
+      typeof value === "number"
+        ? new Date(value)
+        : new Date(String(value));
+    if (isNaN(d.getTime())) return null;
+    return d;
+  };
+
   useEffect(() => {
     const calcularTempoRestante = () => {
       if (reserva.status !== "ATIVA") {
@@ -33,10 +50,14 @@ export function ReservaCard({
       }
 
       const agora = new Date();
-      const prazo = new Date(reserva.prazoRetirada);
-      const diferenca = prazo.getTime() - agora.getTime();
+      const prazo = parseToDate(reserva.prazoRetirada);
+      if (!prazo) {
+        setTempoRestante("Prazo indisponível");
+        return;
+      }
 
-      if (diferenca <= 0) {
+      const diferenca = prazo.getTime() - agora.getTime();
+      if (isNaN(diferenca) || diferenca <= 0) {
         setTempoRestante("Prazo expirado");
         return;
       }
