@@ -14,9 +14,9 @@ const mapSubcategoriaResponse = (
   subcategoria: SubCategoryResponse
 ): Subcategoria => ({
   id: subcategoria.id,
-  nome: subcategoria.description,
-  descricao: subcategoria.description,
-  categoriaId: subcategoria.category?.categoryCode ?? 0,
+  description: subcategoria.description,
+  categoryCode: subcategoria.category?.categoryCode ?? 0,
+  category: subcategoria.category,
 });
 
 const normalizeSubcategoriasResponse = (
@@ -26,16 +26,31 @@ const normalizeSubcategoriasResponse = (
 
 export const subcategoriasService = {
   /**
+   * Listar todas as subcategorias
+   * GET /subcategories
+   */
+  async listarTodas(): Promise<Subcategoria[]> {
+    const response = await api.get<SubCategoryResponse[]>(
+      API_ENDPOINTS.SUBCATEGORIAS.BASE
+    );
+    return normalizeSubcategoriasResponse(response.data).map(
+      mapSubcategoriaResponse
+    );
+  },
+
+  /**
    * Listar subcategorias por categoria
    * GET /subcategories?categoryCode=...
    */
   async listarPorCategoria(
     categoryCode: number
   ): Promise<Subcategoria[]> {
-    const response = await api.get<Subcategoria[]>(
+    const response = await api.get<SubCategoryResponse[]>(
       API_ENDPOINTS.SUBCATEGORIAS.BY_CATEGORY(categoryCode)
     );
-    return response.data;
+    return normalizeSubcategoriasResponse(response.data).map(
+      mapSubcategoriaResponse
+    );
   },
 
   /**

@@ -241,36 +241,16 @@ export function BookForm({
         categoriaId
       );
       const response =
-        await subcategoriasService.listarPorCategoria(
-          categoriaId
-        );
+        await subcategoriasService.listarTodas();
 
       console.log(
         "✅ Subcategorias carregadas (raw):",
         response
       );
 
-      const subcategoriasFormatadas = response
-        .map((sub: any) => {
-          console.log("🔍 Mapeando subcategoria:", sub);
-          return {
-            id: sub.id || sub.subcategoryCode,
-            description:
-              sub.description || sub.name || sub.nome,
-            categoryCode:
-              sub.category?.categoryCode ||
-              sub.categoryCode ||
-              sub.categoriaId,
-          };
-        })
-        .filter((sub: any) => {
-          const isValid = sub.id && sub.description;
-          console.log(
-            `🔍 Subcategoria ${sub.description} válida?`,
-            isValid
-          );
-          return isValid;
-        });
+      const subcategoriasFormatadas = response.filter(
+        (sub) => sub.categoryCode === categoriaId
+      );
 
       console.log(
         "✅ Subcategorias formatadas:",
