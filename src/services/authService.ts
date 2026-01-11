@@ -31,6 +31,48 @@ function mapUserResponseToUsuario(
   };
 }
 
+function normalizeRole(
+  role: string | null | undefined
+): TipoAcesso | null {
+  if (!role) {
+    return null;
+  }
+
+  const trimmedRole = role.trim();
+  const normalized = trimmedRole.startsWith("ROLE_")
+    ? trimmedRole.replace(/^ROLE_/, "")
+    : trimmedRole;
+
+  if (
+    normalized === "ADMIN" ||
+    normalized === "BIBLIOTECARIO" ||
+    normalized === "USUARIO"
+  ) {
+    return normalized;
+  }
+
+  return null;
+}
+
+function extractRoleFromToken(decoded: any): TipoAcesso | null {
+  if (!decoded) {
+    return null;
+  }
+
+  const rawRole =
+    decoded.role ?? decoded.roles ?? decoded.authorities;
+
+  if (Array.isArray(rawRole)) {
+    return normalizeRole(rawRole[0]);
+  }
+
+  if (typeof rawRole === "string") {
+    return normalizeRole(rawRole);
+  }
+
+  return null;
+}
+
 // Função para decodificar JWT
 function decodeJWT(token: string): any {
   try {
@@ -83,6 +125,8 @@ export const authService = {
       throw new Error("Token JWT inválido ou não decodificável.");
     }
 
+    const roleFromToken = extractRoleFromToken(decoded);
+
     const enrollmentFromToken = (() => {
       const rawEnrollment =
         decoded.enrollment ?? decoded.sub;
@@ -122,7 +166,12 @@ export const authService = {
         );
       }
 
-      const user: Usuario = userData;
+      const user: Usuario = {
+        ...userData,
+        role: roleFromToken ??
+          userData.role ??
+          "USUARIO",
+      };
 
       console.log("👤 Usuário final:", user);
       console.log(
