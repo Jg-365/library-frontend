@@ -29,45 +29,14 @@ export const livrosService = {
       API_ENDPOINTS.LIVROS.BASE
     );
 
-    console.log(
-      "📚 Response raw from backend:",
-      response.data
-    );
-
     // Verificar se data é array ou se está dentro de content (paginação Spring Boot)
     const booksArray = Array.isArray(response.data)
       ? response.data
       : response.data?.content || [];
 
-    console.log(
-      "📚 Total de livros recebidos:",
-      booksArray.length
-    );
-    if (booksArray.length > 0) {
-      console.log(
-        "📚 Primeiro livro mapeado:",
-        booksArray[0]
-      );
-    }
-
     const mappedBooks = booksArray.map(
       mapBookResponseToLivro
     );
-
-    console.log(
-      "📚 Livros após mapeamento:",
-      mappedBooks.length
-    );
-    if (mappedBooks.length > 0) {
-      console.log("📚 Exemplo de livro mapeado:", {
-        titulo: mappedBooks[0]?.titulo,
-        autores: mappedBooks[0]?.autores,
-        quantidadeExemplares:
-          mappedBooks[0]?.quantidadeExemplares,
-        editora: mappedBooks[0]?.editora,
-        categoria: mappedBooks[0]?.categoria,
-      });
-    }
 
     return mappedBooks;
   },

@@ -12,11 +12,18 @@ import type {
   CategoryResponse,
 } from "@/types/BackendResponses";
 
+type CategoryResponseInput = CategoryResponse & {
+  id?: number;
+  descricao?: string;
+  nome?: string;
+};
+
 const mapCategoriaResponse = (
-  categoria: CategoryResponse
+  categoria: CategoryResponseInput
 ): Categoria => ({
-  categoryCode: categoria.categoryCode,
-  description: categoria.description,
+  categoryCode: categoria.categoryCode ?? categoria.id ?? 0,
+  description:
+    categoria.description ?? categoria.descricao ?? categoria.nome ?? "",
 });
 
 export const categoriasService = {
