@@ -15,8 +15,8 @@ interface BookCoverProps {
 export function BookCover({
   isbn,
   title,
-  className = "w-full h-48 object-cover rounded-t-lg",
-  fallbackClassName = "w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center rounded-t-lg",
+  className = "w-full h-48 object-contain rounded-t-lg",
+  fallbackClassName = "w-full h-48 bg-slate-100 text-gray-700 font-medium flex items-center justify-center rounded-t-lg",
 }: BookCoverProps) {
   const [coverUrl, setCoverUrl] = useState<string | null>(
     null
@@ -70,6 +70,7 @@ export function BookCover({
         className={className}
         onError={() => setHasError(true)}
         loading="lazy"
+        style={{ imageRendering: "auto" }}
       />
     );
   }

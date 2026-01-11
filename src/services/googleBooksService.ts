@@ -9,6 +9,8 @@ const GOOGLE_BOOKS_API =
 interface GoogleBookVolume {
   volumeInfo?: {
     imageLinks?: {
+      extraLarge?: string;
+      large?: string;
       thumbnail?: string;
       smallThumbnail?: string;
     };
@@ -41,16 +43,11 @@ export async function getBookCoverByISBN(
 
     const data: GoogleBooksResponse = await response.json();
 
-    // Pega a primeira imagem encontrada
-    const thumbnail =
-      data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail ||
-      data.items?.[0]?.volumeInfo?.imageLinks
-        ?.smallThumbnail;
+    const imageLinks =
+      data.items?.[0]?.volumeInfo?.imageLinks;
+    const thumbnail = getPreferredCoverUrl(imageLinks);
 
-    // Converte HTTP para HTTPS se necessário
-    return thumbnail
-      ? thumbnail.replace("http://", "https://")
-      : null;
+    return normalizeCoverUrl(thumbnail);
   } catch (error) {
     console.warn(
       `Falha ao buscar capa para ISBN ${isbn}:`,
@@ -86,14 +83,11 @@ export async function getBookCoverByTitle(
 
     const data: GoogleBooksResponse = await response.json();
 
-    const thumbnail =
-      data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail ||
-      data.items?.[0]?.volumeInfo?.imageLinks
-        ?.smallThumbnail;
+    const imageLinks =
+      data.items?.[0]?.volumeInfo?.imageLinks;
+    const thumbnail = getPreferredCoverUrl(imageLinks);
 
-    return thumbnail
-      ? thumbnail.replace("http://", "https://")
-      : null;
+    return normalizeCoverUrl(thumbnail);
   } catch (error) {
     console.warn(
       `Falha ao buscar capa para "${title}":`,
@@ -101,4 +95,27 @@ export async function getBookCoverByTitle(
     );
     return null;
   }
+}
+
+function getPreferredCoverUrl(
+  imageLinks: NonNullable<
+    GoogleBookVolume["volumeInfo"]
+  >["imageLinks"]
+): string | undefined {
+  return (
+    imageLinks?.extraLarge ||
+    imageLinks?.large ||
+    imageLinks?.thumbnail ||
+    imageLinks?.smallThumbnail
+  );
+}
+
+function normalizeCoverUrl(
+  thumbnail?: string
+): string | null {
+  if (!thumbnail) return null;
+
+  const httpsUrl = thumbnail.replace("http://", "https://");
+
+  return httpsUrl.replace(/zoom=1\b/, "zoom=2");
 }
