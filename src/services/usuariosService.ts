@@ -65,8 +65,16 @@ export const usuariosService = {
   async buscarPorEnrollment(
     enrollment: string
   ): Promise<Usuario> {
+    const normalizedEnrollment = enrollment.trim();
+    if (!/^\d+$/.test(normalizedEnrollment)) {
+      throw new Error(
+        "Enrollment inválido: esperado valor numérico."
+      );
+    }
     const response = await api.get<Usuario>(
-      API_ENDPOINTS.USUARIOS.BY_ENROLLMENT(enrollment)
+      API_ENDPOINTS.USUARIOS.BY_ENROLLMENT(
+        normalizedEnrollment
+      )
     );
     return response.data;
   },
