@@ -43,7 +43,7 @@ export function CadastroDevolucoes() {
     try {
       setIsLoading(true);
       const response =
-        await emprestimosService.listarTodos();
+        await emprestimosService.listarPorUsuario();
       setEmprestimos(response);
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");

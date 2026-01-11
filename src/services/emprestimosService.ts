@@ -255,47 +255,6 @@ export const emprestimosService = {
   },
 
   /**
-   * Listar TODOS os empréstimos (ADMIN/BIBLIOTECARIO)
-   * Usa o endpoint GET /loans para listar todos os empréstimos do sistema
-   */
-  async listarTodos(): Promise<Emprestimo[]> {
-    try {
-      let response;
-      try {
-        response = await api.get(
-          API_ENDPOINTS.EMPRESTIMOS.BASE
-        );
-      } catch (error: any) {
-        const status = error?.response?.status;
-        if (status === 403 || status === 404) {
-          response = await api.get(
-            API_ENDPOINTS.EMPRESTIMOS.BY_USER
-          );
-        } else {
-          throw error;
-        }
-      }
-
-      // Verificar se é array ou paginado
-      const loansArray = Array.isArray(response.data)
-        ? response.data
-        : response.data?.content || [];
-
-      const emprestimos = await Promise.all(
-        loansArray.map(mapLoanResponseToEmprestimo)
-      );
-
-      return emprestimos;
-    } catch (error) {
-      console.error(
-        "❌ Erro ao listar empréstimos:",
-        error
-      );
-      throw error;
-    }
-  },
-
-  /**
    * Devolver livros (ADMIN/BIBLIOTECARIO)
    * PATCH /loans/return
    */

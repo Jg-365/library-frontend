@@ -29,8 +29,8 @@ export function CadastroEmprestimos() {
   const fetchEmprestimos = async () => {
     try {
       setIsLoading(true);
-      // Bibliotecário deve ver TODOS os empréstimos
-      const data = await emprestimosService.listarTodos();
+      const data =
+        await emprestimosService.listarPorUsuario();
       setEmprestimos(data);
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");
@@ -83,7 +83,7 @@ export function CadastroEmprestimos() {
             Gerenciamento de Empréstimos
           </h1>
           <p className="text-gray-600 mt-1">
-            Visualize e gerencie todos os empréstimos ativos
+            Visualize e gerencie seus empréstimos ativos
           </p>
         </div>
 
