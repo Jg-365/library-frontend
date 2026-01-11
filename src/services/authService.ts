@@ -1,9 +1,7 @@
 import { api } from "./api";
-import type {
-  LoginRequest,
-  RegisterRequest,
-} from "@/types/Auth";
+import type { LoginRequest, RegisterRequest } from "@/types/Auth";
 import type { Usuario } from "@/types/Usuario";
+import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
 
 // Função para decodificar JWT
@@ -152,29 +150,25 @@ export const authService = {
   },
 
   logout: async () => {
-    try {
-      await api.post(API_ENDPOINTS.AUTH.LOGOUT);
-    } catch (error: any) {
-      // Se o backend não expõe o endpoint de logout, evitar poluir o console com 404
-      const status = error?.response?.status;
-      if (status && status !== 404) {
-        console.warn(
-          "Falha ao chamar endpoint de logout:",
-          error
-        );
-      }
-    }
-
     // JWT logout é feito no frontend removendo o token
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
   },
 
   refresh: async (): Promise<{ accessToken: string }> => {
-    const response = await api.post<{
-      accessToken: string;
-    }>(API_ENDPOINTS.AUTH.REFRESH);
-    return response.data;
+    const token = localStorage.getItem(
+      STORAGE_KEYS.AUTH_TOKEN
+    );
+
+    if (!token) {
+      throw new Error("Token não encontrado para refresh.");
+    }
+
+    api.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${token}`;
+
+    return { accessToken: token };
   },
 
   saveAuth: (token: string, user: Usuario) => {
@@ -216,7 +210,7 @@ export const authService = {
       role: data.role,
     });
 
-    const payload: RegisterRequest = {
+    const payload: CreateUsuarioPayload = {
       name: data.name,
       username: data.username,
       password: data.password,
@@ -241,6 +235,6 @@ export const authService = {
       payload.workRegime = data.workRegime;
     }
 
-    await api.post(API_ENDPOINTS.AUTH.REGISTER, payload);
+    await api.post(API_ENDPOINTS.USUARIOS.CREATE, payload);
   },
 };
