@@ -84,10 +84,6 @@ export function AuthProvider({
         return;
       }
 
-      const needsEnrollment =
-        !storedAuth.user?.enrollment ||
-        storedAuth.user.enrollment <= 0;
-
       // Verifica se o token expirou
       if (isTokenExpired(storedAuth.token)) {
         console.warn(
@@ -107,18 +103,20 @@ export function AuthProvider({
       }
 
       try {
-        const freshUser = await authService.getMe();
+        const freshUser = authService.getUserFromToken(
+          storedAuth.token
+        );
         if (isMounted) {
           setUser(freshUser);
           authService.saveAuth(storedAuth.token, freshUser);
         }
       } catch (error) {
         console.error(
-          "Erro ao recarregar usuário em /users/me:",
+          "Erro ao reconstruir usuário a partir do token:",
           error
         );
         if (isMounted) {
-          setUser(needsEnrollment ? null : storedAuth.user);
+          setUser(null);
         }
       } finally {
         if (isMounted) {

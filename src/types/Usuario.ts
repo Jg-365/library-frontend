@@ -32,7 +32,7 @@ export interface Usuario {
   address: string; // Endereço
 
   // Classificação
-  userType: TipoUsuario; // Tipo de usuário (ALUNO/PROFESSOR/FUNCIONARIO)
+  userType?: TipoUsuario; // Tipo de usuário (ALUNO/PROFESSOR/FUNCIONARIO)
   role: TipoAcesso; // Nível de acesso (ADMIN/BIBLIOTECARIO/USUARIO)
 
   // Status
