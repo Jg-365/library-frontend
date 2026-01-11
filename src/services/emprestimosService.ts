@@ -40,22 +40,15 @@ async function mapLoanResponseToEmprestimo(
   // Buscar informações dos livros pelos copyCodes
   const livros: any[] = [];
 
-  console.log("🔍 Processando empréstimo:", {
-    loanCode: loan.loanCode,
-    copyCodes: loan.copyCodes,
-  });
-
   if (loan.copyCodes && loan.copyCodes.length > 0) {
     // Extrair ISBNs dos copyCodes (formato: "isbn-sequential")
     const isbns = new Set<string>();
 
     for (const copyCode of loan.copyCodes) {
-      console.log("📦 CopyCode:", copyCode);
       // copyCode formato: "9788521207467-10"
       const parts = copyCode.split("-");
       if (parts.length === 2) {
         isbns.add(parts[0]); // ISBN é a primeira parte
-        console.log("✅ ISBN extraído:", parts[0]);
       } else {
         console.warn(
           "⚠️ CopyCode formato inesperado:",
@@ -64,17 +57,10 @@ async function mapLoanResponseToEmprestimo(
       }
     }
 
-    console.log(
-      "📚 ISBNs únicos a buscar:",
-      Array.from(isbns)
-    );
-
     // Buscar cada livro pelo ISBN
     for (const isbn of isbns) {
       try {
-        console.log(`🔎 Buscando livro ISBN: ${isbn}`);
         const response = await api.get(`/books/${isbn}`);
-        console.log("✅ Livro encontrado:", response.data);
         livros.push({
           titulo:
             response.data?.title ||
@@ -115,8 +101,6 @@ async function mapLoanResponseToEmprestimo(
       }
     }
   }
-
-  console.log("📖 Livros mapeados:", livros);
 
   return {
     id: loan.loanCode,
@@ -260,8 +244,6 @@ export const emprestimosService = {
       API_ENDPOINTS.EMPRESTIMOS.BY_USER
     );
 
-    console.log("📚 Empréstimos recebidos:", response.data);
-
     // Verificar se é array ou paginado
     const loansArray = Array.isArray(response.data)
       ? response.data
@@ -278,15 +260,8 @@ export const emprestimosService = {
    */
   async listarTodos(): Promise<Emprestimo[]> {
     try {
-      console.log("🔍 Buscando todos os empréstimos...");
-
       const response = await api.get(
         API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
-
-      console.log(
-        "📚 Empréstimos recebidos:",
-        response.data
       );
 
       // Verificar se é array ou paginado
@@ -296,10 +271,6 @@ export const emprestimosService = {
 
       const emprestimos = await Promise.all(
         loansArray.map(mapLoanResponseToEmprestimo)
-      );
-
-      console.log(
-        `✅ Total de empréstimos encontrados: ${emprestimos.length}`
       );
 
       return emprestimos;

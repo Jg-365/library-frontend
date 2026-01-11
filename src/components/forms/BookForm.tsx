@@ -208,24 +208,7 @@ export function BookForm({
     try {
       const categoriasResponse =
         await categoriasService.listarTodas("");
-      console.log("Categorias carregadas:", categoriasResponse);
-      console.log(
-        "Primeira categoria:",
-        categoriasResponse[0]
-      );
-
-      // Mapear resposta para o formato usado no frontend
-      const categoriasFormatadas =
-        categoriasResponse.map((cat: any) => ({
-          categoryCode: cat.categoryCode ?? cat.id,
-          description:
-            cat.description || cat.descricao || cat.nome,
-        }));
-      console.log(
-        "Primeira categoria formatada:",
-        categoriasFormatadas[0]
-      );
-      setCategorias(categoriasFormatadas);
+      setCategorias(categoriasResponse);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
       console.error("Erro ao carregar categorias:", error);
@@ -236,25 +219,11 @@ export function BookForm({
     categoriaId: number
   ) => {
     try {
-      console.log(
-        "🔍 Carregando subcategorias para categoria:",
-        categoriaId
-      );
       const response =
         await subcategoriasService.listarTodas();
 
-      console.log(
-        "✅ Subcategorias carregadas (raw):",
-        response
-      );
-
       const subcategoriasFormatadas = response.filter(
         (sub) => sub.categoryCode === categoriaId
-      );
-
-      console.log(
-        "✅ Subcategorias formatadas:",
-        subcategoriasFormatadas
       );
       setSubcategorias(subcategoriasFormatadas);
     } catch (error) {
@@ -355,8 +324,6 @@ export function BookForm({
     try {
       setIsLoading(true);
 
-      console.log("📚 Dados do formulário:", data);
-
       // Transformar dados para o formato que o backend espera
       const autoresSelecionados = selectedAutores.filter(
         (autor) => data.autores.includes(autor.id)
@@ -390,15 +357,6 @@ export function BookForm({
           coAuthorsEmails,
         };
 
-        console.log(
-          "🔄 Atualizando livro com ISBN:",
-          livro.isbn
-        );
-        console.log(
-          "📤 Update Payload:",
-          JSON.stringify(updatePayload, null, 2)
-        );
-
         await livrosService.atualizar(
           livro.isbn,
           updatePayload
@@ -415,12 +373,6 @@ export function BookForm({
           emailAuthor,
           coAuthorsEmails,
         };
-
-        console.log("\u2795 Criando novo livro");
-        console.log(
-          "\ud83d\udce4 Create Payload:",
-          JSON.stringify(createPayload, null, 2)
-        );
 
         await livrosService.criar(createPayload);
         toast.success("Livro cadastrado com sucesso!");
@@ -608,27 +560,14 @@ export function BookForm({
             control={form.control}
             name="categoriaId"
             render={({ field }) => {
-              console.log(
-                "Renderizando categoria, categorias:",
-                categorias
-              );
-              console.log("Field value:", field.value);
               const categoriasValidas = categorias.filter(
                 (categoria) => categoria?.categoryCode
-              );
-              console.log(
-                "Categorias após filtro:",
-                categoriasValidas
               );
               return (
                 <FormItem>
                   <FormLabel>Categoria *</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      console.log(
-                        "Categoria selecionada:",
-                        value
-                      );
                       const categoriaId = parseInt(value);
                       field.onChange(categoriaId);
                       // Carregar subcategorias da categoria selecionada
@@ -753,42 +692,21 @@ export function BookForm({
                 <SelectValue placeholder="Adicionar autor" />
               </SelectTrigger>
               <SelectContent>
-                {(() => {
-                  console.log(
-                    "Autores antes do filtro:",
-                    autores
-                  );
-                  console.log(
-                    "Autores selecionados:",
-                    selectedAutores
-                  );
-                  const autoresFiltrados = autores.filter(
-                    (a) => {
-                      const jaAdicionado =
-                        selectedAutores.find(
-                          (sa) => sa.id === a.id
-                        );
-                      console.log(
-                        `Autor ${a.nome} (id: ${
-                          a.id
-                        }) - Já adicionado: ${!!jaAdicionado}`
-                      );
-                      return a?.id && !jaAdicionado;
-                    }
-                  );
-                  console.log(
-                    "Autores após filtro:",
-                    autoresFiltrados
-                  );
-                  return autoresFiltrados.map((autor) => (
+                {autores
+                  .filter((autor) => {
+                    const jaAdicionado = selectedAutores.find(
+                      (sa) => sa.id === autor.id
+                    );
+                    return autor?.id && !jaAdicionado;
+                  })
+                  .map((autor) => (
                     <SelectItem
                       key={autor.id}
                       value={autor.id.toString()}
                     >
                       {autor.nome}
                     </SelectItem>
-                  ));
-                })()}
+                  ))}
               </SelectContent>
             </Select>
 
