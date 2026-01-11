@@ -7,6 +7,7 @@ import type {
 } from "@/types/Usuario";
 import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
+import { toast } from "sonner";
 interface UserResponse {
   enrollment: number;
   role: TipoAcesso;
@@ -57,6 +58,10 @@ function normalizeRole(
 function extractRoleFromToken(decoded: any): TipoAcesso | null {
   if (!decoded) {
     return null;
+  }
+
+  if (Array.isArray(decoded.roles) && decoded.roles.length > 0) {
+    return normalizeRole(decoded.roles[0]);
   }
 
   const rawRole =
@@ -126,27 +131,7 @@ export const authService = {
     }
 
     const roleFromToken = extractRoleFromToken(decoded);
-
-    const enrollmentFromToken = (() => {
-      const rawEnrollment =
-        decoded.enrollment ?? decoded.sub;
-      if (typeof rawEnrollment === "number") {
-        return String(rawEnrollment);
-      }
-      if (typeof rawEnrollment === "string") {
-        const trimmed = rawEnrollment.trim();
-        if (/^\d+$/.test(trimmed)) {
-          return trimmed;
-        }
-      }
-      return null;
-    })();
-
-    if (!enrollmentFromToken) {
-      throw new Error(
-        "Token JWT não contém matrícula válida."
-      );
-    }
+    const enrollmentFromToken = decoded.enrollment;
 
     // Configura o token no header para as próximas requisições
     api.defaults.headers.common[
@@ -158,10 +143,17 @@ export const authService = {
       const userData = await authService.getMe();
 
       if (
-        String(userData.enrollment) !==
-        enrollmentFromToken
+        enrollmentFromToken !== undefined &&
+        userData.enrollment !== enrollmentFromToken
       ) {
-        throw new Error(
+        console.warn(
+          "⚠️ Matrícula divergente entre token e usuário:",
+          {
+            token: enrollmentFromToken,
+            userResponse: userData.enrollment,
+          }
+        );
+        toast.warning(
           "Matrícula do token não confere com o usuário autenticado."
         );
       }
