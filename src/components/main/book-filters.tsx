@@ -13,37 +13,42 @@ export function filterBooks(
         (book as any).title ||
         ""
       ).toLowerCase();
-      const match = titulo.includes(
-        filters.titulo.toLowerCase()
-      );
+      const filtroTitulo = (
+        filters.titulo ?? ""
+      ).toLowerCase();
+      const match = titulo.includes(filtroTitulo);
       if (!match) return false;
     }
 
     // Filtro por autor
     if (filters.autor) {
       const autores = book.autores || [];
+      const filtroAutor = (
+        filters.autor ?? ""
+      ).toLowerCase();
       const match = autores.some((autor) =>
-        (autor?.nome || "")
+        (autor?.nome ?? "")
           .toLowerCase()
-          .includes(filters.autor!.toLowerCase())
+          .includes(filtroAutor)
       );
       if (!match) return false;
     }
 
     // Filtro por editora
     if (filters.editora) {
-      const editora = (book.editora || "").toLowerCase();
-      const match = editora.includes(
-        filters.editora.toLowerCase()
-      );
+      const editora = (book.editora ?? "").toLowerCase();
+      const filtroEditora = (
+        filters.editora ?? ""
+      ).toLowerCase();
+      const match = editora.includes(filtroEditora);
       if (!match) return false;
     }
 
     // Filtro por ISBN
     if (filters.isbn) {
-      const match = book.isbn
-        .toLowerCase()
-        .includes(filters.isbn.toLowerCase());
+      const isbn = (book.isbn ?? "").toLowerCase();
+      const filtroIsbn = (filters.isbn ?? "").toLowerCase();
+      const match = isbn.includes(filtroIsbn);
       if (!match) return false;
     }
 
@@ -59,26 +64,27 @@ export function filterBooks(
 
     // Filtro por categoria
     if (filters.category) {
-      const categoria = (book.categoria || "")
+      const categoria = (book.categoria ?? "")
         .toLowerCase()
         .trim();
-      if (
-        !categoria ||
-        !categoria.includes(filters.category.toLowerCase())
-      )
+      const filtroCategoria = (
+        filters.category ?? ""
+      ).toLowerCase();
+      if (!categoria || !categoria.includes(filtroCategoria))
         return false;
     }
 
     // Filtro por subcategoria
     if (filters.subCategory) {
-      const subcategoria = (book.subcategoria || "")
+      const subcategoria = (book.subcategoria ?? "")
         .toLowerCase()
         .trim();
+      const filtroSubcategoria = (
+        filters.subCategory ?? ""
+      ).toLowerCase();
       if (
         !subcategoria ||
-        !subcategoria.includes(
-          filters.subCategory.toLowerCase()
-        )
+        !subcategoria.includes(filtroSubcategoria)
       )
         return false;
     }
