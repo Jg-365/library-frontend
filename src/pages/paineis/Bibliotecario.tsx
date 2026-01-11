@@ -22,6 +22,7 @@ import {
   type DashboardStats,
   type AtividadeRecente,
 } from "@/services/dashboardService";
+import { toast } from "sonner";
 
 function BibliotecarioDashboard() {
   const { user } = useAuthContext();
@@ -58,6 +59,16 @@ function BibliotecarioDashboard() {
         "Erro ao carregar dados do dashboard:",
         error
       );
+      toast.error(
+        "Erro ao carregar informações do dashboard"
+      );
+      setStats({
+        totalUsuarios: 0,
+        totalLivros: 0,
+        emprestimosAtivos: 0,
+        reservasPendentes: 0,
+      });
+      setAtividades([]);
     } finally {
       setLoading(false);
     }
