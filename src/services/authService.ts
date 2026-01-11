@@ -7,8 +7,6 @@ import type {
 } from "@/types/Usuario";
 import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
-import { usuariosService } from "@/services/usuariosService";
-
 interface UserResponse {
   enrollment: number;
   role: TipoAcesso;
@@ -17,11 +15,6 @@ interface UserResponse {
   username: string;
   address: string;
   active: boolean;
-  id?: number;
-  nome?: string;
-  email?: string;
-  perfil?: TipoAcesso;
-  ativo?: boolean;
 }
 
 function mapUserResponseToUsuario(
@@ -35,11 +28,6 @@ function mapUserResponseToUsuario(
     username: userData.username,
     address: userData.address,
     active: userData.active,
-    id: userData.id,
-    nome: userData.name ?? userData.nome,
-    email: userData.email ?? userData.username,
-    perfil: userData.role ?? userData.perfil,
-    ativo: userData.active ?? userData.ativo,
   };
 }
 
@@ -95,29 +83,6 @@ export const authService = {
       throw new Error("Token JWT inválido ou não decodificável.");
     }
 
-    // Normaliza o perfil baseado na role do JWT
-    // Tenta pegar de roles, role, ou authorities
-    let perfil = "ALUNO"; // Default
-
-    if (decoded.roles && Array.isArray(decoded.roles)) {
-      perfil =
-        decoded.roles[0]?.replace("ROLE_", "") || "ALUNO";
-    } else if (decoded.role) {
-      perfil = decoded.role.replace("ROLE_", "");
-    } else if (
-      decoded.authorities &&
-      Array.isArray(decoded.authorities)
-    ) {
-      perfil =
-        decoded.authorities[0]?.replace("ROLE_", "") ||
-        "ALUNO";
-    }
-
-    // Remove qualquer mapeamento - mantém as roles exatamente como vêm do backend
-    // Backend usa: ADMIN, BIBLIOTECARIO, ALUNO, PROFESSOR
-
-    console.log("👔 Perfil do JWT:", perfil);
-
     const enrollmentFromToken = (() => {
       const rawEnrollment =
         decoded.enrollment ?? decoded.sub;
@@ -144,41 +109,20 @@ export const authService = {
       "Authorization"
     ] = `Bearer ${accessToken}`;
 
-    // Busca dados completos do usuário via enrollment
-    console.log(
-      "🔍 Buscando dados do usuário via matrícula..."
-    );
-
     try {
-      console.log(
-        "🔄 Chamando GET",
-        API_ENDPOINTS.USUARIOS.BY_ENROLLMENT(
-          enrollmentFromToken
-        )
-      );
-      const userData =
-        await usuariosService.buscarPorEnrollment(
-          enrollmentFromToken
-        );
-      console.log(
-        "✅ Dados do usuário recebidos:",
-        userData
-      );
+      console.log("🔄 Chamando GET", API_ENDPOINTS.USUARIOS.ME);
+      const userData = await authService.getMe();
 
-      const user: Usuario = {
-        ...userData,
-        enrollment: Number(enrollmentFromToken),
-        role: userData.role ?? perfil,
-        userType:
-          userData.userType ??
-          decoded.userType ??
-          "ALUNO",
-        id: userData.id ?? decoded.sub,
-        nome: userData.name ?? userData.nome,
-        email: userData.email ?? userData.username,
-        perfil: userData.role ?? perfil,
-        username: userData.username ?? userData.email,
-      };
+      if (
+        String(userData.enrollment) !==
+        enrollmentFromToken
+      ) {
+        throw new Error(
+          "Matrícula do token não confere com o usuário autenticado."
+        );
+      }
+
+      const user: Usuario = userData;
 
       console.log("👤 Usuário final:", user);
       console.log(
