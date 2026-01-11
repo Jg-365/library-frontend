@@ -20,6 +20,17 @@ import { mapBookResponseToLivro } from "./mappers/bookMapper";
 async function mapReserveResponseToReserva(
   reserve: ReserveResponse
 ): Promise<Reserva> {
+  const calculatePrazoRetirada = (
+    reserveDate?: string
+  ): string | undefined => {
+    if (!reserveDate) return undefined;
+    const date = new Date(reserveDate);
+    if (isNaN(date.getTime())) return undefined;
+    const prazo = new Date(date);
+    prazo.setDate(prazo.getDate() + 4);
+    return prazo.toISOString();
+  };
+
   const normalizeStatus = (
     status?: string
   ): Reserva["status"] | undefined => {
@@ -56,7 +67,10 @@ async function mapReserveResponseToReserva(
     usuarioId: reserve.userEnrollment,
     livroIsbn: reserve.bookIsbn,
     dataReserva: reserve.reserveDate,
-    status: reserve.status ?? "ATIVA",
+    status: normalizeStatus(reserve.status) ?? "ATIVA",
+    prazoRetirada: calculatePrazoRetirada(
+      reserve.reserveDate
+    ),
   };
 
   // Tentar popular o objeto `livro` para evitar undefined em componentes
