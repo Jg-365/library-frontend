@@ -10,9 +10,16 @@ const NORMALIZED_API_BASE_URL = RAW_API_BASE_URL
     : `https://${RAW_API_BASE_URL}`
   : "https://trabalhobd-20252-equipe-552419-production.up.railway.app/library";
 
+const ensureLibraryBasePath = (baseUrl: string) => {
+  const sanitized = baseUrl.replace(/\/+$/, "");
+  return sanitized.endsWith("/library")
+    ? sanitized
+    : `${sanitized}/library`;
+};
+
 export const API_CONFIG = {
   // Em dev usa proxy do Vite (vite.config.ts), em produção use variável de ambiente VITE_API_URL
-  BASE_URL: NORMALIZED_API_BASE_URL,
+  BASE_URL: ensureLibraryBasePath(NORMALIZED_API_BASE_URL),
 
   TIMEOUT: 10000,
 
