@@ -174,12 +174,11 @@ export const dashboardService = {
             API_ENDPOINTS.EMPRESTIMOS.BASE
           );
         } catch (error: any) {
-          const status = error?.response?.status;
-          if (status === 403 || status === 404) {
+          try {
             emprestimosResponse = await api.get(
               API_ENDPOINTS.EMPRESTIMOS.BY_USER
             );
-          } else {
+          } catch (fallbackError) {
             throw error;
           }
         }
@@ -292,27 +291,40 @@ export const dashboardService = {
       // Como não há endpoint de auditoria, vamos buscar dados recentes
       const atividades: AtividadeRecente[] = [];
 
-      // Buscar empréstimos recentes do usuário
-      const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BY_USER
-      );
-      if (Array.isArray(emprestimosResponse.data)) {
-        emprestimosResponse.data
-          .slice(0, 2)
-          .forEach((emp: any) => {
-            atividades.push({
-              id: `emp-${emp.loanCode || emp.id}`,
-              acao: "Empréstimo realizado",
-              usuario:
-                emp.userName || emp.userId || "Usuário",
-              timestamp:
-                emp.loanDate || new Date().toISOString(),
-              tipo: "emprestimo",
-            });
-          });
-      }
-
       const isPrivileged = this._isPrivileged(perfil);
+      let emprestimosResponse;
+      if (isPrivileged) {
+        try {
+          emprestimosResponse = await api.get(
+            API_ENDPOINTS.EMPRESTIMOS.BASE
+          );
+        } catch (error: any) {
+          emprestimosResponse = await api.get(
+            API_ENDPOINTS.EMPRESTIMOS.BY_USER
+          );
+        }
+      } else {
+        emprestimosResponse = await api.get(
+          API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        );
+      }
+      const emprestimosArray = Array.isArray(
+        emprestimosResponse?.data
+      )
+        ? emprestimosResponse?.data
+        : emprestimosResponse?.data?.content || [];
+      emprestimosArray.slice(0, 2).forEach((emp: any) => {
+        atividades.push({
+          id: `emp-${emp.loanCode || emp.id}`,
+          acao: "Empréstimo realizado",
+          usuario:
+            emp.userName || emp.userId || "Usuário",
+          timestamp:
+            emp.loanDate || new Date().toISOString(),
+          tipo: "emprestimo",
+        });
+      });
+
       // Buscar reservas recentes
       if (isPrivileged) {
         if (this._reservesSupported === false) {

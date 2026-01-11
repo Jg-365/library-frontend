@@ -35,6 +35,7 @@ export function CadastroEmprestimos() {
     } catch (error: any) {
       toast.error("Erro ao carregar empréstimos");
       console.error("Erro ao buscar empréstimos:", error);
+      setEmprestimos([]);
     } finally {
       setIsLoading(false);
     }

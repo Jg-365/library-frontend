@@ -260,9 +260,21 @@ export const emprestimosService = {
    */
   async listarTodos(): Promise<Emprestimo[]> {
     try {
-      const response = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
+      let response;
+      try {
+        response = await api.get(
+          API_ENDPOINTS.EMPRESTIMOS.BASE
+        );
+      } catch (error: any) {
+        const status = error?.response?.status;
+        if (status === 403 || status === 404) {
+          response = await api.get(
+            API_ENDPOINTS.EMPRESTIMOS.BY_USER
+          );
+        } else {
+          throw error;
+        }
+      }
 
       // Verificar se é array ou paginado
       const loansArray = Array.isArray(response.data)
