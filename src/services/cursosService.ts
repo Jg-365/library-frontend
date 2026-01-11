@@ -14,17 +14,11 @@ export interface CursoPayload {
   courseName: string;
 }
 
-function mapCursoResponse(
-  curso: any,
-  index: number
-): Curso {
+function mapCursoResponse(curso: any): Curso {
   return {
-    cod_curso:
-      curso?.cod_curso ??
-      curso?.courseCode ??
-      curso?.id ??
-      index,
-    nome: curso?.nome ?? curso?.courseName ?? "",
+    courseCode:
+      curso?.courseCode ?? curso?.cod_curso ?? curso?.id ?? 0,
+    courseName: curso?.courseName ?? curso?.nome ?? "",
   };
 }
 
@@ -37,24 +31,19 @@ export const cursosService = {
     const response = await api.get(
       API_ENDPOINTS.CURSOS.BASE
     );
-    return (response.data || []).map(
-      (curso: any, index: number) =>
-        mapCursoResponse(curso, index)
-    );
+    return (response.data || []).map(mapCursoResponse);
   },
 
   /**
    * Criar novo curso
    * POST /courses
    */
-  async criar(
-    dados: Omit<Curso, "courseCode">
-  ): Promise<Curso> {
+  async criar(dados: CursoPayload): Promise<Curso> {
     const response = await api.post<Curso>(
       API_ENDPOINTS.CURSOS.CREATE,
       dados
     );
-    return mapCursoResponse(response.data, 0);
+    return mapCursoResponse(response.data);
   },
 
   /**
@@ -65,7 +54,7 @@ export const cursosService = {
     const response = await api.get(
       API_ENDPOINTS.CURSOS.BY_ID(id)
     );
-    return mapCursoResponse(response.data, 0);
+    return mapCursoResponse(response.data);
   },
 
   /**
@@ -76,7 +65,7 @@ export const cursosService = {
     const response = await api.get(
       API_ENDPOINTS.CURSOS.BY_NAME(courseName)
     );
-    return mapCursoResponse(response.data, 0);
+    return mapCursoResponse(response.data);
   },
 
   /**
@@ -88,7 +77,7 @@ export const cursosService = {
       API_ENDPOINTS.CURSOS.UPDATE,
       dados
     );
-    return mapCursoResponse(response.data, 0);
+    return mapCursoResponse(response.data);
   },
 
   /**
