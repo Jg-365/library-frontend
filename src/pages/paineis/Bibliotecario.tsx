@@ -43,18 +43,12 @@ function BibliotecarioDashboard() {
   const carregarDados = async () => {
     try {
       setLoading(true);
-      const isPrivileged =
-        user?.perfil === "ADMIN" ||
-        user?.perfil === "BIBLIOTECARIO";
-
       const [statsData, atividadesData] = await Promise.all(
         [
-          isPrivileged
-            ? dashboardService.getStatsGlobal()
-            : dashboardService.getStats(),
-          isPrivileged
-            ? dashboardService.getAtividadesRecentesGlobal()
-            : dashboardService.getAtividadesRecentes(),
+          dashboardService.getStats(user?.perfil),
+          dashboardService.getAtividadesRecentes(
+            user?.perfil
+          ),
         ]
       );
       setStats(statsData);

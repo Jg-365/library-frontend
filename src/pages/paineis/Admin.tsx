@@ -48,8 +48,10 @@ function AdminDashboard() {
       setLoading(true);
       const [statsData, atividadesData] = await Promise.all(
         [
-          dashboardService.getStats(),
-          dashboardService.getAtividadesRecentes(),
+          dashboardService.getStats(user?.perfil),
+          dashboardService.getAtividadesRecentes(
+            user?.perfil
+          ),
         ]
       );
       setStats(statsData);
