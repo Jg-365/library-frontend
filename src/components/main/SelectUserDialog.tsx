@@ -47,7 +47,7 @@ export function SelectUserDialog({
   const [filteredUsuarios, setFilteredUsuarios] = useState<
     Usuario[]
   >([]);
-  const [selectedUserId, setSelectedUserId] =
+  const [selectedEnrollment, setSelectedEnrollment] =
     useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,25 +94,25 @@ export function SelectUserDialog({
   };
 
   const handleConfirm = () => {
-    if (!selectedUserId) {
+    if (!selectedEnrollment) {
       toast.error("Selecione um usuário");
       return;
     }
 
     const usuario = usuarios.find(
-      (u) => u.id === selectedUserId
+      (u) => String(u.enrollment ?? "") === selectedEnrollment
     );
     if (usuario) {
       onSelectUser(usuario.enrollment);
       onOpenChange(false);
-      setSelectedUserId("");
+      setSelectedEnrollment("");
       setSearchTerm("");
     }
   };
 
   const handleCancel = () => {
     onOpenChange(false);
-    setSelectedUserId("");
+    setSelectedEnrollment("");
     setSearchTerm("");
   };
 
@@ -159,8 +159,8 @@ export function SelectUserDialog({
               </p>
             ) : (
               <Select
-                value={selectedUserId}
-                onValueChange={setSelectedUserId}
+                value={selectedEnrollment}
+                onValueChange={setSelectedEnrollment}
               >
                 <SelectTrigger id="usuario">
                   <SelectValue placeholder="Selecione um usuário" />
@@ -174,7 +174,7 @@ export function SelectUserDialog({
                     filteredUsuarios.map((usuario) => (
                       <SelectItem
                         key={usuario.id}
-                        value={usuario.id}
+                        value={String(usuario.enrollment ?? "")}
                       >
                         <div
                           key={usuario.id + "-content"}
@@ -208,7 +208,7 @@ export function SelectUserDialog({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!selectedUserId}
+            disabled={!selectedEnrollment}
           >
             Confirmar
           </Button>
