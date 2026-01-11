@@ -163,28 +163,7 @@ export const authService = {
         "❌ Erro ao buscar dados do usuário:",
         error
       );
-
-      // Fallback: usa apenas dados do JWT
-      const user: Usuario = {
-        id: decoded.sub,
-        nome: decoded.name || decoded.sub,
-        email: decoded.email || decoded.sub,
-        perfil:
-          perfil as import("@/types/Usuario").TipoAcesso,
-        enrollment:
-          typeof decoded.enrollment === "number"
-            ? decoded.enrollment
-            : 0,
-        username: decoded.sub,
-        name: decoded.name || decoded.sub,
-        address: decoded.address || "",
-        userType:
-          perfil as import("@/types/Usuario").TipoUsuario,
-        role: perfil as import("@/types/Usuario").TipoAcesso,
-        active: true,
-      };
-
-      return { user, token: accessToken };
+      throw error;
     }
   },
 

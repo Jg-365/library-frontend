@@ -83,6 +83,10 @@ export function AuthProvider({
         return;
       }
 
+      const needsEnrollment =
+        !storedAuth.user?.enrollment ||
+        storedAuth.user.enrollment <= 0;
+
       // Verifica se o token expirou
       if (isTokenExpired(storedAuth.token)) {
         console.warn(
@@ -113,7 +117,7 @@ export function AuthProvider({
           error
         );
         if (isMounted) {
-          setUser(storedAuth.user);
+          setUser(needsEnrollment ? null : storedAuth.user);
         }
       } finally {
         if (isMounted) {
