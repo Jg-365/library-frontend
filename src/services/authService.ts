@@ -7,30 +7,6 @@ import type {
 } from "@/types/Usuario";
 import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
-import { toast } from "sonner";
-interface UserResponse {
-  enrollment: number;
-  role: TipoAcesso;
-  userType: TipoUsuario;
-  name: string;
-  username: string;
-  address: string;
-  active: boolean;
-}
-
-function mapUserResponseToUsuario(
-  userData: UserResponse
-): Usuario {
-  return {
-    enrollment: userData.enrollment,
-    role: userData.role,
-    userType: userData.userType,
-    name: userData.name,
-    username: userData.username,
-    address: userData.address,
-    active: userData.active,
-  };
-}
 
 function normalizeRole(
   role: string | null | undefined
@@ -78,6 +54,55 @@ function extractRoleFromToken(decoded: any): TipoAcesso | null {
   return null;
 }
 
+function deriveUserTypeFromRole(
+  role: TipoAcesso | null
+): TipoUsuario | undefined {
+  if (!role) {
+    return undefined;
+  }
+
+  if (role === "ADMIN" || role === "BIBLIOTECARIO") {
+    return "FUNCIONARIO";
+  }
+
+  if (role === "USUARIO") {
+    return "ALUNO";
+  }
+
+  return undefined;
+}
+
+function buildUserFromToken(token: string): Usuario {
+  const decoded = decodeJWT(token);
+  console.log("🔓 JWT decodificado completo:", decoded);
+  console.log(
+    "🔑 Propriedades do token:",
+    Object.keys(decoded || {})
+  );
+
+  if (!decoded) {
+    throw new Error("Token JWT inválido ou não decodificável.");
+  }
+
+  const roleFromToken = extractRoleFromToken(decoded);
+  const enrollment = decoded.enrollment ?? 0;
+  const username = decoded.sub ?? decoded.username ?? "";
+  const role = roleFromToken ?? "USUARIO";
+  const userType = roleFromToken
+    ? deriveUserTypeFromRole(roleFromToken)
+    : undefined;
+
+  return {
+    enrollment,
+    role,
+    userType,
+    name: decoded.name ?? decoded.nome ?? username,
+    username,
+    address: decoded.address ?? "",
+    active: decoded.active ?? true,
+  };
+}
+
 // Função para decodificar JWT
 function decodeJWT(token: string): any {
   try {
@@ -118,76 +143,22 @@ export const authService = {
 
     const { accessToken } = response.data;
 
-    // Decodifica o JWT para extrair informações do usuário
-    const decoded = decodeJWT(accessToken);
-    console.log("🔓 JWT decodificado completo:", decoded);
-    console.log(
-      "🔑 Propriedades do token:",
-      Object.keys(decoded || {})
-    );
-
-    if (!decoded) {
-      throw new Error("Token JWT inválido ou não decodificável.");
-    }
-
-    const roleFromToken = extractRoleFromToken(decoded);
-    const enrollmentFromToken = decoded.enrollment;
-
     // Configura o token no header para as próximas requisições
     api.defaults.headers.common[
       "Authorization"
     ] = `Bearer ${accessToken}`;
 
-    try {
-      console.log("🔄 Chamando GET", API_ENDPOINTS.USUARIOS.ME);
-      const userData = await authService.getMe();
+    const user = buildUserFromToken(accessToken);
 
-      if (
-        enrollmentFromToken !== undefined &&
-        userData.enrollment !== enrollmentFromToken
-      ) {
-        console.warn(
-          "⚠️ Matrícula divergente entre token e usuário:",
-          {
-            token: enrollmentFromToken,
-            userResponse: userData.enrollment,
-          }
-        );
-        toast.warning(
-          "Matrícula do token não confere com o usuário autenticado."
-        );
-      }
-
-      const user: Usuario = {
-        ...userData,
-        role: roleFromToken ??
-          userData.role ??
-          "USUARIO",
-      };
-
-      console.log("👤 Usuário final:", user);
-      console.log(
-        "📋 Enrollment (matrícula):",
-        user.enrollment,
-        "Tipo:",
-        typeof user.enrollment
-      );
-
-      return { user, token: accessToken };
-    } catch (error) {
-      console.error(
-        "❌ Erro ao buscar dados do usuário:",
-        error
-      );
-      throw error;
-    }
-  },
-
-  getMe: async (): Promise<Usuario> => {
-    const response = await api.get<UserResponse>(
-      API_ENDPOINTS.USUARIOS.ME
+    console.log("👤 Usuário final:", user);
+    console.log(
+      "📋 Enrollment (matrícula):",
+      user.enrollment,
+      "Tipo:",
+      typeof user.enrollment
     );
-    return mapUserResponseToUsuario(response.data);
+
+    return { user, token: accessToken };
   },
 
   logout: async () => {
@@ -240,6 +211,10 @@ export const authService = {
     } catch {
       return null;
     }
+  },
+
+  getUserFromToken: (token: string): Usuario => {
+    return buildUserFromToken(token);
   },
 
   register: async (
