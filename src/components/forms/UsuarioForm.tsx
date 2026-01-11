@@ -35,7 +35,7 @@ interface Curso {
 
 interface UsuarioFormProps {
   usuario?: Usuario & { ativo?: boolean };
-  onSuccess?: () => void;
+  onSuccess?: (usuario: Usuario, mode: "create" | "update") => void;
 }
 
 export function UsuarioForm({
@@ -91,6 +91,7 @@ export function UsuarioForm({
   const onSubmit = async (data: UsuarioFormData) => {
     setIsSubmitting(true);
     try {
+      let savedUsuario: Usuario | null = null;
       if (isEditing) {
         // Se está editando e não forneceu senha, remove do payload
         const payload = data.senha
@@ -103,17 +104,19 @@ export function UsuarioForm({
 
         // Escolher endpoint correto baseado no tipo de usuário
         if (userType === "ALUNO") {
-          await usuariosService.atualizarAluno(
+          savedUsuario = await usuariosService.atualizarAluno(
             enrollment?.toString() || "",
             payload
           );
         } else if (userType === "PROFESSOR") {
-          await usuariosService.atualizarProfessor(
+          savedUsuario =
+            await usuariosService.atualizarProfessor(
             enrollment?.toString() || "",
             payload
           );
         } else {
-          await usuariosService.atualizarFuncionario(
+          savedUsuario =
+            await usuariosService.atualizarFuncionario(
             enrollment?.toString() || "",
             payload
           );
@@ -153,11 +156,17 @@ export function UsuarioForm({
         }
         // FUNCIONARIO não precisa de campos adicionais
 
-        await usuariosService.criar(backendPayload);
+        savedUsuario =
+          await usuariosService.criar(backendPayload);
         toast.success("Usuário cadastrado com sucesso!");
         form.reset();
       }
-      onSuccess?.();
+      if (savedUsuario) {
+        onSuccess?.(
+          savedUsuario,
+          isEditing ? "update" : "create"
+        );
+      }
     } catch (error: any) {
       // Extrai mensagem de erro detalhada
       let message = "Erro ao salvar usuário";

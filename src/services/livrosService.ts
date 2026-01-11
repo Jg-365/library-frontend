@@ -20,13 +20,46 @@ import type { BookResponse } from "@/types/BackendResponses";
 import { mapBookResponseToLivro } from "./mappers/bookMapper";
 
 export const livrosService = {
+  _cache: new Map<string, Livro[]>(),
+
+  _cacheKey(options?: {
+    page?: number;
+    size?: number;
+  }) {
+    if (!options?.page && !options?.size) {
+      return "all";
+    }
+    return `page=${options?.page ?? 0}&size=${
+      options?.size ?? 10
+    }`;
+  },
+
   /**
    * Listar/Buscar todos os livros
    * GET /books
    */
-  async listarTodos(): Promise<Livro[]> {
+  async listarTodos(options?: {
+    page?: number;
+    size?: number;
+    force?: boolean;
+  }): Promise<Livro[]> {
+    const cacheKey = livrosService._cacheKey(options);
+    if (!options?.force && livrosService._cache.has(cacheKey)) {
+      return livrosService._cache.get(cacheKey) || [];
+    }
+
     const response = await api.get(
-      API_ENDPOINTS.LIVROS.BASE
+      API_ENDPOINTS.LIVROS.BASE,
+      {
+        params:
+          options?.page !== undefined ||
+          options?.size !== undefined
+            ? {
+                page: options?.page,
+                size: options?.size,
+              }
+            : undefined,
+      }
     );
 
     // Verificar se data é array ou se está dentro de content (paginação Spring Boot)
@@ -38,6 +71,7 @@ export const livrosService = {
       mapBookResponseToLivro
     );
 
+    livrosService._cache.set(cacheKey, mappedBooks);
     return mappedBooks;
   },
 
@@ -116,6 +150,7 @@ export const livrosService = {
       API_ENDPOINTS.LIVROS.CREATE,
       payload
     );
+    livrosService._cache.clear();
     return mapBookResponseToLivro(response.data);
   },
 
@@ -131,6 +166,7 @@ export const livrosService = {
       API_ENDPOINTS.LIVROS.UPDATE(isbn),
       payload
     );
+    livrosService._cache.clear();
     return mapBookResponseToLivro(response.data);
   },
 
@@ -140,6 +176,7 @@ export const livrosService = {
    */
   async deletar(isbn: string): Promise<void> {
     await api.delete(API_ENDPOINTS.LIVROS.DELETE(isbn));
+    livrosService._cache.clear();
   },
 
   /**

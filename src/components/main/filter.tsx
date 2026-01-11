@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,8 @@ interface BookFiltersProps {
   onClearFilters: () => void;
 }
 
+const FILTER_DEBOUNCE_MS = 350;
+
 const filterLabels: Record<keyof BookFilterValues, string> =
   {
     titulo: "Título",
@@ -52,20 +54,37 @@ export function BookFilters({
     {}
   );
   const [isOpen, setIsOpen] = useState(false);
+  const skipDebounceRef = useRef(false);
+  const pendingToastRef = useRef<{
+    key: keyof BookFilterValues;
+    value: string;
+  } | null>(null);
 
   const handleFilterChange = (
     key: keyof BookFilterValues,
-    value: string
+    value: string,
+    options?: {
+      debounce?: boolean;
+      showToast?: boolean;
+    }
   ) => {
+    const shouldDebounce = options?.debounce ?? true;
+    const showToast = options?.showToast ?? true;
     const newFilters = {
       ...filters,
       [key]: value || undefined,
     };
     setFilters(newFilters);
+    if (shouldDebounce) {
+      pendingToastRef.current =
+        value && showToast ? { key, value } : null;
+      return;
+    }
+
+    skipDebounceRef.current = true;
     onFilterChange(newFilters);
 
-    // Toast responsivo com informação clara
-    if (value) {
+    if (value && showToast) {
       toast.success(`Filtro aplicado`, {
         description: `${filterLabels[key]}: "${value}"`,
         duration: 2000,
@@ -75,6 +94,8 @@ export function BookFilters({
 
   const handleClear = () => {
     setFilters({});
+    skipDebounceRef.current = true;
+    pendingToastRef.current = null;
     onClearFilters();
     setIsOpen(false);
     toast.info("Filtros removidos", {
@@ -86,12 +107,36 @@ export function BookFilters({
   const handleRemoveFilter = (
     key: keyof BookFilterValues
   ) => {
-    handleFilterChange(key, "");
+    handleFilterChange(key, "", {
+      debounce: false,
+      showToast: false,
+    });
     toast.info("Filtro removido", {
       description: `${filterLabels[key]} foi removido`,
       duration: 2000,
     });
   };
+
+  useEffect(() => {
+    if (skipDebounceRef.current) {
+      skipDebounceRef.current = false;
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      onFilterChange(filters);
+      if (pendingToastRef.current) {
+        const { key, value } = pendingToastRef.current;
+        toast.success("Filtro aplicado", {
+          description: `${filterLabels[key]}: "${value}"`,
+          duration: 2000,
+        });
+        pendingToastRef.current = null;
+      }
+    }, FILTER_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+  }, [filters, onFilterChange]);
 
   const activeFiltersCount =
     Object.values(filters).filter(Boolean).length;
@@ -226,7 +271,9 @@ export function BookFilters({
                     <Select
                       value={filters.ano}
                       onValueChange={(value) =>
-                        handleFilterChange("ano", value)
+                        handleFilterChange("ano", value, {
+                          debounce: false,
+                        })
                       }
                     >
                       <SelectTrigger id="ano">
@@ -282,7 +329,8 @@ export function BookFilters({
                       onValueChange={(value) =>
                         handleFilterChange(
                           "category",
-                          value
+                          value,
+                          { debounce: false }
                         )
                       }
                     >

@@ -79,7 +79,17 @@ export function CadastroUsuarios() {
         usuarioToDelete.enrollment?.toString() || ""
       );
       toast.success("Usuário excluído com sucesso!");
-      fetchUsuarios();
+      setUsuarios((prev) =>
+        prev.filter(
+          (usuario) =>
+            (usuario.enrollment ?? usuario.id) !==
+            (usuarioToDelete.enrollment ??
+              usuarioToDelete.id)
+        )
+      );
+      setTotalUsuarios((prev) =>
+        Math.max(prev - 1, 0)
+      );
     } catch (error: any) {
       const message = getErrorMessage(
         error.response?.data?.message,
@@ -92,10 +102,44 @@ export function CadastroUsuarios() {
     }
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = (
+    savedUsuario: Usuario,
+    mode: "create" | "update"
+  ) => {
     setDialogOpen(false);
     setSelectedUsuario(null);
-    fetchUsuarios();
+    setUsuarios((prev) => {
+      const savedKey =
+        savedUsuario.enrollment ?? savedUsuario.id;
+      if (mode === "create") {
+        const exists = prev.some(
+          (usuario) =>
+            (usuario.enrollment ?? usuario.id) ===
+            savedKey
+        );
+        if (exists) {
+          return prev.map((usuario) =>
+            (usuario.enrollment ?? usuario.id) ===
+            savedKey
+              ? { ...usuario, ...savedUsuario }
+              : usuario
+          );
+        }
+        return [
+          { ...savedUsuario, ativo: true },
+          ...prev,
+        ];
+      }
+
+      return prev.map((usuario) =>
+        (usuario.enrollment ?? usuario.id) === savedKey
+          ? { ...usuario, ...savedUsuario }
+          : usuario
+      );
+    });
+    if (mode === "create") {
+      setTotalUsuarios((prev) => prev + 1);
+    }
   };
 
   const handleNewUsuario = () => {

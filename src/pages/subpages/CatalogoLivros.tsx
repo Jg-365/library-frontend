@@ -170,6 +170,36 @@ export function CatalogoLivros() {
     }
   };
 
+  const updateLivroDisponibilidade = (
+    isbn: string,
+    delta: number
+  ) => {
+    setLivros((prev) =>
+      prev.map((livroItem) =>
+        livroItem.isbn === isbn
+          ? {
+              ...livroItem,
+              quantidadeExemplares: Math.max(
+                livroItem.quantidadeExemplares + delta,
+                0
+              ),
+            }
+          : livroItem
+      )
+    );
+    setSelectedLivro((prev) =>
+      prev && prev.isbn === isbn
+        ? {
+            ...prev,
+            quantidadeExemplares: Math.max(
+              prev.quantidadeExemplares + delta,
+              0
+            ),
+          }
+        : prev
+    );
+  };
+
   const realizarReserva = async (
     livro: Livro,
     enrollment?: number
@@ -198,10 +228,6 @@ export function CatalogoLivros() {
           livro?.isbn
         }",`,
       });
-
-      // Recarregar livros para atualizar disponibilidade
-      const livrosArray = await livrosService.listarTodos();
-      setLivros(livrosArray);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
       const mensagem = getErrorMessage(
@@ -252,10 +278,7 @@ export function CatalogoLivros() {
           livro?.isbn
         }",`,
       });
-
-      // Recarregar livros para atualizar disponibilidade
-      const livrosArray = await livrosService.listarTodos();
-      setLivros(livrosArray);
+      updateLivroDisponibilidade(livro.isbn, -1);
       setReservaParaOutroUsuario(false);
     } catch (error: any) {
       const mensagem = getErrorMessage(
