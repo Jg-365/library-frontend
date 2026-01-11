@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/services/api";
 import {
   autoresService,
+  categoriasService,
   subcategoriasService,
 } from "@/services";
 import type { Livro, Autor, Categoria } from "@/types";
@@ -34,7 +34,6 @@ import {
   livroFormSchema,
   type LivroFormValues,
 } from "@/schemas";
-import { API_ENDPOINTS } from "@/config";
 import { livrosService } from "@/services/livrosService";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
@@ -207,20 +206,21 @@ export function BookForm({
 
   const carregarCategorias = async () => {
     try {
-      const response = await api.get(
-        `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
+      const categoriasResponse =
+        await categoriasService.listarTodas("");
+      console.log("Categorias carregadas:", categoriasResponse);
+      console.log(
+        "Primeira categoria:",
+        categoriasResponse[0]
       );
-      console.log("Categorias carregadas:", response.data);
-      console.log("Primeira categoria:", response.data[0]);
 
       // Mapear resposta para o formato usado no frontend
-      const categoriasFormatadas = response.data.map(
-        (cat: any) => ({
+      const categoriasFormatadas =
+        categoriasResponse.map((cat: any) => ({
           categoryCode: cat.categoryCode ?? cat.id,
           description:
             cat.description || cat.descricao || cat.nome,
-        })
-      );
+        }));
       console.log(
         "Primeira categoria formatada:",
         categoriasFormatadas[0]
