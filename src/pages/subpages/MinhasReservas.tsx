@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { reservasService as reservasApi } from "@/services/reservasService";
 import type { Reserva, Perfil } from "@/types";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { useAuth } from "@/store/AuthContext";
 
 export default function MinhasReservas() {
   const location = useLocation();
