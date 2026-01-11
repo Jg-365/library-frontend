@@ -65,11 +65,9 @@ export function SubcategoriaForm({
 
   const carregarCategorias = async () => {
     try {
-      const response = await api.get<Categoria[]>(
-        `${API_ENDPOINTS.CATEGORIAS.BASE}?description=`
-      );
-
-      setCategorias(response.data);
+      const categoriasResponse =
+        await categoriasService.listarTodas("");
+      setCategorias(categoriasResponse);
     } catch (error) {
       toast.error("Erro ao carregar categorias");
     }
