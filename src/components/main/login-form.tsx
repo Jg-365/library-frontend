@@ -62,7 +62,8 @@ export function LoginForm() {
       const userData = localStorage.getItem("user-data");
       if (userData) {
         const user = JSON.parse(userData);
-        const perfil = user.perfil as Perfil;
+        const perfil =
+          (user.role ?? user.perfil ?? "USUARIO") as Perfil;
 
         console.log("🔐 Login bem-sucedido:", {
           perfil,

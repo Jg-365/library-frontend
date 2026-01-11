@@ -21,10 +21,11 @@ export function AppRoutes() {
 
 function RouterContent() {
   const location = useLocation();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
 
   // Derive perfil from user object with fallbacks
-  const perfil = role || "USUARIO";
+  const perfil =
+    user?.role ?? user?.perfil ?? role ?? "USUARIO";
 
   // Hide header on auth pages
   const hideHeaderPaths = ["/login", "/register"];
