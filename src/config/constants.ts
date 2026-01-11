@@ -150,7 +150,6 @@ export const API_ENDPOINTS = {
     BY_USER: "/reserves/users",
     BY_BOOK: (isbn: string) => `/reserves/books/${isbn}`,
     DELETE: (id: number) => `/reserves/${id}`,
-    CANCELAR: (id: number) => `/reserves/${id}`,
   },
 
   // Multas (Fines)

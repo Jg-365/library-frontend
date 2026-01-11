@@ -154,36 +154,4 @@ export const reservasService = {
   async deletar(id: number): Promise<void> {
     await api.delete(API_ENDPOINTS.RESERVAS.DELETE(id));
   },
-
-  /**
-   * Cancelar reserva
-   * DELETE /reserves/{id}
-   */
-  async cancelar(id: number): Promise<void> {
-    // DEBUG: logar token/headers antes da chamada para diagnosticar 403
-    try {
-      const token = localStorage.getItem("auth-token");
-      console.debug(
-        "[reservasService.cancelar] token present:",
-        !!token
-      );
-      console.debug(
-        "[reservasService.cancelar] api.defaults.headers.common.Authorization:",
-        api.defaults.headers.common.Authorization
-      );
-
-      await api.delete(API_ENDPOINTS.RESERVAS.CANCELAR(id));
-    } catch (error: any) {
-      console.error(
-        `[reservasService.cancelar] Erro ao cancelar reserva ${id}:`,
-        {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-          request: error.request,
-        }
-      );
-      throw error;
-    }
-  },
 };

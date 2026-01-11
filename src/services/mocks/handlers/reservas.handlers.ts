@@ -95,38 +95,6 @@ export function setupReservasHandlers(mock: MockAdapter) {
     return [201, reservaCriada];
   });
 
-  // PUT /api/reservas/:id/cancelar - Cancelar reserva
-  mock
-    .onPut(/\/reservas\/\d+\/cancelar/)
-    .reply((config) => {
-      const matches = config.url?.match(
-        /\/reservas\/(\d+)\/cancelar/
-      );
-      const id = matches ? parseInt(matches[1]) : 0;
-      const index = reservas.findIndex((r) => r.id === id);
-
-      if (index === -1) {
-        return [404, { message: "Reserva não encontrada" }];
-      }
-
-      if (reservas[index].status !== "ATIVA") {
-        return [
-          400,
-          {
-            message:
-              "Apenas reservas ativas podem ser canceladas",
-          },
-        ];
-      }
-
-      reservas[index] = {
-        ...reservas[index],
-        status: "CANCELADA",
-      };
-
-      return [200, reservas[index]];
-    });
-
   // PUT /api/reservas/:id/concluir - Concluir reserva (quando livro é retirado)
   mock
     .onPut(/\/reservas\/\d+\/concluir/)
@@ -159,7 +127,7 @@ export function setupReservasHandlers(mock: MockAdapter) {
       return [200, reservas[index]];
     });
 
-  // DELETE /api/reservas/:id - Deletar reserva (admin)
+  // DELETE /api/reservas/:id - Cancelar reserva
   mock.onDelete(/\/reservas\/\d+/).reply((config) => {
     const id = parseInt(
       config.url?.split("/").pop() || "0"
@@ -170,8 +138,21 @@ export function setupReservasHandlers(mock: MockAdapter) {
       return [404, { message: "Reserva não encontrada" }];
     }
 
-    reservas.splice(index, 1);
+    if (reservas[index].status !== "ATIVA") {
+      return [
+        400,
+        {
+          message:
+            "Apenas reservas ativas podem ser canceladas",
+        },
+      ];
+    }
 
-    return [204];
+    reservas[index] = {
+      ...reservas[index],
+      status: "CANCELADA",
+    };
+
+    return [200, reservas[index]];
   });
 }

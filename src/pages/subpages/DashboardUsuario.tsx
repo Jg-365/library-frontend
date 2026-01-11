@@ -227,7 +227,7 @@ export function DashboardUsuario() {
     reserva: Reserva
   ) => {
     try {
-      await reservasService.cancelar(reserva.id);
+      await reservasService.deletar(reserva.id);
       toast.success("Reserva cancelada com sucesso!");
       carregarDados();
     } catch (error: any) {
