@@ -51,6 +51,32 @@ export default function MinhasReservas() {
     return d.toLocaleDateString("pt-BR");
   };
 
+  const getTempoRestante = (
+    prazoRetirada?: string
+  ): string => {
+    const prazoDate = parseToDate(prazoRetirada);
+    if (!prazoDate) return "-";
+    const diffMs = prazoDate.getTime() - Date.now();
+    const oneDayMs = 1000 * 60 * 60 * 24;
+    if (diffMs < 0) return "Prazo expirado";
+    if (diffMs < oneDayMs) return "Hoje";
+    const diffDays = Math.ceil(diffMs / oneDayMs);
+    return `${diffDays} dia${diffDays > 1 ? "s" : ""}`;
+  };
+
+  const getDisplayStatus = (reserva: Reserva) => {
+    const status = reserva.status || "ATIVA";
+    if (status === "ATIVA") {
+      const prazoDate = parseToDate(
+        reserva.prazoRetirada
+      );
+      if (prazoDate && prazoDate.getTime() < Date.now()) {
+        return "EXPIRADA";
+      }
+    }
+    return status;
+  };
+
   const getPerfil = (): Perfil => {
     if (location.pathname.startsWith("/admin")) {
       return "ADMIN";
@@ -149,6 +175,8 @@ export default function MinhasReservas() {
         return "bg-green-100 text-green-800 border-green-300";
       case "CANCELADA":
         return "bg-gray-100 text-gray-800 border-gray-300";
+      case "EXPIRADA":
+        return "bg-red-100 text-red-800 border-red-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
@@ -196,8 +224,11 @@ export default function MinhasReservas() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {reservas.map((reserva) => (
-              <Card key={reserva.id} className="shadow-lg">
+            {reservas.map((reserva) => {
+              const displayStatus =
+                getDisplayStatus(reserva);
+              return (
+                <Card key={reserva.id} className="shadow-lg">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -208,10 +239,10 @@ export default function MinhasReservas() {
                     <Badge
                       variant="outline"
                       className={getStatusColor(
-                        reserva.status || ""
+                        displayStatus
                       )}
                     >
-                      {reserva.status}
+                      {displayStatus}
                     </Badge>
                   </div>
                   <CardDescription>
@@ -225,7 +256,7 @@ export default function MinhasReservas() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div className="grid grid-cols-1 gap-4 text-sm mb-4 sm:grid-cols-3">
                     <div>
                       <p className="text-gray-500">
                         Data da Reserva
@@ -243,6 +274,16 @@ export default function MinhasReservas() {
                         {formatDate(reserva.prazoRetirada)}
                       </p>
                     </div>
+                    <div>
+                      <p className="text-gray-500">
+                        Tempo restante
+                      </p>
+                      <p className="font-medium">
+                        {getTempoRestante(
+                          reserva.prazoRetirada
+                        )}
+                      </p>
+                    </div>
                   </div>
                   {/* Cancel button removed per UX decision */}
                   {reserva.status === "CONCLUIDA" && (
@@ -255,7 +296,8 @@ export default function MinhasReservas() {
                   )}
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
 
