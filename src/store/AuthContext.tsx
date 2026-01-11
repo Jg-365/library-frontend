@@ -157,7 +157,7 @@ export function AuthProvider({
       value={{
         user,
         token,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user?.enrollment,
         isLoading,
         login,
         logout,
