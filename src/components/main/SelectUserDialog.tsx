@@ -23,8 +23,8 @@ import { usuariosService } from "@/services";
 
 interface Usuario {
   id: string;
-  nome: string;
-  enrollment: number;
+  name?: string;
+  enrollment?: number;
   email?: string;
 }
 
@@ -61,16 +61,16 @@ export function SelectUserDialog({
 
   useEffect(() => {
     if (searchTerm) {
+      const normalizedSearch = searchTerm.toLowerCase();
       const filtered = usuarios.filter(
         (u) =>
-          u.nome
+          (u.name ?? "")
             .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          u.enrollment.toString().includes(searchTerm) ||
-          (u.email &&
-            u.email
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()))
+            .includes(normalizedSearch) ||
+          String(u.enrollment ?? "").includes(searchTerm) ||
+          (u.email ?? "")
+            .toLowerCase()
+            .includes(normalizedSearch)
       );
       setFilteredUsuarios(filtered);
     } else {
@@ -181,10 +181,14 @@ export function SelectUserDialog({
                           className="flex flex-col"
                         >
                           <span className="font-medium">
-                            {usuario.nome}
+                            {(usuario.name ?? "").trim() ||
+                              "Usuário sem nome"}
                           </span>
                           <span className="text-xs text-gray-500">
-                            Matrícula: {usuario.enrollment}
+                            Matrícula:{" "}
+                            {String(
+                              usuario.enrollment ?? ""
+                            )}
                             {usuario.email &&
                               ` • ${usuario.email}`}
                           </span>
