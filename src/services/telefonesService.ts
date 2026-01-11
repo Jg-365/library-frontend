@@ -8,13 +8,44 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 
-interface Telefone {
+interface TelefoneBackend {
   id: number;
   number: string;
+  tipo?: string;
+  ownerId?: string;
+  // Adicione outros campos conforme necessário
+}
+
+interface Telefone {
+  id: number;
+  numero: string;
   tipo?: string;
   usuarioId?: string;
   // Adicione outros campos conforme necessário
 }
+
+const mapTelefoneFromBackend = (
+  telefone: TelefoneBackend
+): Telefone => ({
+  id: telefone.id,
+  numero: telefone.number,
+  tipo: telefone.tipo,
+  usuarioId: telefone.ownerId,
+});
+
+const mapTelefoneToBackend = (dados: {
+  numero: string;
+  tipo?: string;
+  usuarioId?: string;
+}): {
+  number: string;
+  tipo?: string;
+  ownerId?: string;
+} => ({
+  number: dados.numero,
+  tipo: dados.tipo,
+  ownerId: dados.usuarioId,
+});
 
 export const telefonesService = {
   /**
@@ -22,15 +53,15 @@ export const telefonesService = {
    * POST /phones
    */
   async criar(dados: {
-    number: string;
+    numero: string;
     tipo?: string;
     usuarioId?: string;
   }): Promise<Telefone> {
-    const response = await api.post<Telefone>(
+    const response = await api.post<TelefoneBackend>(
       API_ENDPOINTS.TELEFONES.CREATE,
-      dados
+      mapTelefoneToBackend(dados)
     );
-    return response.data;
+    return mapTelefoneFromBackend(response.data);
   },
 
   /**
@@ -39,13 +70,16 @@ export const telefonesService = {
    */
   async atualizar(
     id: number,
-    dados: { number?: string; tipo?: string }
+    dados: { numero?: string; tipo?: string }
   ): Promise<Telefone> {
-    const response = await api.patch<Telefone>(
+    const response = await api.patch<TelefoneBackend>(
       API_ENDPOINTS.TELEFONES.UPDATE(id),
-      dados
+      {
+        number: dados.numero,
+        tipo: dados.tipo,
+      }
     );
-    return response.data;
+    return mapTelefoneFromBackend(response.data);
   },
 
   /**
