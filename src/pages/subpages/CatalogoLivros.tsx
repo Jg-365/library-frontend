@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { api } from "@/services/api";
 import { livrosService } from "@/services/livrosService";
+import { reservasService } from "@/services/reservasService";
+import { emprestimosService } from "@/services/emprestimosService";
+import { api } from "@/services/api";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import { SelectUserDialog } from "@/components/main/SelectUserDialog";
@@ -32,6 +34,13 @@ import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/config/constants";
 import { useAuth as useAuthContext } from "@/store/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
+import {
+  CustomModal,
+  CustomModalContent,
+  CustomModalDescription,
+  CustomModalHeader,
+  CustomModalTitle,
+} from "@/components/ui/custom-modal";
 
 export function CatalogoLivros() {
   const { user } = useAuthContext();
@@ -48,6 +57,8 @@ export function CatalogoLivros() {
     useState<Livro | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isSelectUserOpen, setIsSelectUserOpen] =
+    useState(false);
+  const [isEnrollmentErrorOpen, setIsEnrollmentErrorOpen] =
     useState(false);
   const [
     reservaParaOutroUsuario,
@@ -127,11 +138,19 @@ export function CatalogoLivros() {
     }
 
     // Usuário comum faz reserva para si mesmo
-    await realizarReserva(livro, user?.enrollment);
+    const enrollment = await resolveEnrollment();
+    if (!enrollment) {
+      return;
+    }
+    await realizarReserva(livro, enrollment);
   };
 
   const handleReservarParaMim = async (livro: Livro) => {
-    await realizarReserva(livro, user?.enrollment);
+    const enrollment = await resolveEnrollment();
+    if (!enrollment) {
+      return;
+    }
+    await realizarReserva(livro, enrollment);
   };
 
   const handleReservarParaOutro = (livro: Livro) => {
@@ -141,7 +160,11 @@ export function CatalogoLivros() {
   };
 
   const handleEmprestarParaMim = async (livro: Livro) => {
-    await realizarEmprestimo(livro, user?.enrollment);
+    const enrollment = await resolveEnrollment();
+    if (!enrollment) {
+      return;
+    }
+    await realizarEmprestimo(livro, enrollment);
   };
 
   const handleEmprestarParaOutro = (livro: Livro) => {
@@ -200,19 +223,48 @@ export function CatalogoLivros() {
     );
   };
 
+  const showEnrollmentError = () => {
+    setIsEnrollmentErrorOpen(true);
+  };
+
+  const resolveEnrollment = async () => {
+    if (user?.enrollment) {
+      return user.enrollment;
+    }
+
+    try {
+      const response = await api.get(
+        API_ENDPOINTS.USUARIOS.ME
+      );
+      const enrollment =
+        response.data?.enrollment ||
+        response.data?.matricula;
+
+      if (enrollment) {
+        return Number(enrollment);
+      }
+    } catch (error) {
+      console.error(
+        "Erro ao buscar matrícula do usuário:",
+        error
+      );
+    }
+
+    showEnrollmentError();
+    return undefined;
+  };
+
   const realizarReserva = async (
     livro: Livro,
     enrollment?: number
   ) => {
     try {
       if (!enrollment) {
-        toast.error(
-          "Erro: matrícula do usuário não encontrada"
-        );
+        showEnrollmentError();
         return;
       }
 
-      await api.post(API_ENDPOINTS.RESERVAS.CREATE, {
+      await reservasService.criar({
         userEnrollment: Number(enrollment),
         bookIsbn: livro.isbn,
       });
@@ -244,9 +296,7 @@ export function CatalogoLivros() {
   ) => {
     try {
       if (!enrollment) {
-        toast.error(
-          "Erro: matrícula do usuário não encontrada"
-        );
+        showEnrollmentError();
         return;
       }
 
@@ -428,6 +478,36 @@ export function CatalogoLivros() {
           title="Reservar para Usuário"
           description="Selecione o usuário para o qual deseja reservar este livro"
         />
+
+        <CustomModal
+          open={isEnrollmentErrorOpen}
+          onOpenChange={setIsEnrollmentErrorOpen}
+        >
+          <CustomModalContent
+            onClose={() => setIsEnrollmentErrorOpen(false)}
+          >
+            <CustomModalHeader>
+              <CustomModalTitle>
+                Não foi possível identificar sua matrícula
+              </CustomModalTitle>
+              <CustomModalDescription>
+                Não conseguimos recuperar sua matrícula. Por
+                favor, faça login novamente ou contate o
+                suporte caso o problema continue.
+              </CustomModalDescription>
+            </CustomModalHeader>
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                onClick={() =>
+                  setIsEnrollmentErrorOpen(false)
+                }
+              >
+                Entendi
+              </Button>
+            </div>
+          </CustomModalContent>
+        </CustomModal>
 
         {/* Modal de Detalhes */}
         <BookDetailsDialog
