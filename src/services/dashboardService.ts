@@ -165,28 +165,11 @@ export const dashboardService = {
       this._logFriendlyError("total de livros", error);
     }
 
-    // Buscar empréstimos do usuário logado ou globais (admin/bibliotecário)
+    // Buscar empréstimos do usuário logado (GET /loans/users)
     try {
-      let emprestimosResponse;
-      if (isPrivileged) {
-        try {
-          emprestimosResponse = await api.get(
-            API_ENDPOINTS.EMPRESTIMOS.BASE
-          );
-        } catch (error: any) {
-          try {
-            emprestimosResponse = await api.get(
-              API_ENDPOINTS.EMPRESTIMOS.BY_USER
-            );
-          } catch (fallbackError) {
-            throw error;
-          }
-        }
-      } else {
-        emprestimosResponse = await api.get(
-          API_ENDPOINTS.EMPRESTIMOS.BY_USER
-        );
-      }
+      const emprestimosResponse = await api.get(
+        API_ENDPOINTS.EMPRESTIMOS.BY_USER
+      );
       const emprestimosArray = Array.isArray(
         emprestimosResponse?.data
       )
@@ -291,23 +274,9 @@ export const dashboardService = {
       // Como não há endpoint de auditoria, vamos buscar dados recentes
       const atividades: AtividadeRecente[] = [];
 
-      const isPrivileged = this._isPrivileged(perfil);
-      let emprestimosResponse;
-      if (isPrivileged) {
-        try {
-          emprestimosResponse = await api.get(
-            API_ENDPOINTS.EMPRESTIMOS.BASE
-          );
-        } catch (error: any) {
-          emprestimosResponse = await api.get(
-            API_ENDPOINTS.EMPRESTIMOS.BY_USER
-          );
-        }
-      } else {
-        emprestimosResponse = await api.get(
-          API_ENDPOINTS.EMPRESTIMOS.BY_USER
-        );
-      }
+      const emprestimosResponse = await api.get(
+        API_ENDPOINTS.EMPRESTIMOS.BY_USER
+      );
       const emprestimosArray = Array.isArray(
         emprestimosResponse?.data
       )
