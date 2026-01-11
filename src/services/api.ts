@@ -1,6 +1,10 @@
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { API_CONFIG, STORAGE_KEYS } from "@/config";
+import {
+  API_CONFIG,
+  API_ENDPOINTS,
+  STORAGE_KEYS,
+} from "@/config";
 import { getErrorMessage } from "@/lib/errorMessage";
 
 export const api = axios.create({
@@ -24,7 +28,9 @@ export const api = axios.create({
 // Interceptor para adicionar token nas requisições
 api.interceptors.request.use((config) => {
   // Não adiciona token nas rotas de autenticação (login)
-  const isAuthRoute = config.url?.includes("/auth/login");
+  const isAuthRoute = config.url?.includes(
+    API_ENDPOINTS.AUTH.LOGIN
+  );
 
   const token = localStorage.getItem(
     STORAGE_KEYS.AUTH_TOKEN

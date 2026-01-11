@@ -72,22 +72,61 @@ export function AuthProvider({
 
   // Carrega autenticação salva ao iniciar e verifica expiração
   useEffect(() => {
-    const storedAuth = authService.getStoredAuth();
-    if (storedAuth) {
+    let isMounted = true;
+
+    const loadAuth = async () => {
+      const storedAuth = authService.getStoredAuth();
+      if (!storedAuth) {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       // Verifica se o token expirou
       if (isTokenExpired(storedAuth.token)) {
         console.warn(
           "⏰ Token JWT expirado! Fazendo logout automático..."
         );
         authService.logout();
-        setUser(null);
-        setToken(null);
-      } else {
-        setUser(storedAuth.user);
+        if (isMounted) {
+          setUser(null);
+          setToken(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      if (isMounted) {
         setToken(storedAuth.token);
       }
-    }
-    setIsLoading(false);
+
+      try {
+        const freshUser = await authService.getMe();
+        if (isMounted) {
+          setUser(freshUser);
+          authService.saveAuth(storedAuth.token, freshUser);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao recarregar usuário em /users/me:",
+          error
+        );
+        if (isMounted) {
+          setUser(storedAuth.user);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (
