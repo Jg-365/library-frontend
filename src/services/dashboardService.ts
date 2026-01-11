@@ -26,6 +26,12 @@ export const dashboardService = {
   _isPrivileged(perfil?: string) {
     return perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
   },
+  _logFriendlyError(contexto: string, error: unknown) {
+    console.warn(
+      `Não foi possível carregar ${contexto}. Exibindo dados parciais.`,
+      error
+    );
+  },
 
   /**
    * Fallback: agregação de reservas por usuário quando GET /reserves não está disponível.
@@ -121,10 +127,14 @@ export const dashboardService = {
    * Buscar estatísticas gerais do sistema
    */
   async getStats(perfil?: string): Promise<DashboardStats> {
+    const isPrivileged = this._isPrivileged(perfil);
+    let totalUsuarios = 0;
+    let totalLivros = 0;
+    let emprestimosAtivos = 0;
+    let reservasPendentes = 0;
+
+    // Buscar total de usuários
     try {
-      const isPrivileged = this._isPrivileged(perfil);
-      // Buscar total de usuários
-      let totalUsuarios = 0;
       if (isPrivileged) {
         const usuariosResponse = await api.get(
           API_ENDPOINTS.USUARIOS.ALL
@@ -138,33 +148,63 @@ export const dashboardService = {
         );
         totalUsuarios = usuarioResponse.data ? 1 : 0;
       }
+    } catch (error) {
+      this._logFriendlyError("total de usuários", error);
+    }
 
-      // Buscar total de livros
+    // Buscar total de livros
+    try {
       const livrosResponse = await api.get(
         API_ENDPOINTS.LIVROS.BASE
       );
-      const totalLivros =
+      totalLivros =
         livrosResponse.data?.totalElements ||
         livrosResponse.data?.content?.length ||
         0;
+    } catch (error) {
+      this._logFriendlyError("total de livros", error);
+    }
 
-      // Buscar empréstimos do usuário logado ou globais (admin/bibliotecário)
-      const emprestimosResponse = await api.get(
-        isPrivileged
-          ? API_ENDPOINTS.EMPRESTIMOS.BASE
-          : API_ENDPOINTS.EMPRESTIMOS.BY_USER
-      );
+    // Buscar empréstimos do usuário logado ou globais (admin/bibliotecário)
+    try {
+      let emprestimosResponse;
+      if (isPrivileged) {
+        try {
+          emprestimosResponse = await api.get(
+            API_ENDPOINTS.EMPRESTIMOS.BASE
+          );
+        } catch (error: any) {
+          const status = error?.response?.status;
+          if (status === 403 || status === 404) {
+            emprestimosResponse = await api.get(
+              API_ENDPOINTS.EMPRESTIMOS.BY_USER
+            );
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        emprestimosResponse = await api.get(
+          API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        );
+      }
       const emprestimosArray = Array.isArray(
-        emprestimosResponse.data
+        emprestimosResponse?.data
       )
-        ? emprestimosResponse.data
-        : emprestimosResponse.data?.content || [];
+        ? emprestimosResponse?.data
+        : emprestimosResponse?.data?.content || [];
       const counts = this._classifyLoans(emprestimosArray);
-      const emprestimosAtivos = counts.ativos;
+      emprestimosAtivos = counts.ativos;
+    } catch (error) {
+      this._logFriendlyError(
+        "empréstimos ativos",
+        error
+      );
+    }
 
-      // Buscar reservas do usuário logado
-      // Endpoint: GET /reserves/users
-      let reservasPendentes = 0;
+    // Buscar reservas do usuário logado
+    // Endpoint: GET /reserves/users
+    try {
       if (isPrivileged) {
         if (this._reservesSupported === false) {
           const aggregated =
@@ -199,10 +239,7 @@ export const dashboardService = {
               );
               this._reservesSupported = false;
             } else {
-              console.error(
-                "Erro ao buscar reservas globais:",
-                err
-              );
+              throw err;
             }
           }
         }
@@ -220,22 +257,19 @@ export const dashboardService = {
             ).length
           : 0;
       }
-
-      return {
-        totalUsuarios,
-        totalLivros,
-        emprestimosAtivos,
-        reservasPendentes,
-      };
     } catch (error) {
-      console.error("Erro ao buscar estatísticas:", error);
-      return {
-        totalUsuarios: 0,
-        totalLivros: 0,
-        emprestimosAtivos: 0,
-        reservasPendentes: 0,
-      };
+      this._logFriendlyError(
+        "reservas pendentes",
+        error
+      );
     }
+
+    return {
+      totalUsuarios,
+      totalLivros,
+      emprestimosAtivos,
+      reservasPendentes,
+    };
   },
 
   /**
@@ -255,15 +289,12 @@ export const dashboardService = {
     AtividadeRecente[]
   > {
     try {
-      const isPrivileged = this._isPrivileged(perfil);
       // Como não há endpoint de auditoria, vamos buscar dados recentes
       const atividades: AtividadeRecente[] = [];
 
       // Buscar empréstimos recentes do usuário
       const emprestimosResponse = await api.get(
-        isPrivileged
-          ? API_ENDPOINTS.EMPRESTIMOS.BASE
-          : API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        API_ENDPOINTS.EMPRESTIMOS.BY_USER
       );
       if (Array.isArray(emprestimosResponse.data)) {
         emprestimosResponse.data
@@ -281,6 +312,7 @@ export const dashboardService = {
           });
       }
 
+      const isPrivileged = this._isPrivileged(perfil);
       // Buscar reservas recentes
       if (isPrivileged) {
         if (this._reservesSupported === false) {
@@ -336,35 +368,44 @@ export const dashboardService = {
               );
               this._reservesSupported = false;
             } else {
-              console.error(
-                "Erro ao buscar reservas globais:",
+              this._logFriendlyError(
+                "reservas recentes",
                 err
               );
             }
           }
         }
       } else {
-        const reservasResponse = await api.get(
-          API_ENDPOINTS.RESERVAS.BY_USER
-        );
-        if (Array.isArray(reservasResponse.data)) {
-          reservasResponse.data
-            .slice(0, 2)
-            .forEach((res: any) => {
-              atividades.push({
-                id: `res-${res.id}`,
-                acao:
-                  res.status === "ATIVA"
-                    ? "Reserva aprovada"
-                    : "Reserva criada",
-                usuario:
-                  res.userName || res.userId || "Usuário",
-                timestamp:
-                  res.reservationDate ||
-                  new Date().toISOString(),
-                tipo: "reserva",
+        try {
+          const reservasResponse = await api.get(
+            API_ENDPOINTS.RESERVAS.BY_USER
+          );
+          if (Array.isArray(reservasResponse.data)) {
+            reservasResponse.data
+              .slice(0, 2)
+              .forEach((res: any) => {
+                atividades.push({
+                  id: `res-${res.id}`,
+                  acao:
+                    res.status === "ATIVA"
+                      ? "Reserva aprovada"
+                      : "Reserva criada",
+                  usuario:
+                    res.userName ||
+                    res.userId ||
+                    "Usuário",
+                  timestamp:
+                    res.reservationDate ||
+                    new Date().toISOString(),
+                  tipo: "reserva",
+                });
               });
-            });
+          }
+        } catch (error) {
+          this._logFriendlyError(
+            "reservas recentes",
+            error
+          );
         }
       }
 
@@ -377,8 +418,8 @@ export const dashboardService = {
 
       return atividades.slice(0, 4);
     } catch (error) {
-      console.error(
-        "Erro ao buscar atividades recentes:",
+      this._logFriendlyError(
+        "atividades recentes",
         error
       );
       return [];
