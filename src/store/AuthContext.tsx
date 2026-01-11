@@ -5,11 +5,12 @@ import {
   useEffect,
 } from "react";
 import type { ReactNode } from "react";
-import type { Usuario } from "@/types/Usuario";
+import type { TipoAcesso, Usuario } from "@/types/Usuario";
 import { authService } from "@/services/authService";
 
 interface AuthContextType {
   user: Usuario | null;
+  role: TipoAcesso | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -152,10 +153,13 @@ export function AuthProvider({
     setToken(null);
   };
 
+  const role = user?.role ?? user?.perfil ?? null;
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        role,
         token,
         isAuthenticated: !!user?.enrollment,
         isLoading,

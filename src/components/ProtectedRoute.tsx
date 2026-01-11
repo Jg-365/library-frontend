@@ -13,7 +13,8 @@ export function ProtectedRoute({
   children,
   perfisPermitidos,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, user, isLoading } = useAuthContext();
+  const { isAuthenticated, user, role, isLoading } =
+    useAuthContext();
   const [showAccessDenied, setShowAccessDenied] =
     useState(false);
 
@@ -35,8 +36,7 @@ export function ProtectedRoute({
   }
 
   // Normalize profile (backend may return `role` or legacy `perfil`)
-  const currentPerfil =
-    (user && (user.role || (user as any).perfil)) || null;
+  const currentPerfil = role;
 
   // Administrador tem acesso a todas as rotas
   if (currentPerfil === "ADMIN") {
