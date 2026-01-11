@@ -7,12 +7,18 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
-import type { Curso } from "@/types";
+import type {
+  CourseCreateRequest,
+  CourseUpdateRequest,
+  Curso,
+} from "@/types";
 
-export interface CursoPayload {
-  courseCode?: number;
-  courseName: string;
-}
+const toCoursePayload = (
+  dados: CourseCreateRequest | CourseUpdateRequest
+) => ({
+  courseCode: dados.courseCode,
+  courseName: dados.courseName,
+});
 
 function mapCursoResponse(curso: any): Curso {
   return {
@@ -38,10 +44,12 @@ export const cursosService = {
    * Criar novo curso
    * POST /courses
    */
-  async criar(dados: CursoPayload): Promise<Curso> {
+  async criar(
+    dados: CourseCreateRequest
+  ): Promise<Curso> {
     const response = await api.post<Curso>(
       API_ENDPOINTS.CURSOS.CREATE,
-      dados
+      toCoursePayload(dados)
     );
     return mapCursoResponse(response.data);
   },
@@ -72,10 +80,12 @@ export const cursosService = {
    * Atualizar curso existente
    * PATCH /courses
    */
-  async atualizar(dados: CursoPayload): Promise<Curso> {
+  async atualizar(
+    dados: CourseUpdateRequest
+  ): Promise<Curso> {
     const response = await api.patch(
       API_ENDPOINTS.CURSOS.UPDATE,
-      dados
+      toCoursePayload(dados)
     );
     return mapCursoResponse(response.data);
   },

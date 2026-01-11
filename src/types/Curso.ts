@@ -13,3 +13,13 @@ export interface Curso {
     | "DOUTORADO";
   ativo?: boolean;
 }
+
+export interface CourseCreateRequest {
+  courseCode?: number;
+  courseName: string;
+}
+
+export interface CourseUpdateRequest {
+  courseCode: number;
+  courseName: string;
+}
