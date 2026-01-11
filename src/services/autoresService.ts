@@ -51,11 +51,11 @@ export const autoresService = {
   },
   /**
    * Buscar autores por nome
-   * GET /authors?name=...
+   * GET /authors?authorName=...
    */
   async buscarPorNome(name?: string): Promise<Autor[]> {
     const params = name
-      ? `?name=${encodeURIComponent(name)}`
+      ? `?authorName=${encodeURIComponent(name)}`
       : "";
     const response = await api.get(
       `${API_ENDPOINTS.AUTORES.BY_NAME}${params}`
