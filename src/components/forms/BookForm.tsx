@@ -42,7 +42,7 @@ import { getErrorMessage } from "@/lib/errorMessage";
 
 interface BookFormProps {
   livro?: Livro;
-  onSuccess?: () => void;
+  onSuccess?: (livro: Livro, mode: "create" | "update") => void;
   onCancel?: () => void;
 }
 
@@ -357,11 +357,12 @@ export function BookForm({
           coAuthorsEmails,
         };
 
-        await livrosService.atualizar(
+        const updatedBook = await livrosService.atualizar(
           livro.isbn,
           updatePayload
         );
         toast.success("Livro atualizado com sucesso!");
+        onSuccess?.(updatedBook, "update");
       } else {
         // Criar novo livro
         const createPayload: BookRequest = {
@@ -374,11 +375,11 @@ export function BookForm({
           coAuthorsEmails,
         };
 
-        await livrosService.criar(createPayload);
+        const createdBook =
+          await livrosService.criar(createPayload);
         toast.success("Livro cadastrado com sucesso!");
+        onSuccess?.(createdBook, "create");
       }
-
-      onSuccess?.();
     } catch (error: any) {
       console.error(
         "❌ Erro completo ao cadastrar livro:",

@@ -147,7 +147,11 @@ export function CadastroEdicao() {
     try {
       await livrosService.deletar(livroToDelete.isbn);
       toast.success("Livro excluído com sucesso!");
-      carregarLivros();
+      setLivros((prev) =>
+        prev.filter(
+          (livro) => livro.isbn !== livroToDelete.isbn
+        )
+      );
     } catch (error: any) {
       toast.error("Erro ao excluir livro", {
         description:
@@ -162,10 +166,20 @@ export function CadastroEdicao() {
     }
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (
+    savedBook: Livro,
+    mode: "create" | "update"
+  ) => {
     setIsFormOpen(false);
     setEditingLivro(undefined);
-    carregarLivros();
+    setLivros((prev) => {
+      if (mode === "create") {
+        return [savedBook, ...prev];
+      }
+      return prev.map((livro) =>
+        livro.isbn === savedBook.isbn ? savedBook : livro
+      );
+    });
   };
 
   const booksColumn = createBooksColumn({

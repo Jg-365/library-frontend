@@ -32,6 +32,17 @@ const normalizeUsuariosPage = (
 };
 
 export const usuariosService = {
+  _cache: new Map<string, MyPage<Usuario>>(),
+
+  _cacheKey(options?: { page?: number; size?: number }) {
+    if (!options?.page && !options?.size) {
+      return "all";
+    }
+    return `page=${options?.page ?? 0}&size=${
+      options?.size ?? 10
+    }`;
+  },
+
   /**
    * Criar novo usuário
    * POST /users/create
@@ -43,6 +54,7 @@ export const usuariosService = {
       API_ENDPOINTS.USUARIOS.CREATE,
       dados
     );
+    usuariosService._cache.clear();
     return response.data;
   },
 
@@ -63,13 +75,33 @@ export const usuariosService = {
    * Listar todos os usuários
    * GET /users/all
    */
-  async listarTodos(): Promise<MyPage<Usuario>> {
+  async listarTodos(options?: {
+    page?: number;
+    size?: number;
+    force?: boolean;
+  }): Promise<MyPage<Usuario>> {
+    const cacheKey = usuariosService._cacheKey(options);
+    if (!options?.force && usuariosService._cache.has(cacheKey)) {
+      return (
+        usuariosService._cache.get(cacheKey) ||
+        normalizeUsuariosPage([])
+      );
+    }
     const response = await api.get<
       MyPage<Usuario> | Usuario[]
-    >(
-      API_ENDPOINTS.USUARIOS.ALL
-    );
-    return normalizeUsuariosPage(response.data);
+    >(API_ENDPOINTS.USUARIOS.ALL, {
+      params:
+        options?.page !== undefined ||
+        options?.size !== undefined
+          ? {
+              page: options?.page,
+              size: options?.size,
+            }
+          : undefined,
+    });
+    const normalized = normalizeUsuariosPage(response.data);
+    usuariosService._cache.set(cacheKey, normalized);
+    return normalized;
   },
 
   /**
@@ -84,6 +116,7 @@ export const usuariosService = {
       API_ENDPOINTS.USUARIOS.UPDATE_TEACHER(enrollment),
       dados
     );
+    usuariosService._cache.clear();
     return response.data;
   },
 
@@ -99,6 +132,7 @@ export const usuariosService = {
       API_ENDPOINTS.USUARIOS.UPDATE_STUDENT(enrollment),
       dados
     );
+    usuariosService._cache.clear();
     return response.data;
   },
 
@@ -114,6 +148,7 @@ export const usuariosService = {
       API_ENDPOINTS.USUARIOS.UPDATE_EMPLOYEE(enrollment),
       dados
     );
+    usuariosService._cache.clear();
     return response.data;
   },
 
@@ -125,6 +160,7 @@ export const usuariosService = {
     await api.delete(
       API_ENDPOINTS.USUARIOS.DELETE(enrollment)
     );
+    usuariosService._cache.clear();
   },
 
   /**
