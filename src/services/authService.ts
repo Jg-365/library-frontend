@@ -95,6 +95,7 @@ function buildUserFromToken(token: string): Usuario {
   return {
     enrollment,
     role,
+    perfil: role,
     userType,
     name: decoded.name ?? decoded.nome ?? username,
     username,
@@ -184,10 +185,17 @@ export const authService = {
   },
 
   saveAuth: (token: string, user: Usuario) => {
+    const resolvedRole =
+      normalizeRole(user.role ?? user.perfil) ?? "USUARIO";
+    const normalizedUser = {
+      ...user,
+      role: resolvedRole,
+      perfil: resolvedRole,
+    };
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     localStorage.setItem(
       STORAGE_KEYS.USER_DATA,
-      JSON.stringify(user)
+      JSON.stringify(normalizedUser)
     );
   },
 

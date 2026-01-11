@@ -36,7 +36,8 @@ export function ProtectedRoute({
   }
 
   // Normalize profile (backend may return `role` or legacy `perfil`)
-  const currentPerfil = role;
+  const currentPerfil =
+    user?.role ?? user?.perfil ?? role ?? null;
 
   // Administrador tem acesso a todas as rotas
   if (currentPerfil === "ADMIN") {
