@@ -23,6 +23,9 @@ export interface AtividadeRecente {
 export const dashboardService = {
   // Cache whether the backend supports GET /reserves to avoid repeated 405s
   _reservesSupported: null as boolean | null,
+  _isPrivileged(perfil?: string) {
+    return perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
+  },
 
   /**
    * Fallback: agregação de reservas por usuário quando GET /reserves não está disponível.
@@ -117,17 +120,24 @@ export const dashboardService = {
   /**
    * Buscar estatísticas gerais do sistema
    */
-  async getStats(): Promise<DashboardStats> {
+  async getStats(perfil?: string): Promise<DashboardStats> {
     try {
+      const isPrivileged = this._isPrivileged(perfil);
       // Buscar total de usuários
-      const usuariosResponse = await api.get(
-        API_ENDPOINTS.USUARIOS.ALL
-      );
-      const totalUsuarios = Array.isArray(
-        usuariosResponse.data
-      )
-        ? usuariosResponse.data.length
-        : 0;
+      let totalUsuarios = 0;
+      if (isPrivileged) {
+        const usuariosResponse = await api.get(
+          API_ENDPOINTS.USUARIOS.ALL
+        );
+        totalUsuarios = Array.isArray(usuariosResponse.data)
+          ? usuariosResponse.data.length
+          : 0;
+      } else {
+        const usuarioResponse = await api.get(
+          API_ENDPOINTS.USUARIOS.ME
+        );
+        totalUsuarios = usuarioResponse.data ? 1 : 0;
+      }
 
       // Buscar total de livros
       const livrosResponse = await api.get(
@@ -138,11 +148,11 @@ export const dashboardService = {
         livrosResponse.data?.content?.length ||
         0;
 
-      // Buscar empréstimos do usuário logado
-      // Nota: Backend não tem endpoint para TODOS os empréstimos
-      // Apenas empréstimos do usuário autenticado
+      // Buscar empréstimos do usuário logado ou globais (admin/bibliotecário)
       const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        isPrivileged
+          ? API_ENDPOINTS.EMPRESTIMOS.BASE
+          : API_ENDPOINTS.EMPRESTIMOS.BY_USER
       );
       const emprestimosArray = Array.isArray(
         emprestimosResponse.data
@@ -154,18 +164,62 @@ export const dashboardService = {
 
       // Buscar reservas do usuário logado
       // Endpoint: GET /reserves/users
-      const reservasResponse = await api.get(
-        API_ENDPOINTS.RESERVAS.BY_USER
-      );
-      const reservasPendentes = Array.isArray(
-        reservasResponse.data
-      )
-        ? reservasResponse.data.filter(
-            (r: any) =>
-              r.status === "PENDENTE" ||
-              r.status === "ATIVA"
-          ).length
-        : 0;
+      let reservasPendentes = 0;
+      if (isPrivileged) {
+        if (this._reservesSupported === false) {
+          const aggregated =
+            await this._fetchReservesByAllUsers();
+          reservasPendentes = Array.isArray(aggregated)
+            ? aggregated.filter(
+                (r: any) =>
+                  r.status === "PENDENTE" ||
+                  r.status === "ATIVA"
+              ).length
+            : 0;
+        } else {
+          try {
+            const reservasResponse = await api.get(
+              API_ENDPOINTS.RESERVAS.BASE
+            );
+            const reservasArray = Array.isArray(
+              reservasResponse.data
+            )
+              ? reservasResponse.data
+              : reservasResponse.data?.content || [];
+            reservasPendentes = reservasArray.filter(
+              (r: any) =>
+                r.status === "PENDENTE" ||
+                r.status === "ATIVA"
+            ).length;
+            this._reservesSupported = true;
+          } catch (err: any) {
+            if (err?.response?.status === 405) {
+              console.warn(
+                "GET /reserves não permitido pelo backend - pulando estatísticas de reservas globais"
+              );
+              this._reservesSupported = false;
+            } else {
+              console.error(
+                "Erro ao buscar reservas globais:",
+                err
+              );
+            }
+          }
+        }
+      } else {
+        const reservasResponse = await api.get(
+          API_ENDPOINTS.RESERVAS.BY_USER
+        );
+        reservasPendentes = Array.isArray(
+          reservasResponse.data
+        )
+          ? reservasResponse.data.filter(
+              (r: any) =>
+                r.status === "PENDENTE" ||
+                r.status === "ATIVA"
+            ).length
+          : 0;
+      }
 
       return {
         totalUsuarios,
@@ -188,127 +242,38 @@ export const dashboardService = {
    * Buscar estatísticas globais do sistema (usuários com privilégio)
    */
   async getStatsGlobal(): Promise<DashboardStats> {
-    try {
-      const usuariosResponse = await api.get(
-        API_ENDPOINTS.USUARIOS.ALL
-      );
-      const totalUsuarios = Array.isArray(
-        usuariosResponse.data
-      )
-        ? usuariosResponse.data.length
-        : 0;
-
-      const livrosResponse = await api.get(
-        API_ENDPOINTS.LIVROS.BASE
-      );
-      const totalLivros =
-        livrosResponse.data?.totalElements ||
-        livrosResponse.data?.content?.length ||
-        0;
-
-      // Buscar todos os empréstimos do sistema
-      const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
-      const emprestimosArray = Array.isArray(
-        emprestimosResponse.data
-      )
-        ? emprestimosResponse.data
-        : emprestimosResponse.data?.content || [];
-      const counts = this._classifyLoans(emprestimosArray);
-      const emprestimosAtivos = counts.ativos;
-
-      // Buscar todas as reservas do sistema
-      // Nem todos os backends expõem GET /reserves (405). Tratar fallback.
-      let reservasPendentes = 0;
-      // If we previously determined reserves is unsupported, try per-user aggregation
-      if (this._reservesSupported === false) {
-        const aggregated =
-          await this._fetchReservesByAllUsers();
-        reservasPendentes = Array.isArray(aggregated)
-          ? aggregated.filter(
-              (r: any) =>
-                r.status === "PENDENTE" ||
-                r.status === "ATIVA"
-            ).length
-          : 0;
-      } else {
-        try {
-          const reservasResponse = await api.get(
-            API_ENDPOINTS.RESERVAS.BASE
-          );
-          const reservasArray = Array.isArray(
-            reservasResponse.data
-          )
-            ? reservasResponse.data
-            : reservasResponse.data?.content || [];
-          reservasPendentes = reservasArray.filter(
-            (r: any) =>
-              r.status === "PENDENTE" ||
-              r.status === "ATIVA"
-          ).length;
-          // mark supported on success
-          this._reservesSupported = true;
-        } catch (err: any) {
-          // If the server returns 405 (Method Not Allowed), don't break the dashboard.
-          if (err?.response?.status === 405) {
-            console.warn(
-              "GET /reserves não permitido pelo backend - pulando estatísticas de reservas globais"
-            );
-            this._reservesSupported = false;
-          } else {
-            console.error(
-              "Erro ao buscar reservas globais:",
-              err
-            );
-          }
-          reservasPendentes = 0;
-        }
-      }
-
-      return {
-        totalUsuarios,
-        totalLivros,
-        emprestimosAtivos,
-        reservasPendentes,
-      };
-    } catch (error) {
-      console.error(
-        "Erro ao buscar estatísticas globais:",
-        error
-      );
-      return {
-        totalUsuarios: 0,
-        totalLivros: 0,
-        emprestimosAtivos: 0,
-        reservasPendentes: 0,
-      };
-    }
+    return this.getStats("ADMIN");
   },
 
   /**
    * Buscar atividades recentes (simulado por enquanto)
    * TODO: Implementar endpoint de auditoria no backend
    */
-  async getAtividadesRecentes(): Promise<
+  async getAtividadesRecentes(
+    perfil?: string
+  ): Promise<
     AtividadeRecente[]
   > {
     try {
+      const isPrivileged = this._isPrivileged(perfil);
       // Como não há endpoint de auditoria, vamos buscar dados recentes
       const atividades: AtividadeRecente[] = [];
 
       // Buscar empréstimos recentes do usuário
       const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        isPrivileged
+          ? API_ENDPOINTS.EMPRESTIMOS.BASE
+          : API_ENDPOINTS.EMPRESTIMOS.BY_USER
       );
       if (Array.isArray(emprestimosResponse.data)) {
         emprestimosResponse.data
           .slice(0, 2)
           .forEach((emp: any) => {
             atividades.push({
-              id: `emp-${emp.id}`,
+              id: `emp-${emp.loanCode || emp.id}`,
               acao: "Empréstimo realizado",
-              usuario: emp.userName || "Usuário",
+              usuario:
+                emp.userName || emp.userId || "Usuário",
               timestamp:
                 emp.loanDate || new Date().toISOString(),
               tipo: "emprestimo",
@@ -317,26 +282,90 @@ export const dashboardService = {
       }
 
       // Buscar reservas recentes
-      const reservasResponse = await api.get(
-        API_ENDPOINTS.RESERVAS.BY_USER
-      );
-      if (Array.isArray(reservasResponse.data)) {
-        reservasResponse.data
-          .slice(0, 2)
-          .forEach((res: any) => {
-            atividades.push({
-              id: `res-${res.id}`,
-              acao:
-                res.status === "ATIVA"
-                  ? "Reserva aprovada"
-                  : "Reserva criada",
-              usuario: res.userName || "Usuário",
-              timestamp:
-                res.reservationDate ||
-                new Date().toISOString(),
-              tipo: "reserva",
+      if (isPrivileged) {
+        if (this._reservesSupported === false) {
+          const aggregated =
+            await this._fetchReservesByAllUsers();
+          if (Array.isArray(aggregated)) {
+            aggregated.slice(0, 2).forEach((res: any) => {
+              atividades.push({
+                id: `res-${res.id}`,
+                acao:
+                  res.status === "ATIVA"
+                    ? "Reserva aprovada"
+                    : "Reserva criada",
+                usuario:
+                  res.userName || res.userId || "Usuário",
+                timestamp:
+                  res.reservationDate ||
+                  new Date().toISOString(),
+                tipo: "reserva",
+              });
             });
-          });
+          }
+        } else {
+          try {
+            const reservasResponse = await api.get(
+              API_ENDPOINTS.RESERVAS.BASE
+            );
+            const reservasArray = Array.isArray(
+              reservasResponse.data
+            )
+              ? reservasResponse.data
+              : reservasResponse.data?.content || [];
+            reservasArray.slice(0, 2).forEach((res: any) => {
+              atividades.push({
+                id: `res-${res.id}`,
+                acao:
+                  res.status === "ATIVA"
+                    ? "Reserva aprovada"
+                    : "Reserva criada",
+                usuario:
+                  res.userName || res.userId || "Usuário",
+                timestamp:
+                  res.reservationDate ||
+                  new Date().toISOString(),
+                tipo: "reserva",
+              });
+            });
+            this._reservesSupported = true;
+          } catch (err: any) {
+            if (err?.response?.status === 405) {
+              console.warn(
+                "GET /reserves não permitido pelo backend - pulando atividades de reservas globais"
+              );
+              this._reservesSupported = false;
+            } else {
+              console.error(
+                "Erro ao buscar reservas globais:",
+                err
+              );
+            }
+          }
+        }
+      } else {
+        const reservasResponse = await api.get(
+          API_ENDPOINTS.RESERVAS.BY_USER
+        );
+        if (Array.isArray(reservasResponse.data)) {
+          reservasResponse.data
+            .slice(0, 2)
+            .forEach((res: any) => {
+              atividades.push({
+                id: `res-${res.id}`,
+                acao:
+                  res.status === "ATIVA"
+                    ? "Reserva aprovada"
+                    : "Reserva criada",
+                usuario:
+                  res.userName || res.userId || "Usuário",
+                timestamp:
+                  res.reservationDate ||
+                  new Date().toISOString(),
+                tipo: "reserva",
+              });
+            });
+        }
       }
 
       // Ordenar por timestamp (mais recente primeiro)
@@ -362,109 +391,7 @@ export const dashboardService = {
   async getAtividadesRecentesGlobal(): Promise<
     AtividadeRecente[]
   > {
-    try {
-      const atividades: AtividadeRecente[] = [];
-
-      // Buscar últimos empréstimos do sistema
-      const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BASE
-      );
-      const emprestimosArray = Array.isArray(
-        emprestimosResponse.data
-      )
-        ? emprestimosResponse.data
-        : emprestimosResponse.data?.content || [];
-
-      emprestimosArray.slice(0, 4).forEach((emp: any) => {
-        atividades.push({
-          id: `emp-${emp.loanCode || emp.id}`,
-          acao: "Empréstimo registrado",
-          usuario: emp.userName || emp.userId || "Usuário",
-          timestamp:
-            emp.loanDate || new Date().toISOString(),
-          tipo: "emprestimo",
-        });
-      });
-
-      // Buscar últimas reservas do sistema
-      // Tratar caso em que GET /reserves não esteja disponível (405)
-      // If previously detected unsupported, use per-user aggregation as fallback
-      if (this._reservesSupported === false) {
-        const aggregated =
-          await this._fetchReservesByAllUsers();
-        const reservasArray = Array.isArray(aggregated)
-          ? aggregated
-          : [];
-        reservasArray.slice(0, 4).forEach((res: any) => {
-          atividades.push({
-            id: `res-${res.id}`,
-            acao:
-              res.status === "ATIVA"
-                ? "Reserva aprovada"
-                : "Reserva criada",
-            usuario:
-              res.userName || res.userId || "Usuário",
-            timestamp:
-              res.reservationDate ||
-              new Date().toISOString(),
-            tipo: "reserva",
-          });
-        });
-      } else {
-        try {
-          const reservasResponse = await api.get(
-            API_ENDPOINTS.RESERVAS.BASE
-          );
-          const reservasArray = Array.isArray(
-            reservasResponse.data
-          )
-            ? reservasResponse.data
-            : reservasResponse.data?.content || [];
-
-          reservasArray.slice(0, 4).forEach((res: any) => {
-            atividades.push({
-              id: `res-${res.id}`,
-              acao:
-                res.status === "ATIVA"
-                  ? "Reserva aprovada"
-                  : "Reserva criada",
-              usuario:
-                res.userName || res.userId || "Usuário",
-              timestamp:
-                res.reservationDate ||
-                new Date().toISOString(),
-              tipo: "reserva",
-            });
-          });
-          this._reservesSupported = true;
-        } catch (err: any) {
-          if (err?.response?.status === 405) {
-            console.warn(
-              "GET /reserves não permitido pelo backend - pulando atividades de reservas globais"
-            );
-            this._reservesSupported = false;
-          } else {
-            console.error(
-              "Erro ao buscar reservas globais:",
-              err
-            );
-          }
-        }
-      }
-
-      atividades.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() -
-          new Date(a.timestamp).getTime()
-      );
-      return atividades.slice(0, 6);
-    } catch (error) {
-      console.error(
-        "Erro ao buscar atividades globais:",
-        error
-      );
-      return [];
-    }
+    return this.getAtividadesRecentes("ADMIN");
   },
 
   /**
