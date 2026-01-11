@@ -42,10 +42,8 @@ export function CadastroCursos() {
   const fetchCursos = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(
-        API_ENDPOINTS.CURSOS.BASE
-      );
-      setCursos(response.data);
+      const response = await cursosService.listarTodos();
+      setCursos(response);
     } catch (error: any) {
       toast.error("Erro ao carregar cursos");
       console.error("Erro ao buscar cursos:", error);
@@ -72,9 +70,7 @@ export function CadastroCursos() {
     if (!cursoToDelete) return;
 
     try {
-      await api.delete(
-        `${API_ENDPOINTS.CURSOS.BASE}/${cursoToDelete.courseCode}`
-      );
+      await cursosService.deletar(cursoToDelete.courseCode);
       toast.success("Curso excluído com sucesso!");
       fetchCursos();
     } catch (error: any) {

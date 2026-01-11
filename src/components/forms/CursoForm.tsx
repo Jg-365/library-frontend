@@ -43,7 +43,7 @@ export function CursoForm({
     setIsSubmitting(true);
     try {
       if (isEditing) {
-        await api.patch(API_ENDPOINTS.CURSOS.BASE, {
+        await cursosService.atualizar({
           courseCode: curso.courseCode,
           courseName: data.courseName,
         });
