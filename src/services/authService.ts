@@ -1,8 +1,46 @@
 import { api } from "./api";
 import type { LoginRequest, RegisterRequest } from "@/types/Auth";
-import type { Usuario } from "@/types/Usuario";
+import type {
+  TipoAcesso,
+  TipoUsuario,
+  Usuario,
+} from "@/types/Usuario";
 import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
+
+interface UserResponse {
+  enrollment: number;
+  role: TipoAcesso;
+  userType: TipoUsuario;
+  name: string;
+  username: string;
+  address: string;
+  active: boolean;
+  id?: number;
+  nome?: string;
+  email?: string;
+  perfil?: TipoAcesso;
+  ativo?: boolean;
+}
+
+function mapUserResponseToUsuario(
+  userData: UserResponse
+): Usuario {
+  return {
+    enrollment: userData.enrollment,
+    role: userData.role,
+    userType: userData.userType,
+    name: userData.name,
+    username: userData.username,
+    address: userData.address,
+    active: userData.active,
+    id: userData.id,
+    nome: userData.name ?? userData.nome,
+    email: userData.email ?? userData.username,
+    perfil: userData.role ?? userData.perfil,
+    ativo: userData.active ?? userData.ativo,
+  };
+}
 
 // Função para decodificar JWT
 function decodeJWT(token: string): any {
@@ -90,25 +128,26 @@ export const authService = {
         "🔄 Chamando GET",
         API_ENDPOINTS.USUARIOS.ME
       );
-      const userResponse = await api.get<any>(
+      const userResponse = await api.get<UserResponse>(
         API_ENDPOINTS.USUARIOS.ME
       );
 
-      const userData = userResponse.data;
+      const userData = mapUserResponseToUsuario(
+        userResponse.data
+      );
       console.log(
         "✅ Dados do usuário recebidos:",
         userData
       );
 
       const user: Usuario = {
-        id: userData.id || decoded.sub,
-        nome: userData.name || userData.nome || decoded.sub,
-        email: userData.email || decoded.sub,
-        perfil: perfil,
-        enrollment:
-          userData.enrollment || userData.matricula, // Matrícula numérica do backend
-        username: decoded.sub,
-      } as Usuario;
+        ...userData,
+        id: userData.id ?? decoded.sub,
+        nome: userData.name ?? decoded.sub,
+        email: userData.email ?? decoded.sub,
+        perfil: userData.role ?? perfil,
+        username: userData.username ?? decoded.sub,
+      };
 
       console.log("👤 Usuário final:", user);
       console.log(
@@ -147,6 +186,13 @@ export const authService = {
 
       return { user, token: accessToken };
     }
+  },
+
+  getMe: async (): Promise<Usuario> => {
+    const response = await api.get<UserResponse>(
+      API_ENDPOINTS.USUARIOS.ME
+    );
+    return mapUserResponseToUsuario(response.data);
   },
 
   logout: async () => {
