@@ -214,7 +214,7 @@ export function CadastroEdicao() {
         />
         <Card className="shadow-lg">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="text-xl flex items-center gap-2 mb-2">
                   <BookOpen className="h-5 w-5 text-blue-600" />
@@ -227,7 +227,10 @@ export function CadastroEdicao() {
                     : "livros encontrados"}
                 </CardDescription>
               </div>
-              <Button onClick={handleNew} className="gap-2">
+              <Button
+                onClick={handleNew}
+                className="w-full gap-2 sm:w-auto"
+              >
                 <Plus className="h-4 w-4" />
                 Novo Livro
               </Button>

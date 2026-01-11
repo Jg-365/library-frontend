@@ -357,7 +357,7 @@ export function CadastroCategorias() {
           backTo={getBasePath()}
         />
         {/* Título e Botão de Adicionar */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
               <FolderTree className="text-blue-600" />
@@ -368,7 +368,11 @@ export function CadastroCategorias() {
               sistema
             </p>
           </div>
-          <Button onClick={handleNovaCategoria} size="lg">
+          <Button
+            onClick={handleNovaCategoria}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
             <Plus className="mr-2 h-5 w-5" />
             Nova Categoria
           </Button>
@@ -394,11 +398,12 @@ export function CadastroCategorias() {
                   setDescricaoBusca(event.target.value)
                 }
               />
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleBuscarCategorias}
+                  className="w-full sm:w-auto"
                 >
                   Buscar
                 </Button>
@@ -406,6 +411,7 @@ export function CadastroCategorias() {
                   type="button"
                   variant="ghost"
                   onClick={handleLimparBusca}
+                  className="w-full sm:w-auto"
                 >
                   Limpar
                 </Button>
@@ -423,7 +429,7 @@ export function CadastroCategorias() {
         {/* Tabela de Subcategorias */}
         <Card className="shadow-lg">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <List className="h-5 w-5" />
@@ -436,7 +442,10 @@ export function CadastroCategorias() {
                     : "subcategorias encontradas"}
                 </CardDescription>
               </div>
-              <Button onClick={handleNovaSubcategoria}>
+              <Button
+                onClick={handleNovaSubcategoria}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Subcategoria
               </Button>
