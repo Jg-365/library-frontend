@@ -7,6 +7,7 @@ import type {
 } from "@/types/Usuario";
 import type { CreateUsuarioPayload } from "@/types";
 import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
+import { usuariosService } from "@/services/usuariosService";
 
 interface UserResponse {
   enrollment: number;
@@ -90,6 +91,10 @@ export const authService = {
       Object.keys(decoded || {})
     );
 
+    if (!decoded) {
+      throw new Error("Token JWT inválido ou não decodificável.");
+    }
+
     // Normaliza o perfil baseado na role do JWT
     // Tenta pegar de roles, role, ou authorities
     let perfil = "ALUNO"; // Default
@@ -113,28 +118,48 @@ export const authService = {
 
     console.log("👔 Perfil do JWT:", perfil);
 
+    const enrollmentFromToken = (() => {
+      const rawEnrollment =
+        decoded.enrollment ?? decoded.sub;
+      if (typeof rawEnrollment === "number") {
+        return String(rawEnrollment);
+      }
+      if (typeof rawEnrollment === "string") {
+        const trimmed = rawEnrollment.trim();
+        if (/^\d+$/.test(trimmed)) {
+          return trimmed;
+        }
+      }
+      return null;
+    })();
+
+    if (!enrollmentFromToken) {
+      throw new Error(
+        "Token JWT não contém matrícula válida."
+      );
+    }
+
     // Configura o token no header para as próximas requisições
     api.defaults.headers.common[
       "Authorization"
     ] = `Bearer ${accessToken}`;
 
-    // Busca dados completos do usuário via endpoint /users/me
+    // Busca dados completos do usuário via enrollment
     console.log(
-      "🔍 Buscando dados do usuário autenticado..."
+      "🔍 Buscando dados do usuário via matrícula..."
     );
 
     try {
       console.log(
         "🔄 Chamando GET",
-        API_ENDPOINTS.USUARIOS.ME
+        API_ENDPOINTS.USUARIOS.BY_ENROLLMENT(
+          enrollmentFromToken
+        )
       );
-      const userResponse = await api.get<UserResponse>(
-        API_ENDPOINTS.USUARIOS.ME
-      );
-
-      const userData = mapUserResponseToUsuario(
-        userResponse.data
-      );
+      const userData =
+        await usuariosService.buscarPorEnrollment(
+          enrollmentFromToken
+        );
       console.log(
         "✅ Dados do usuário recebidos:",
         userData
@@ -142,11 +167,17 @@ export const authService = {
 
       const user: Usuario = {
         ...userData,
+        enrollment: Number(enrollmentFromToken),
+        role: userData.role ?? perfil,
+        userType:
+          userData.userType ??
+          decoded.userType ??
+          "ALUNO",
         id: userData.id ?? decoded.sub,
-        nome: userData.name ?? decoded.sub,
-        email: userData.email ?? decoded.sub,
+        nome: userData.name ?? userData.nome,
+        email: userData.email ?? userData.username,
         perfil: userData.role ?? perfil,
-        username: userData.username ?? decoded.sub,
+        username: userData.username ?? userData.email,
       };
 
       console.log("👤 Usuário final:", user);
