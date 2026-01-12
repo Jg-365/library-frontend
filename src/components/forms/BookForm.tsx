@@ -345,6 +345,27 @@ export function BookForm({
         )
       );
 
+      if (!data.subcategoriaId) {
+        form.setError("subcategoriaId", {
+          type: "manual",
+          message: "Subcategoria é obrigatória",
+        });
+        toast.error("Selecione uma subcategoria");
+        return;
+      }
+
+      if (!emailAuthor) {
+        form.setError("autores", {
+          type: "manual",
+          message:
+            "Autor principal precisa ter um email válido",
+        });
+        toast.error(
+          "Autor principal precisa ter um email válido"
+        );
+        return;
+      }
+
       if (livro) {
         // Editar livro existente
         // Nota: ISBN não pode ser alterado (chave primária imutável)
@@ -370,7 +391,7 @@ export function BookForm({
           title: data.titulo,
           releaseYear: data.ano,
           publisher: data.editora,
-          subCategoryId: data.subcategoriaId,
+          subcategoriaId: data.subcategoriaId,
           emailAuthor,
           coAuthorsEmails,
         };

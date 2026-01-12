@@ -146,9 +146,15 @@ export const livrosService = {
    * POST /books
    */
   async criar(payload: BookRequest): Promise<Livro> {
+    const { subCategoryId, subcategoriaId, ...rest } =
+      payload;
+    const idSubCategory = subCategoryId ?? subcategoriaId;
     const response = await api.post<BookResponse>(
       API_ENDPOINTS.LIVROS.CREATE,
-      payload
+      {
+        ...rest,
+        idSubCategory,
+      }
     );
     livrosService._cache.clear();
     return mapBookResponseToLivro(response.data);
