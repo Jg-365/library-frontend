@@ -153,6 +153,12 @@ function AdminDashboard() {
       href: "/admin/cursos",
     },
     {
+      title: "Professores por Curso",
+      description: "Buscar docentes por curso cadastrado",
+      icon: Users,
+      href: "/admin/professores-por-curso",
+    },
+    {
       title: "Minhas Reservas",
       description:
         "Ver e gerenciar suas reservas de livros",

@@ -7,6 +7,7 @@ export { CadastroEdicao } from "./CadastroEdicao";
 export { CadastroCategorias } from "./CadastroCategorias";
 export { CadastroUsuarios } from "./CadastroUsuarios";
 export { CadastroCursos } from "./CadastroCursos";
+export { ProfessoresPorCurso } from "./ProfessoresPorCurso";
 export { CadastroEmprestimos } from "./CadastroEmprestimos";
 export { CadastroDevolucoes } from "./CadastroDevolucoes";
 export { default as Relatorios } from "./Relatorios";

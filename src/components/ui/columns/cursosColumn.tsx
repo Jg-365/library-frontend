@@ -12,17 +12,20 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
+  Users,
 } from "lucide-react";
 import type { Curso } from "@/types";
 
 interface CreateCursoColumnProps {
   onEdit: (curso: Curso) => void;
   onDelete: (curso: Curso) => void;
+  onViewTeachers?: (curso: Curso) => void;
 }
 
 export function createCursoColumn({
   onEdit,
   onDelete,
+  onViewTeachers,
 }: CreateCursoColumnProps): ColumnDef<Curso>[] {
   return [
     {
@@ -63,6 +66,15 @@ export function createCursoColumn({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {onViewTeachers && (
+                <DropdownMenuItem
+                  onClick={() => onViewTeachers(curso)}
+                  className="cursor-pointer"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Ver professores
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => onEdit(curso)}
                 className="cursor-pointer"

@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import { DataTable } from "@/components/main/data-table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   CustomModal,
   CustomModalContent,
@@ -38,6 +40,8 @@ export function CadastroCursos() {
     useState<Curso | null>(null);
   const [cursoToDelete, setCursoToDelete] =
     useState<Curso | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const fetchCursos = async () => {
     try {
@@ -99,7 +103,32 @@ export function CadastroCursos() {
   const columns = createCursoColumn({
     onEdit: handleEdit,
     onDelete: handleDelete,
+    onViewTeachers: (curso) => {
+      navigate(
+        `/admin/professores-por-curso?courseName=${encodeURIComponent(
+          curso.courseName
+        )}`
+      );
+    },
   });
+
+  const filteredCursos = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return cursos;
+    }
+    const normalizedTerm = searchTerm
+      .trim()
+      .toLowerCase();
+    return cursos.filter((curso) => {
+      const nameMatch = curso.courseName
+        .toLowerCase()
+        .includes(normalizedTerm);
+      const codeMatch = String(curso.courseCode).includes(
+        normalizedTerm
+      );
+      return nameMatch || codeMatch;
+    });
+  }, [cursos, searchTerm]);
 
   return (
     <PageLayout perfil="ADMIN">
@@ -121,17 +150,60 @@ export function CadastroCursos() {
               instituição
             </p>
           </div>
-          <Button
-            onClick={handleNewCurso}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700 sm:w-auto"
-          >
-            <GraduationCap className="h-5 w-5 mr-2" />
-            Novo Curso
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button
+              variant="outline"
+              asChild
+              className="w-full sm:w-auto"
+            >
+              <Link to="/admin/professores-por-curso">
+                Buscar professores
+              </Link>
+            </Button>
+            <Button
+              onClick={handleNewCurso}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700 sm:w-auto"
+            >
+              <GraduationCap className="h-5 w-5 mr-2" />
+              Novo Curso
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="flex-1">
+              <label
+                htmlFor="curso-search"
+                className="text-sm font-medium text-gray-700"
+              >
+                Buscar cursos
+              </label>
+              <Input
+                id="curso-search"
+                placeholder="Digite o nome ou ID do curso"
+                value={searchTerm}
+                onChange={(event) =>
+                  setSearchTerm(event.target.value)
+                }
+                className="mt-2"
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setSearchTerm("")}
+              className="w-full md:w-auto"
+            >
+              Limpar filtros
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg">
-          <DataTable columns={columns} data={cursos} />
+          <DataTable
+            columns={columns}
+            data={filteredCursos}
+          />
         </div>
 
         {/* Dialog de Cadastro/Edição */}
