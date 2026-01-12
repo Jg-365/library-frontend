@@ -147,6 +147,19 @@ export const API_ENDPOINTS = {
 };
 ```
 
+### 📑 Relatórios
+
+No momento não existe um endpoint dedicado de relatórios no backend.
+Os relatórios são gerados no frontend agregando dados reais dos seguintes endpoints:
+
+- `GET /loans/users` (empréstimos)
+- `GET /users/all` (apenas ADMIN/BIBLIOTECARIO) ou `GET /users/me` (usuário padrão)
+- `GET /books` (acervo)
+- `GET /reserves/users` (reservas)
+
+Caso o backend venha a disponibilizar um endpoint dedicado (ex.: `GET /reports`),
+atualize o `reportsService` e o `Relatorios.tsx` para consumir a rota diretamente.
+
 ---
 
 ## 🔑 Chaves do LocalStorage

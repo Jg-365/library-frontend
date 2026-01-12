@@ -24,3 +24,4 @@ export { reservasService } from "./reservasService";
 export { copiasService } from "./copiasService";
 export { usuariosService } from "./usuariosService";
 export { telefonesService } from "./telefonesService";
+export { reportsService } from "./reportsService";
