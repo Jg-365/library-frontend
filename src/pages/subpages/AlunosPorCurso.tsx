@@ -18,7 +18,7 @@ import { cursosService, usuariosService } from "@/services";
 import type { Curso, Usuario } from "@/types";
 import { getErrorMessage } from "@/lib/errorMessage";
 
-const professorColumns: ColumnDef<Usuario>[] = [
+const alunoColumns: ColumnDef<Usuario>[] = [
   {
     accessorKey: "enrollment",
     header: "Matrícula",
@@ -47,29 +47,27 @@ const professorColumns: ColumnDef<Usuario>[] = [
     ),
   },
   {
-    accessorKey: "workRegime",
-    header: "Regime",
+    accessorKey: "ingressDate",
+    header: "Ingresso",
     cell: ({ row }) => (
       <div className="text-sm text-gray-600 dark:text-slate-300">
-        {row.original.workRegime ?? "--"}
+        {row.original.ingressDate ?? "--"}
       </div>
     ),
   },
 ];
 
-export function ProfessoresPorCurso() {
+export function AlunosPorCurso() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [selectedCourseName, setSelectedCourseName] =
     useState("");
   const [selectedCourseCode, setSelectedCourseCode] =
     useState<number | null>(null);
-  const [professores, setProfessores] = useState<Usuario[]>(
-    []
-  );
+  const [alunos, setAlunos] = useState<Usuario[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingCursos, setLoadingCursos] =
     useState(true);
-  const [loadingProfessores, setLoadingProfessores] =
+  const [loadingAlunos, setLoadingAlunos] =
     useState(false);
   const [searchParams, setSearchParams] =
     useSearchParams();
@@ -112,56 +110,54 @@ export function ProfessoresPorCurso() {
   }, [cursos, selectedCourseName]);
 
   useEffect(() => {
-    const fetchProfessores = async () => {
+    const fetchAlunos = async () => {
       if (!selectedCourseName) {
-        setProfessores([]);
+        setAlunos([]);
         return;
       }
 
       try {
-        setLoadingProfessores(true);
+        setLoadingAlunos(true);
         const response =
-          await usuariosService.listarProfessoresPorCurso(
+          await usuariosService.listarAlunosPorCurso(
             selectedCourseName,
             selectedCourseCode ?? undefined
           );
-        setProfessores(response.content ?? []);
+        setAlunos(response.content ?? []);
       } catch (error: any) {
         const message = getErrorMessage(
           error.response?.data?.message,
-          "Erro ao buscar professores"
+          "Erro ao buscar alunos"
         );
         toast.error(message);
-        setProfessores([]);
+        setAlunos([]);
       } finally {
-        setLoadingProfessores(false);
+        setLoadingAlunos(false);
       }
     };
 
-    fetchProfessores();
+    fetchAlunos();
   }, [selectedCourseName, selectedCourseCode]);
 
-  const filteredProfessores = useMemo(() => {
+  const filteredAlunos = useMemo(() => {
     if (!searchTerm.trim()) {
-      return professores;
+      return alunos;
     }
 
     const normalizedTerm = searchTerm
       .trim()
       .toLowerCase();
-    return professores.filter((professor) => {
-      const name = professor.name ?? professor.nome ?? "";
-      const email =
-        professor.username ?? professor.email ?? "";
-      const enrollment =
-        professor.enrollment ?? professor.id ?? "";
+    return alunos.filter((aluno) => {
+      const name = aluno.name ?? aluno.nome ?? "";
+      const email = aluno.username ?? aluno.email ?? "";
+      const enrollment = aluno.enrollment ?? aluno.id ?? "";
       return (
         String(name).toLowerCase().includes(normalizedTerm) ||
         String(email).toLowerCase().includes(normalizedTerm) ||
         String(enrollment).includes(normalizedTerm)
       );
     });
-  }, [professores, searchTerm]);
+  }, [alunos, searchTerm]);
 
   const handleCourseChange = (value: string) => {
     setSelectedCourseName(value);
@@ -190,18 +186,17 @@ export function ProfessoresPorCurso() {
           items={[
             { label: "Início", href: "/admin" },
             { label: "Cursos", href: "/admin/cursos" },
-            { label: "Professores por curso" },
+            { label: "Alunos por curso" },
           ]}
           backTo="/admin/cursos"
         />
 
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Professores por Curso
+            Alunos por Curso
           </h1>
           <p className="text-gray-600 mt-1 dark:text-slate-300">
-            Selecione um curso e filtre os professores
-            vinculados.
+            Selecione um curso e filtre os alunos vinculados.
           </p>
         </div>
 
@@ -239,13 +234,13 @@ export function ProfessoresPorCurso() {
             </div>
             <div className="flex flex-col gap-2">
               <label
-                htmlFor="professor-search"
+                htmlFor="aluno-search"
                 className="text-sm font-medium text-gray-700 dark:text-slate-200"
               >
-                Buscar professor
+                Buscar aluno
               </label>
               <Input
-                id="professor-search"
+                id="aluno-search"
                 placeholder="Nome, email ou matrícula"
                 value={searchTerm}
                 onChange={(event) =>
@@ -264,20 +259,16 @@ export function ProfessoresPorCurso() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg dark:bg-slate-900 dark:text-slate-100">
-          {loadingProfessores ? (
+          {loadingAlunos ? (
             <div className="py-12 text-center text-gray-600 dark:text-slate-300">
-              Buscando professores...
+              Buscando alunos...
             </div>
           ) : !selectedCourseName ? (
             <div className="py-12 text-center text-gray-600 dark:text-slate-300">
-              Selecione um curso para visualizar os
-              professores.
+              Selecione um curso para visualizar os alunos.
             </div>
           ) : (
-            <DataTable
-              columns={professorColumns}
-              data={filteredProfessores}
-            />
+            <DataTable columns={alunoColumns} data={filteredAlunos} />
           )}
         </div>
       </div>

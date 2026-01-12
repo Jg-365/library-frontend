@@ -11,6 +11,7 @@ export interface Emprestimo {
   dataEmprestimo?: string;
   dataPrevistaDevolucao: string; // expectedReturnDate (ISO Date)
   dataDevolucaoReal?: string; // returnDate (ISO Date, null se não devolvido)
+  returnDate?: string | null;
   copyCodes: string[]; // IDs das cópias físicas emprestadas
   status: "ATIVO" | "DEVOLVIDO" | "ATRASADO"; // Calculado pelo frontend
 

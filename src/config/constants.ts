@@ -102,6 +102,8 @@ export const API_ENDPOINTS = {
       `/users/employee/${enrollment}`,
     DELETE: (enrollment: string) => `/users/${enrollment}`,
     TEACHERS_BY_COURSE: "/users/teachers/by-course",
+    STUDENTS_BY_COURSE: "/users/students/by-course",
+    USERS_BY_COURSE: "/users/by-course",
   },
 
   // Cursos (Courses)

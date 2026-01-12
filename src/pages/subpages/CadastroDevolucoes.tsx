@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { PageLayout } from "@/components/layouts";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,13 @@ import { getErrorMessage } from "@/lib/errorMessage";
 import type { Emprestimo } from "@/types";
 
 export function CadastroDevolucoes() {
+  const location = useLocation();
+  const perfil = location.pathname.startsWith("/admin")
+    ? "ADMIN"
+    : "BIBLIOTECARIO";
+  const basePath = location.pathname.startsWith("/admin")
+    ? "/admin/dashboard"
+    : "/bibliotecario/dashboard";
   const [emprestimos, setEmprestimos] = useState<
     Emprestimo[]
   >([]);
@@ -140,7 +148,21 @@ export function CadastroDevolucoes() {
 
       setEmprestimoSelecionado(null);
       if (hasSuccess) {
-        fetchEmprestimos();
+        const nowIso = new Date().toISOString();
+        setEmprestimos((prev) =>
+          prev.map((emprestimo) =>
+            emprestimo.id === emprestimoSelecionado.id
+              ? {
+                  ...emprestimo,
+                  returnDate: nowIso,
+                  dataDevolucaoReal:
+                    emprestimo.dataDevolucaoReal ??
+                    nowIso,
+                  status: "DEVOLVIDO",
+                }
+              : emprestimo
+          )
+        );
       }
     } catch (error: any) {
       const message = getErrorMessage(
@@ -170,53 +192,54 @@ export function CadastroDevolucoes() {
 
   const emprestimosPendentes = emprestimos.filter(
     (emprestimo) =>
-      emprestimo.returnDate == null ||
-      emprestimo.status === "ATIVO"
+      emprestimo.returnDate == null &&
+      (emprestimo.status === "ATIVO" ||
+        emprestimo.status === "ATRASADO")
   );
   const emprestimosDevolvidos = emprestimos.filter(
     (emprestimo) =>
-      emprestimo.returnDate != null &&
-      emprestimo.status !== "ATIVO"
+      emprestimo.returnDate != null ||
+      emprestimo.status === "DEVOLVIDO"
   );
 
   return (
-    <PageLayout perfil="BIBLIOTECARIO">
+    <PageLayout perfil={perfil}>
       <div className="w-full max-w-7xl mx-auto">
         <PageBreadcrumb
           items={[
             {
               label: "Início",
-              href: "/bibliotecario/dashboard",
+              href: basePath,
             },
             { label: "Devoluções" },
           ]}
-          backTo="/bibliotecario/dashboard"
+          backTo={basePath}
         />
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Registro de Devoluções
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 mt-1 dark:text-slate-300">
             Registre as devoluções de livros emprestados
           </p>
         </div>
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-slate-300">
               Carregando empréstimos...
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             {emprestimosPendentes.length === 0 ? (
-              <Card className="shadow-lg">
+              <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
                 <CardContent className="py-12 text-center">
-                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-700">
+                  <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-gray-700 dark:text-slate-200">
                     Nenhuma devolução pendente
                   </p>
-                  <p className="text-gray-500 mt-1">
+                  <p className="text-gray-500 mt-1 dark:text-slate-400">
                     Todos os empréstimos ativos já foram devolvidos
                   </p>
                 </CardContent>
@@ -232,12 +255,12 @@ export function CadastroDevolucoes() {
                   return (
                     <Card
                       key={emprestimo.id}
-                      className="shadow-lg"
+                      className="shadow-lg dark:bg-slate-900 dark:text-slate-100"
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             {emprestimo.livro?.titulo ||
                               emprestimo.livros?.[0]?.titulo ||
                               "Livro não informado"}
@@ -246,15 +269,15 @@ export function CadastroDevolucoes() {
                             variant="outline"
                             className={
                               atrasado
-                                ? "bg-red-100 text-red-800 border-red-300"
-                                : "bg-green-100 text-green-800 border-green-300"
+                                ? "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/20 dark:text-red-200 dark:border-red-500/40"
+                                : "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/40"
                             }
                           >
                             {atrasado ? "Atrasado" : "Em dia"}
                           </Badge>
                         </div>
-                        <CardDescription className="flex items-center gap-2 mt-2">
-                          <User className="h-4 w-4" />
+                        <CardDescription className="flex items-center gap-2 mt-2 text-gray-600 dark:text-slate-300">
+                          <User className="h-4 w-4 text-gray-500 dark:text-slate-400" />
                           {emprestimo.usuario?.nome ||
                             "Usuário não informado"}
                         </CardDescription>
@@ -262,21 +285,21 @@ export function CadastroDevolucoes() {
                       <CardContent>
                         <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                           <div>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-slate-400">
                               Data Empréstimo
                             </p>
-                            <p className="font-medium">
+                            <p className="font-medium text-gray-900 dark:text-slate-100">
                               {new Date(
                                 emprestimo.dataEmprestimo
                               ).toLocaleDateString("pt-BR")}
                             </p>
                           </div>
                           <div>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-slate-400">
                               Prazo Devolução
                             </p>
-                            <p className="font-medium flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
+                            <p className="font-medium flex items-center gap-1 text-gray-900 dark:text-slate-100">
+                              <Calendar className="h-4 w-4 text-gray-500 dark:text-slate-400" />
                               {prazo}
                             </p>
                           </div>
@@ -302,11 +325,11 @@ export function CadastroDevolucoes() {
                 <div className="flex items-center gap-2">
                   <Badge
                     variant="secondary"
-                    className="bg-slate-100 text-slate-700"
+                    className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
                   >
                     Devolvidos
                   </Badge>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-slate-400">
                     {emprestimosDevolvidos.length} concluído(s)
                   </span>
                 </div>
@@ -314,25 +337,25 @@ export function CadastroDevolucoes() {
                   {emprestimosDevolvidos.map((emprestimo) => (
                     <Card
                       key={emprestimo.id}
-                      className="shadow-lg"
+                      className="shadow-lg dark:bg-slate-900 dark:text-slate-100"
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             {emprestimo.livro?.titulo ||
                               emprestimo.livros?.[0]?.titulo ||
                               "Livro não informado"}
                           </CardTitle>
                           <Badge
                             variant="outline"
-                            className="bg-slate-100 text-slate-700 border-slate-200"
+                            className="bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
                           >
                             Devolvido
                           </Badge>
                         </div>
-                        <CardDescription className="flex items-center gap-2 mt-2">
-                          <User className="h-4 w-4" />
+                        <CardDescription className="flex items-center gap-2 mt-2 text-gray-600 dark:text-slate-300">
+                          <User className="h-4 w-4 text-gray-500 dark:text-slate-400" />
                           {emprestimo.usuario?.nome ||
                             "Usuário não informado"}
                         </CardDescription>
@@ -340,20 +363,20 @@ export function CadastroDevolucoes() {
                       <CardContent>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-slate-400">
                               Data Empréstimo
                             </p>
-                            <p className="font-medium">
+                            <p className="font-medium text-gray-900 dark:text-slate-100">
                               {new Date(
                                 emprestimo.dataEmprestimo
                               ).toLocaleDateString("pt-BR")}
                             </p>
                           </div>
                           <div>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-slate-400">
                               Data Devolução
                             </p>
-                            <p className="font-medium">
+                            <p className="font-medium text-gray-900 dark:text-slate-100">
                               {emprestimo.returnDate
                                 ? new Date(
                                     emprestimo.returnDate
