@@ -145,7 +145,7 @@ export function CadastroCursos() {
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Gerenciamento de Cursos
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 mt-1 dark:text-slate-300">
               Cadastre e gerencie os cursos oferecidos pela
               instituição
             </p>
@@ -170,12 +170,12 @@ export function CadastroCursos() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-4 dark:bg-slate-900 dark:text-slate-100">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="flex-1">
               <label
                 htmlFor="curso-search"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 dark:text-slate-200"
               >
                 Buscar cursos
               </label>
@@ -199,7 +199,7 @@ export function CadastroCursos() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg">
+        <div className="bg-white rounded-lg shadow-lg dark:bg-slate-900 dark:text-slate-100">
           <DataTable
             columns={columns}
             data={filteredCursos}

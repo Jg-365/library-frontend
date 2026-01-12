@@ -91,7 +91,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Logo/Header */}
         <div className="text-center space-y-2">
@@ -101,13 +101,13 @@ export function LoginForm() {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Biblioteca Virtual
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300">
             Acesse sua conta para continuar
           </p>
         </div>
 
         {/* Login Card */}
-        <Card className="border-0 shadow-2xl backdrop-blur-sm bg-white/80">
+        <Card className="border-0 shadow-2xl backdrop-blur-sm bg-white/80 dark:bg-slate-900/70 dark:text-slate-100">
           <CardContent className="space-y-4">
             {/* Error Alert */}
             {error && (
@@ -137,7 +137,7 @@ export function LoginForm() {
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                           <Input
                             placeholder="Digite seu email ou usuário"
                             disabled={isLoading}

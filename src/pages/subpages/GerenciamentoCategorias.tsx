@@ -582,17 +582,17 @@ export function GerenciamentoCategorias() {
                     </div>
 
                     {isExpanded && subs.length > 0 && (
-                      <div className="border-t bg-gray-50 p-4 pl-12 space-y-2">
+                      <div className="border-t bg-gray-50 p-4 pl-12 space-y-2 dark:border-slate-800 dark:bg-slate-900/60">
                         {subs.map((sub) => (
                           <div
                             key={sub.id}
-                            className="flex items-center justify-between p-3 bg-white rounded border"
+                            className="flex items-center justify-between p-3 bg-white rounded border dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                           >
                             <div>
                               <p className="font-medium">
                                 {sub.description}
                               </p>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 dark:text-slate-400">
                                 Categoria: {categoria.description}
                               </p>
                             </div>

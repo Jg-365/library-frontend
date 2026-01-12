@@ -408,9 +408,9 @@ export function BookFilters({
 
       {/* Badges de filtros ativos - Responsivo e organizado */}
       {activeFiltersCount > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-semibold text-blue-700 flex items-center gap-1">
+            <span className="text-xs font-semibold text-blue-700 flex items-center gap-1 dark:text-blue-200">
               <Filter className="h-3 w-3" />
               Filtros ativos:
             </span>
@@ -426,7 +426,7 @@ export function BookFilters({
                 <Badge
                   key={key}
                   variant="secondary"
-                  className="gap-1.5 bg-white border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors pl-2.5 pr-2 py-1"
+                  className="gap-1.5 bg-white border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors pl-2.5 pr-2 py-1 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-200 dark:hover:bg-slate-800"
                 >
                   <span className="text-xs font-medium">
                     {
@@ -454,7 +454,7 @@ export function BookFilters({
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
             >
               Limpar todos
             </Button>

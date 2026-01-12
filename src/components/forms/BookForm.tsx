@@ -480,23 +480,23 @@ export function BookForm({
                 </FormControl>
                 {/* Google Books suggestions dropdown */}
                 {suggestionsLoading && (
-                  <div className="mt-2 text-sm text-gray-500">
+                  <div className="mt-2 text-sm text-gray-500 dark:text-slate-400">
                     Buscando sugestões...
                   </div>
                 )}
                 {googleSuggestions.length > 0 && (
-                  <div className="mt-2 border rounded bg-white shadow-sm max-h-56 overflow-auto">
+                  <div className="mt-2 border rounded bg-white shadow-sm max-h-56 overflow-auto dark:border-slate-700 dark:bg-slate-900">
                     {googleSuggestions.map((sug) => (
                       <button
                         key={sug.id}
                         type="button"
                         onClick={() => applySuggestion(sug)}
-                        className="w-full text-left p-2 hover:bg-gray-50"
+                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800"
                       >
                         <div className="font-medium">
                           {sug.title}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-slate-400">
                           {(sug.authors || []).join(", ")}
                           {sug.isbn ? ` • ${sug.isbn}` : ""}
                         </div>

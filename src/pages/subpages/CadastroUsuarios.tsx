@@ -167,11 +167,11 @@ export function CadastroUsuarios() {
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Gerenciamento de Usuários
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 mt-1 dark:text-slate-300">
               Cadastre e gerencie professores, alunos e
               bibliotecários
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 mt-1 dark:text-slate-400">
               Total de usuários: {totalUsuarios}
             </p>
           </div>
@@ -184,7 +184,7 @@ export function CadastroUsuarios() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg">
+        <div className="bg-white rounded-lg shadow-lg dark:bg-slate-900 dark:text-slate-100">
           <DataTable columns={columns} data={usuarios} />
         </div>
 

@@ -74,7 +74,7 @@ export function BookCard({
           <div className="absolute bottom-3 left-3">
             <Badge
               variant="secondary"
-              className="bg-white/90 text-gray-800"
+              className="bg-white/90 text-gray-800 dark:bg-slate-900/80 dark:text-slate-100"
             >
               {livro.quantidadeExemplares}{" "}
               {livro.quantidadeExemplares === 1
