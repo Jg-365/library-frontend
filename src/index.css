@@ -95,6 +95,9 @@
       rgba(59, 130, 246, 0.18),
       transparent 50%
     );
+  --scrollbar-track: rgba(15, 23, 42, 0.08);
+  --scrollbar-thumb-base: rgba(14, 165, 233, 0.9);
+  --scrollbar-thumb-hover: rgba(16, 185, 129, 0.95);
 }
 
 .dark {
@@ -149,6 +152,9 @@
       rgba(59, 130, 246, 0.28),
       transparent 50%
     );
+  --scrollbar-track: rgba(15, 23, 42, 0.18);
+  --scrollbar-thumb-base: rgba(94, 165, 255, 0.8);
+  --scrollbar-thumb-hover: rgba(59, 130, 246, 0.9);
 }
 
 @layer base {
@@ -209,6 +215,32 @@
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  *,
+  *::before,
+  *::after {
+    scrollbar-color: var(--scrollbar-thumb-base)
+        var(--scrollbar-track);
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      var(--scrollbar-thumb-base),
+      var(--scrollbar-thumb-hover)
+    );
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
   }
 }
 

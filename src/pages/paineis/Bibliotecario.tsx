@@ -7,6 +7,7 @@ import {
   FileText,
   Calendar,
   BookPlus,
+  BookCheck,
   Tags,
 } from "lucide-react";
 import {
@@ -134,6 +135,13 @@ function BibliotecarioDashboard() {
       description: "Gerenciar empréstimos ativos",
       icon: FileText,
       href: "/bibliotecario/emprestimos",
+    },
+    {
+      title: "Devoluções",
+      description:
+        "Registrar devoluções e atualizar multas",
+      icon: BookCheck,
+      href: "/bibliotecario/devolucoes",
     },
     {
       title: "Minhas Reservas",
@@ -289,6 +297,3 @@ function BibliotecarioDashboard() {
 }
 
 export default BibliotecarioDashboard;
-
-
-

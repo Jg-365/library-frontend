@@ -92,8 +92,12 @@ export const usuarioFormSchema = z
       }
     }
 
-    // Validação condicional para PROFESSOR - campos obrigatórios no banco
-    if (data.tipoUsuario === "PROFESSOR") {
+    // Validação condicional para PROFESSOR e FUNCIONÁRIO - campos obrigatórios no banco
+    const isEmploymentUser =
+      data.tipoUsuario === "PROFESSOR" ||
+      data.tipoUsuario === "FUNCIONARIO";
+
+    if (isEmploymentUser) {
       if (
         !data.dataContratacao ||
         data.dataContratacao === ""
@@ -101,7 +105,7 @@ export const usuarioFormSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            "Data de contratação é obrigatória para professores",
+            "Data de contratação é obrigatória para professores e funcionários",
           path: ["dataContratacao"],
         });
       }
@@ -109,7 +113,7 @@ export const usuarioFormSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            "Regime de trabalho é obrigatório para professores",
+            "Regime de trabalho é obrigatório para professores e funcionários",
           path: ["regimeTrabalho"],
         });
       }

@@ -78,6 +78,8 @@ export function UsuarioForm({
   const tipoUsuarioSelecionado = form.watch("tipoUsuario");
   const tipoUsuarioEdicao =
     usuario?.userType ?? tipoUsuarioSelecionado;
+  const isProfessor = tipoUsuarioEdicao === "PROFESSOR";
+  const isFuncionario = tipoUsuarioEdicao === "FUNCIONARIO";
 
   // Busca cursos ao montar o componente
   useEffect(() => {
@@ -199,12 +201,17 @@ export function UsuarioForm({
           backendPayload.ingressDate = data.dataIngresso;
           backendPayload.graduationDate =
             data.dataFormatura;
-        } else if (data.tipoUsuario === "PROFESSOR") {
-          // courseCode opcional (pode ser null no banco se permitido)
-          if (data.codigoCurso && data.codigoCurso > 0) {
-            backendPayload.courseCode = data.codigoCurso;
+        } else if (
+          data.tipoUsuario === "PROFESSOR" ||
+          data.tipoUsuario === "FUNCIONARIO"
+        ) {
+          if (data.tipoUsuario === "PROFESSOR") {
+            // courseCode opcional (pode ser null no banco se permitido)
+            if (data.codigoCurso && data.codigoCurso > 0) {
+              backendPayload.courseCode = data.codigoCurso;
+            }
           }
-          // Campos obrigatórios para PROFESSOR (validação garante que existem)
+          // Campos obrigatórios para PROFESSORES e FUNCIONÁRIOS (validação garante)
           backendPayload.hireDate = data.dataContratacao;
           const mappedRegime = mapWorkRegime(
             data.regimeTrabalho
@@ -213,7 +220,6 @@ export function UsuarioForm({
             backendPayload.workRegime = mappedRegime;
           }
         }
-        // FUNCIONARIO não precisa de campos adicionais
 
         savedUsuario =
           await usuariosService.criar(backendPayload);
@@ -512,67 +518,67 @@ export function UsuarioForm({
           </>
         )}
 
-        {/* Campos específicos para PROFESSOR */}
-        {tipoUsuarioEdicao === "PROFESSOR" && (
+        {/* Campos específicos para PROFESSOR e FUNCIONÁRIO */}
+        {(isProfessor || isFuncionario) && (
           <>
-            <FormField
-              control={form.control}
-              name="codigoCurso"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Curso (opcional)</FormLabel>
-                  {isLoadingCursos ? (
-                    <div className="text-sm text-muted-foreground py-2">
-                      Carregando cursos...
-                    </div>
-                  ) : cursos.length === 0 ? (
-                    <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
-                      <p className="text-sm text-amber-800 font-medium">
-                        ⚠️ Nenhum curso cadastrado
-                      </p>
-                      <p className="text-xs text-amber-700 mt-1">
-                        Deixe em branco ou cadastre cursos
-                        no sistema
-                      </p>
-                    </div>
-                  ) : (
-                    <Select
-                      onValueChange={(value) => {
-                        if (value === "NONE") {
-                          field.onChange(undefined);
-                          return;
-                        }
-                        field.onChange(parseInt(value));
-                      }}
-                      value={
-                        field.value?.toString() ?? "NONE"
-                      }
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o curso (opcional)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="NONE">
-                          Nenhum
-                        </SelectItem>
-                        {cursos.map((curso) => (
-                          <SelectItem
-                            key={curso.courseCode}
-                            value={curso.courseCode.toString()}
-                          >
-                            {curso.courseName} (Cód.{" "}
-                            {curso.courseCode})
+            {isProfessor && (
+              <FormField
+                control={form.control}
+                name="codigoCurso"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Curso (opcional)</FormLabel>
+                    {isLoadingCursos ? (
+                      <div className="text-sm text-muted-foreground py-2">
+                        Carregando cursos...
+                      </div>
+                    ) : cursos.length === 0 ? (
+                      <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                        <p className="text-sm text-amber-800 font-medium">
+                          ⚠️ Nenhum curso cadastrado
+                        </p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          Deixe em branco ou cadastre cursos
+                          no sistema
+                        </p>
+                      </div>
+                    ) : (
+                      <Select
+                        onValueChange={(value) => {
+                          if (value === "NONE") {
+                            field.onChange(undefined);
+                            return;
+                          }
+                          field.onChange(parseInt(value));
+                        }}
+                        value={field.value?.toString() ?? "NONE"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o curso (opcional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="NONE">
+                            Nenhum
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                          {cursos.map((curso) => (
+                            <SelectItem
+                              key={curso.courseCode}
+                              value={curso.courseCode.toString()}
+                            >
+                              {curso.courseName} (Cód.{" "}
+                              {curso.courseCode})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {!isEditing && (
               <FormField
@@ -627,6 +633,7 @@ export function UsuarioForm({
             />
           </>
         )}
+
 
         {!isEditing && (
           <FormField

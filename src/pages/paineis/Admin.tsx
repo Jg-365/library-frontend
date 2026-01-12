@@ -11,6 +11,7 @@ import {
   Shield,
   FolderTree,
   GraduationCap,
+  BookCheck,
 } from "lucide-react";
 import {
   Card,
@@ -174,6 +175,12 @@ function AdminDashboard() {
         "Ver e gerenciar suas reservas de livros",
       icon: Calendar,
       href: "/admin/reservas",
+    },
+    {
+      title: "Devoluções",
+      description: "Registrar devoluções e aplicar multas",
+      icon: BookCheck,
+      href: "/admin/devolucoes",
     },
     {
       title: "Minhas Reservas",

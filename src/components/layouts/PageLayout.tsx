@@ -21,7 +21,7 @@ export function PageLayout({
     <div className="min-h-screen relative cyber-atlas-surface">
       <main
         className={cn(
-          "mx-auto w-full space-y-6",
+          "mx-auto w-full space-y-6 flex flex-col items-center justify-center",
           className
         )}
       >
