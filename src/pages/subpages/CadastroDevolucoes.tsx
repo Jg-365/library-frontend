@@ -168,6 +168,17 @@ export function CadastroDevolucoes() {
     };
   };
 
+  const emprestimosPendentes = emprestimos.filter(
+    (emprestimo) =>
+      emprestimo.returnDate == null ||
+      emprestimo.status === "ATIVO"
+  );
+  const emprestimosDevolvidos = emprestimos.filter(
+    (emprestimo) =>
+      emprestimo.returnDate != null &&
+      emprestimo.status !== "ATIVO"
+  );
+
   return (
     <PageLayout perfil="BIBLIOTECARIO">
       <div className="w-full max-w-7xl mx-auto">
@@ -196,91 +207,167 @@ export function CadastroDevolucoes() {
               Carregando empréstimos...
             </p>
           </div>
-        ) : emprestimos.length === 0 ? (
-          <Card className="shadow-lg">
-            <CardContent className="py-12 text-center">
-              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-700">
-                Nenhum empréstimo ativo
-              </p>
-              <p className="text-gray-500 mt-1">
-                Todos os livros foram devolvidos
-              </p>
-            </CardContent>
-          </Card>
         ) : (
-          <div className="grid gap-4">
-            {emprestimos.map((emprestimo) => {
-              const { dias, prazo } = calcularDiasRestantes(
-                emprestimo.dataEmprestimo
-              );
-              const atrasado = dias < 0;
+          <div className="space-y-6">
+            {emprestimosPendentes.length === 0 ? (
+              <Card className="shadow-lg">
+                <CardContent className="py-12 text-center">
+                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-gray-700">
+                    Nenhuma devolução pendente
+                  </p>
+                  <p className="text-gray-500 mt-1">
+                    Todos os empréstimos ativos já foram devolvidos
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {emprestimosPendentes.map((emprestimo) => {
+                  const { dias, prazo } = calcularDiasRestantes(
+                    emprestimo.dataEmprestimo
+                  );
+                  const atrasado = dias < 0;
 
-              return (
-                <Card
-                  key={emprestimo.id}
-                  className="shadow-lg"
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-blue-600" />
-                        {emprestimo.livro?.titulo ||
-                          emprestimo.livros?.[0]?.titulo ||
-                          "Livro não informado"}
-                      </CardTitle>
-                      <Badge
-                        variant="outline"
-                        className={
-                          atrasado
-                            ? "bg-red-100 text-red-800 border-red-300"
-                            : "bg-green-100 text-green-800 border-green-300"
-                        }
-                      >
-                        {atrasado ? "Atrasado" : "Em dia"}
-                      </Badge>
-                    </div>
-                    <CardDescription className="flex items-center gap-2 mt-2">
-                      <User className="h-4 w-4" />
-                      {emprestimo.usuario?.nome ||
-                        "Usuário não informado"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                      <div>
-                        <p className="text-gray-500">
-                          Data Empréstimo
-                        </p>
-                        <p className="font-medium">
-                          {new Date(
-                            emprestimo.dataEmprestimo
-                          ).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">
-                          Prazo Devolução
-                        </p>
-                        <p className="font-medium flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {prazo}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() =>
-                        handleDevolver(emprestimo)
-                      }
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  return (
+                    <Card
+                      key={emprestimo.id}
+                      className="shadow-lg"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Registrar Devolução
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            {emprestimo.livro?.titulo ||
+                              emprestimo.livros?.[0]?.titulo ||
+                              "Livro não informado"}
+                          </CardTitle>
+                          <Badge
+                            variant="outline"
+                            className={
+                              atrasado
+                                ? "bg-red-100 text-red-800 border-red-300"
+                                : "bg-green-100 text-green-800 border-green-300"
+                            }
+                          >
+                            {atrasado ? "Atrasado" : "Em dia"}
+                          </Badge>
+                        </div>
+                        <CardDescription className="flex items-center gap-2 mt-2">
+                          <User className="h-4 w-4" />
+                          {emprestimo.usuario?.nome ||
+                            "Usuário não informado"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                          <div>
+                            <p className="text-gray-500">
+                              Data Empréstimo
+                            </p>
+                            <p className="font-medium">
+                              {new Date(
+                                emprestimo.dataEmprestimo
+                              ).toLocaleDateString("pt-BR")}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">
+                              Prazo Devolução
+                            </p>
+                            <p className="font-medium flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {prazo}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() =>
+                            handleDevolver(emprestimo)
+                          }
+                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Registrar Devolução
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {emprestimosDevolvidos.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="bg-slate-100 text-slate-700"
+                  >
+                    Devolvidos
+                  </Badge>
+                  <span className="text-sm text-gray-500">
+                    {emprestimosDevolvidos.length} concluído(s)
+                  </span>
+                </div>
+                <div className="grid gap-4">
+                  {emprestimosDevolvidos.map((emprestimo) => (
+                    <Card
+                      key={emprestimo.id}
+                      className="shadow-lg"
+                    >
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            {emprestimo.livro?.titulo ||
+                              emprestimo.livros?.[0]?.titulo ||
+                              "Livro não informado"}
+                          </CardTitle>
+                          <Badge
+                            variant="outline"
+                            className="bg-slate-100 text-slate-700 border-slate-200"
+                          >
+                            Devolvido
+                          </Badge>
+                        </div>
+                        <CardDescription className="flex items-center gap-2 mt-2">
+                          <User className="h-4 w-4" />
+                          {emprestimo.usuario?.nome ||
+                            "Usuário não informado"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">
+                              Data Empréstimo
+                            </p>
+                            <p className="font-medium">
+                              {new Date(
+                                emprestimo.dataEmprestimo
+                              ).toLocaleDateString("pt-BR")}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">
+                              Data Devolução
+                            </p>
+                            <p className="font-medium">
+                              {emprestimo.returnDate
+                                ? new Date(
+                                    emprestimo.returnDate
+                                  ).toLocaleDateString("pt-BR")
+                                : "Informação indisponível"}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
