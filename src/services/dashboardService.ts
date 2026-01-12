@@ -4,6 +4,7 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
+import type { MyPage } from "@/types/BackendResponses";
 
 export interface DashboardStats {
   totalUsuarios: number;
@@ -172,14 +173,17 @@ export const dashboardService = {
       // Buscar total de usuários
       try {
         if (isPrivileged) {
-          const usuariosResponse = await api.get(
+          const usuariosResponse = await api.get<
+            MyPage<unknown> | unknown[]
+          >(
             API_ENDPOINTS.USUARIOS.ALL
           );
-          totalUsuarios = Array.isArray(
-            usuariosResponse.data
-          )
-            ? usuariosResponse.data.length
-            : 0;
+          const usuariosData = usuariosResponse.data;
+          totalUsuarios = Array.isArray(usuariosData)
+            ? usuariosData.length
+            : usuariosData?.totalElements ??
+              usuariosData?.content?.length ??
+              0;
         } else {
           const usuarioResponse = await api.get(
             API_ENDPOINTS.USUARIOS.ME
