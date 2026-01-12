@@ -107,6 +107,61 @@ export function UsuarioForm({
     return value;
   };
 
+  const USERNAME_MAX_LENGTH = 20;
+
+  const sanitizeUsernameSegment = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/gi, "")
+      .toLowerCase()
+      .slice(0, USERNAME_MAX_LENGTH);
+
+  const deriveUsernameFromForm = (
+    email?: string,
+    name?: string
+  ) => {
+    const normalizedEmail = email?.trim().toLowerCase();
+    if (normalizedEmail) {
+      const [localPart] = normalizedEmail.split("@");
+      const emailCandidate = localPart || normalizedEmail;
+      const sanitizedEmail = sanitizeUsernameSegment(
+        emailCandidate
+      );
+      if (sanitizedEmail) {
+        return sanitizedEmail;
+      }
+      const fallbackEmail = normalizedEmail
+        .replace(/[^a-z0-9]/gi, "")
+        .slice(0, USERNAME_MAX_LENGTH);
+      if (fallbackEmail) {
+        return fallbackEmail;
+      }
+      return normalizedEmail.slice(0, USERNAME_MAX_LENGTH);
+    }
+
+    if (name) {
+      const normalizedName = name.trim().toLowerCase();
+      const nameCandidate = normalizedName.replace(/\s+/g, "");
+      const sanitizedName = sanitizeUsernameSegment(
+        nameCandidate
+      );
+      if (sanitizedName) {
+        return sanitizedName;
+      }
+      const fallbackName = nameCandidate.slice(
+        0,
+        USERNAME_MAX_LENGTH
+      );
+      if (fallbackName) {
+        return fallbackName;
+      }
+      return normalizedName.slice(0, USERNAME_MAX_LENGTH);
+    }
+
+    return undefined;
+  };
+
   const buildUpdatePayload = (
     data: UsuarioFormData,
     userType: TipoUsuario | undefined,
@@ -118,7 +173,9 @@ export function UsuarioForm({
           ? Number(enrollment)
           : undefined,
       name: data.nome,
-      username: data.email?.trim(),
+      username:
+        deriveUsernameFromForm(data.email, data.nome) ||
+        data.email?.trim(),
       address: data.endereco,
       active: data.ativo,
     };
@@ -180,12 +237,24 @@ export function UsuarioForm({
         toast.success("Usuário atualizado com sucesso!");
       } else {
         // Mapear dados do formulário para o formato que o backend espera
+        const derivedUsername =
+          deriveUsernameFromForm(data.email, data.nome) ??
+          sanitizeUsernameSegment(
+            (data.email || data.nome || "")
+              .trim()
+              .replace(/\s+/g, "")
+          );
+
+        if (!derivedUsername) {
+          throw new Error(
+            "Informe um e-mail ou nome válido para gerar o username."
+          );
+        }
+
         const backendPayload: any = {
           password: data.senha,
           name: data.nome,
-          username:
-            data.email?.trim() ||
-            data.nome?.toLowerCase().replace(/\s/g, ""),
+          username: derivedUsername,
           address: data.endereco,
           userType: data.tipoUsuario,
           role: data.tipoAcesso,

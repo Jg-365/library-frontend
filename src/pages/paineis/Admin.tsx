@@ -84,8 +84,8 @@ function AdminDashboard() {
       value: loading
         ? "..."
         : stats
-          ? stats.totalUsuarios.toLocaleString("pt-BR")
-          : "—",
+        ? stats.totalUsuarios.toLocaleString("pt-BR")
+        : "—",
       description: "Cadastrados no sistema",
       icon: Users,
     },
@@ -94,8 +94,8 @@ function AdminDashboard() {
       value: loading
         ? "..."
         : stats
-          ? stats.totalLivros.toLocaleString("pt-BR")
-          : "—",
+        ? stats.totalLivros.toLocaleString("pt-BR")
+        : "—",
       description: "Títulos no acervo",
       icon: BookOpen,
     },
@@ -104,10 +104,8 @@ function AdminDashboard() {
       value: loading
         ? "..."
         : stats
-          ? stats.emprestimosAtivos.toLocaleString(
-              "pt-BR"
-            )
-          : "—",
+        ? stats.emprestimosAtivos.toLocaleString("pt-BR")
+        : "—",
       description: "Em andamento",
       icon: FileText,
     },
@@ -116,8 +114,8 @@ function AdminDashboard() {
       value: loading
         ? "..."
         : stats
-          ? stats.reservasPendentes.toLocaleString("pt-BR")
-          : "—",
+        ? stats.reservasPendentes.toLocaleString("pt-BR")
+        : "—",
       description: "Aguardando processamento",
       icon: Calendar,
     },
@@ -181,13 +179,6 @@ function AdminDashboard() {
       description: "Registrar devoluções e aplicar multas",
       icon: BookCheck,
       href: "/admin/devolucoes",
-    },
-    {
-      title: "Minhas Reservas",
-      description:
-        "Ver e gerenciar suas reservas de livros",
-      icon: Calendar,
-      href: "/admin/reservas",
     },
     {
       title: "Relatórios",
@@ -343,6 +334,3 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
-
-
-
