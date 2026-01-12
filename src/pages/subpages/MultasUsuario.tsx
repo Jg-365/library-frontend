@@ -161,7 +161,7 @@ export function MultasUsuario() {
 
         <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
           <CardHeader>
-            <CardTitle className="text-base">
+            <CardTitle className="text-base text-gray-900 dark:text-slate-100">
               Usuário selecionado
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-slate-300">
@@ -185,7 +185,7 @@ export function MultasUsuario() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
                   <Clock className="h-5 w-5 text-orange-500" />
                   Pendentes
                 </CardTitle>
@@ -246,7 +246,7 @@ export function MultasUsuario() {
 
             <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   Pagas
                 </CardTitle>

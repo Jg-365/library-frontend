@@ -120,7 +120,7 @@ export function MinhasMultas() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
                   <Clock className="h-5 w-5 text-orange-500" />
                   Multas pendentes
                 </CardTitle>
@@ -177,7 +177,7 @@ export function MinhasMultas() {
 
             <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   Multas pagas
                 </CardTitle>
