@@ -8,6 +8,7 @@
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
 import { usuariosService } from "./usuariosService";
+import { authService } from "./authService";
 import type {
   Emprestimo,
   CriarEmprestimoRequest,
@@ -110,14 +111,27 @@ async function mapLoanResponseToEmprestimo(
     dataEmprestimo: loan.loanDate,
     dataPrevistaDevolucao: loan.expectedReturnDate,
     dataDevolucaoReal: loan.returnDate || undefined,
+    returnDate: loan.returnDate,
     copyCodes: loan.copyCodes,
     livros: livros,
     status: status,
-    // Try to fetch full user details from the backend when possible. If
-    // the lookup fails, fall back to a minimal placeholder so the UI
-    // doesn't display "Usuário não informado".
     usuario: await (async () => {
       if (!loan.userId) return undefined;
+
+      const stored = authService.getStoredAuth();
+      const role =
+        stored?.user?.role ??
+        stored?.user?.perfil ??
+        null;
+      const canFetchUserDetails =
+        role === "ADMIN" || role === "BIBLIOTECARIO";
+
+      if (!canFetchUserDetails) {
+        return {
+          enrollment: loan.userId,
+        } as any;
+      }
+
       try {
         const fetched =
           await usuariosService.buscarPorEnrollment(
@@ -129,12 +143,12 @@ async function mapLoanResponseToEmprestimo(
             (fetched as any).nome ||
             fetched.name ||
             fetched.username ||
-            `Usuário #${loan.userId}`,
+            undefined,
           name:
             fetched.name ||
             (fetched as any).nome ||
             fetched.username ||
-            `Usuário #${loan.userId}`,
+            undefined,
           username:
             fetched.username ||
             String(fetched.enrollment ?? loan.userId),
@@ -144,20 +158,22 @@ async function mapLoanResponseToEmprestimo(
           role: (fetched as any).role || "USUARIO",
           active: fetched.active ?? true,
         } as any;
-      } catch (err) {
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 403 || status === 400) {
+          console.warn(
+            `[emprestimosService] acesso negado ao usuário ${loan.userId}, usando dados mínimos.`
+          );
+          return {
+            enrollment: loan.userId,
+          } as any;
+        }
         console.warn(
           `[emprestimosService] falha ao buscar usuário ${loan.userId}, usando placeholder`,
           err
         );
         return {
           enrollment: loan.userId,
-          nome: `Usuário #${loan.userId}`,
-          name: `Usuário #${loan.userId}`,
-          username: String(loan.userId),
-          address: "",
-          userType: "FUNCIONARIO",
-          role: "USUARIO",
-          active: true,
         } as any;
       }
     })(),

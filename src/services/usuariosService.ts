@@ -173,22 +173,111 @@ export const usuariosService = {
 
   /**
    * Listar professores por curso
-   * GET /users/teachers/by-course?courseName=<nome>
+   * GET /users/teachers/by-course?course=<nome>
    */
   async listarProfessoresPorCurso(
-    courseName: string
+    courseName: string,
+    courseCode?: number
   ): Promise<MyPage<Usuario>> {
     const normalizedCourseName = courseName.trim();
     if (!normalizedCourseName) {
       return normalizeUsuariosPage([]);
     }
-    const response = await api.get<
-      MyPage<Usuario> | Usuario[]
-    >(
-      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?courseName=${encodeURIComponent(
-        normalizedCourseName
-      )}`
-    );
-    return normalizeUsuariosPage(response.data);
+    try {
+      const response = await api.get<
+        MyPage<Usuario> | Usuario[]
+      >(
+        `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?course=${encodeURIComponent(
+          normalizedCourseName
+        )}`
+      );
+      return normalizeUsuariosPage(response.data);
+    } catch (error) {
+      if (courseCode === undefined) {
+        throw error;
+      }
+      const page = await usuariosService.listarTodos({
+        force: true,
+      });
+      const filtered = page.content.filter(
+        (usuario) =>
+          usuario.courseCode === courseCode &&
+          (usuario.userType === "PROFESSOR" ||
+            usuario.userType === undefined)
+      );
+      return normalizeUsuariosPage(filtered);
+    }
+  },
+
+  /**
+   * Listar alunos por curso
+   * GET /users/students/by-course?course=<nome>
+   */
+  async listarAlunosPorCurso(
+    courseName: string,
+    courseCode?: number
+  ): Promise<MyPage<Usuario>> {
+    const normalizedCourseName = courseName.trim();
+    if (!normalizedCourseName) {
+      return normalizeUsuariosPage([]);
+    }
+    try {
+      const response = await api.get<
+        MyPage<Usuario> | Usuario[]
+      >(
+        `${API_ENDPOINTS.USUARIOS.STUDENTS_BY_COURSE}?course=${encodeURIComponent(
+          normalizedCourseName
+        )}`
+      );
+      return normalizeUsuariosPage(response.data);
+    } catch (error) {
+      if (courseCode === undefined) {
+        throw error;
+      }
+      const page = await usuariosService.listarTodos({
+        force: true,
+      });
+      const filtered = page.content.filter(
+        (usuario) =>
+          usuario.courseCode === courseCode &&
+          usuario.userType === "ALUNO"
+      );
+      return normalizeUsuariosPage(filtered);
+    }
+  },
+
+  /**
+   * Listar usuários por curso
+   * GET /users/by-course?course=<nome>
+   */
+  async listarUsuariosPorCurso(
+    courseName: string,
+    courseCode?: number
+  ): Promise<MyPage<Usuario>> {
+    const normalizedCourseName = courseName.trim();
+    if (!normalizedCourseName) {
+      return normalizeUsuariosPage([]);
+    }
+    try {
+      const response = await api.get<
+        MyPage<Usuario> | Usuario[]
+      >(
+        `${API_ENDPOINTS.USUARIOS.USERS_BY_COURSE}?course=${encodeURIComponent(
+          normalizedCourseName
+        )}`
+      );
+      return normalizeUsuariosPage(response.data);
+    } catch (error) {
+      if (courseCode === undefined) {
+        throw error;
+      }
+      const page = await usuariosService.listarTodos({
+        force: true,
+      });
+      const filtered = page.content.filter(
+        (usuario) => usuario.courseCode === courseCode
+      );
+      return normalizeUsuariosPage(filtered);
+    }
   },
 };
