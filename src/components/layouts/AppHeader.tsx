@@ -168,14 +168,21 @@ export function AppHeader({
       id="app-header"
       className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex h-14 items-center justify-between sm:h-16">
           {/* Logo e Título - Mobile First */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div
-              className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gradient-to-br ${config.gradient} shadow-lg transition-transform hover:scale-105`}
+              className={`flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gradient-to-br ${config.gradient} shadow-lg transition-transform hover:scale-105`}
             >
               <LayoutDashboard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div className="sm:hidden min-w-0">
+              <h1
+                className={`text-sm font-semibold bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent truncate`}
+              >
+                {title || config.title}
+              </h1>
             </div>
             <div className="hidden sm:block">
               <h1
@@ -256,7 +263,7 @@ export function AppHeader({
                     Navegue pelas opções do sistema
                   </CustomSheetDescription>
                 </CustomSheetHeader>
-                <nav className="mt-8 flex flex-col gap-2">
+                <nav className="mt-6 flex flex-col gap-2">
                   {menuItems.map((item, index) => {
                     const isActiveLink = isActive(
                       item.href
@@ -267,7 +274,7 @@ export function AppHeader({
                         to={item.href}
                         onClick={() => setIsOpen(false)}
                         className={`
-                          flex items-center gap-3 px-4 py-3 rounded-lg font-medium
+                          flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
                           transition-all duration-200
                           ${
                             isActiveLink
