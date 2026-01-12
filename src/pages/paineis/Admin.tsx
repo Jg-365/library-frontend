@@ -37,12 +37,9 @@ function AdminDashboard() {
     decodedSubject ??
     user?.role ??
     "Administrador";
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsuarios: 0,
-    totalLivros: 0,
-    emprestimosAtivos: 0,
-    reservasPendentes: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(
+    null
+  );
   const [atividades, setAtividades] = useState<
     AtividadeRecente[]
   >([]);
@@ -73,12 +70,7 @@ function AdminDashboard() {
       toast.error(
         "Erro ao carregar informações do dashboard"
       );
-      setStats({
-        totalUsuarios: 0,
-        totalLivros: 0,
-        emprestimosAtivos: 0,
-        reservasPendentes: 0,
-      });
+      setStats(null);
       setAtividades([]);
     } finally {
       setLoading(false);
@@ -90,7 +82,9 @@ function AdminDashboard() {
       title: "Total de Usuários",
       value: loading
         ? "..."
-        : stats.totalUsuarios.toLocaleString("pt-BR"),
+        : stats
+          ? stats.totalUsuarios.toLocaleString("pt-BR")
+          : "—",
       description: "Cadastrados no sistema",
       icon: Users,
     },
@@ -98,7 +92,9 @@ function AdminDashboard() {
       title: "Livros Cadastrados",
       value: loading
         ? "..."
-        : stats.totalLivros.toLocaleString("pt-BR"),
+        : stats
+          ? stats.totalLivros.toLocaleString("pt-BR")
+          : "—",
       description: "Títulos no acervo",
       icon: BookOpen,
     },
@@ -106,7 +102,11 @@ function AdminDashboard() {
       title: "Empréstimos Ativos",
       value: loading
         ? "..."
-        : stats.emprestimosAtivos.toLocaleString("pt-BR"),
+        : stats
+          ? stats.emprestimosAtivos.toLocaleString(
+              "pt-BR"
+            )
+          : "—",
       description: "Em andamento",
       icon: FileText,
     },
@@ -114,7 +114,9 @@ function AdminDashboard() {
       title: "Reservas Pendentes",
       value: loading
         ? "..."
-        : stats.reservasPendentes.toLocaleString("pt-BR"),
+        : stats
+          ? stats.reservasPendentes.toLocaleString("pt-BR")
+          : "—",
       description: "Aguardando processamento",
       icon: Calendar,
     },

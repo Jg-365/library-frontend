@@ -40,6 +40,21 @@ export const dashboardService = {
   _normalizeArray(data: any) {
     return Array.isArray(data) ? data : data?.content || [];
   },
+  _resolveTotalCount(data: MyPage<unknown> | unknown[] | null | undefined) {
+    if (Array.isArray(data)) {
+      return data.length;
+    }
+
+    if (typeof data?.totalElements === "number") {
+      return data.totalElements;
+    }
+
+    if (Array.isArray(data?.content)) {
+      return data.content.length;
+    }
+
+    return 0;
+  },
   _countPendingReserves(reservas: any[]) {
     return reservas.filter(
       (r: any) =>
@@ -178,12 +193,9 @@ export const dashboardService = {
           >(
             API_ENDPOINTS.USUARIOS.ALL
           );
-          const usuariosData = usuariosResponse.data;
-          totalUsuarios = Array.isArray(usuariosData)
-            ? usuariosData.length
-            : usuariosData?.totalElements ??
-              usuariosData?.content?.length ??
-              0;
+          totalUsuarios = this._resolveTotalCount(
+            usuariosResponse.data
+          );
         } else {
           const usuarioResponse = await api.get(
             API_ENDPOINTS.USUARIOS.ME
