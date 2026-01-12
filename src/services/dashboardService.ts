@@ -21,8 +21,6 @@ export interface AtividadeRecente {
 }
 
 export const dashboardService = {
-  // Cache whether the backend supports GET /reserves to avoid repeated 405s
-  _reservesSupported: null as boolean | null,
   _isPrivileged(perfil?: string) {
     return perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
   },
@@ -33,26 +31,51 @@ export const dashboardService = {
     );
   },
 
-  /**
-   * Fallback: agregação de reservas por usuário quando GET /reserves não está disponível.
-   * Consulta todos os usuários e chama GET /reserves/users?userEnrollment={enrollment}
-   */
-  async _fetchReservesByAllUsers(): Promise<any[]> {
-    try {
-      const resp = await api.get(
-        API_ENDPOINTS.RESERVAS.BY_USER
-      );
-      const reservasArray = Array.isArray(resp.data)
-        ? resp.data
-        : resp.data?.content || [];
-      return reservasArray;
-    } catch (err) {
-      console.error(
-        "Erro ao agregar reservas por usuário:",
-        err
-      );
+  _normalizeArray(data: any) {
+    return Array.isArray(data) ? data : data?.content || [];
+  },
+  _countPendingReserves(reservas: any[]) {
+    return reservas.filter(
+      (r: any) =>
+        r.status === "PENDENTE" || r.status === "ATIVA"
+    ).length;
+  },
+  async _fetchReservesByUser(): Promise<any[]> {
+    const resp = await api.get(API_ENDPOINTS.RESERVAS.BY_USER);
+    return this._normalizeArray(resp.data);
+  },
+  async _fetchReservesByBooks(books: any[]): Promise<any[]> {
+    const isbns = (books || [])
+      .map((book: any) => book?.isbn)
+      .filter(Boolean);
+    if (!isbns.length) {
       return [];
     }
+
+    const results = await Promise.allSettled(
+      isbns.map((isbn: string) =>
+        api.get(API_ENDPOINTS.RESERVAS.BY_BOOK(isbn))
+      )
+    );
+
+    const reservas: any[] = [];
+    const failures = results.filter(
+      (result) => result.status === "rejected"
+    );
+
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        reservas.push(
+          ...this._normalizeArray(result.value.data)
+        );
+      }
+    });
+
+    if (failures.length === results.length) {
+      throw failures[0];
+    }
+
+    return reservas;
   },
 
   /**
@@ -152,15 +175,17 @@ export const dashboardService = {
       this._logFriendlyError("total de usuários", error);
     }
 
+    let livrosArray: any[] = [];
+
     // Buscar total de livros
     try {
       const livrosResponse = await api.get(
         API_ENDPOINTS.LIVROS.BASE
       );
+      const livrosData = livrosResponse.data;
+      livrosArray = this._normalizeArray(livrosData);
       totalLivros =
-        livrosResponse.data?.totalElements ||
-        livrosResponse.data?.content?.length ||
-        0;
+        livrosData?.totalElements || livrosArray.length || 0;
     } catch (error) {
       this._logFriendlyError("total de livros", error);
     }
@@ -185,60 +210,32 @@ export const dashboardService = {
     }
 
     // Buscar reservas do usuário logado
-    // Endpoint: GET /reserves/users
+    // Endpoint: GET /reserves/users ou GET /reserves/books/{isbn}
     try {
+      let reservasArray: any[] = [];
+
       if (isPrivileged) {
-        if (this._reservesSupported === false) {
-          const aggregated =
-            await this._fetchReservesByAllUsers();
-          reservasPendentes = Array.isArray(aggregated)
-            ? aggregated.filter(
-                (r: any) =>
-                  r.status === "PENDENTE" ||
-                  r.status === "ATIVA"
-              ).length
-            : 0;
-        } else {
-          try {
-            const reservasResponse = await api.get(
-              API_ENDPOINTS.RESERVAS.BASE
+        try {
+          reservasArray =
+            await this._fetchReservesByBooks(livrosArray);
+          if (!reservasArray.length) {
+            throw new Error(
+              "Sem dados de reservas globais para livros."
             );
-            const reservasArray = Array.isArray(
-              reservasResponse.data
-            )
-              ? reservasResponse.data
-              : reservasResponse.data?.content || [];
-            reservasPendentes = reservasArray.filter(
-              (r: any) =>
-                r.status === "PENDENTE" ||
-                r.status === "ATIVA"
-            ).length;
-            this._reservesSupported = true;
-          } catch (err: any) {
-            if (err?.response?.status === 405) {
-              console.warn(
-                "GET /reserves não permitido pelo backend - pulando estatísticas de reservas globais"
-              );
-              this._reservesSupported = false;
-            } else {
-              throw err;
-            }
           }
+        } catch (error) {
+          console.warn(
+            "Estatísticas globais de reservas indisponíveis. Usando reservas do usuário autenticado.",
+            error
+          );
+          reservasArray = await this._fetchReservesByUser();
         }
       } else {
-        const reservasResponse = await api.get(
-          API_ENDPOINTS.RESERVAS.BY_USER
-        );
-        reservasPendentes = Array.isArray(
-          reservasResponse.data
-        )
-          ? reservasResponse.data.filter(
-              (r: any) =>
-                r.status === "PENDENTE" ||
-                r.status === "ATIVA"
-            ).length
-          : 0;
+        reservasArray = await this._fetchReservesByUser();
       }
+
+      reservasPendentes =
+        this._countPendingReserves(reservasArray);
     } catch (error) {
       this._logFriendlyError(
         "reservas pendentes",
@@ -294,100 +291,25 @@ export const dashboardService = {
         });
       });
 
-      // Buscar reservas recentes
-      if (isPrivileged) {
-        if (this._reservesSupported === false) {
-          const aggregated =
-            await this._fetchReservesByAllUsers();
-          if (Array.isArray(aggregated)) {
-            aggregated.slice(0, 2).forEach((res: any) => {
-              atividades.push({
-                id: `res-${res.id}`,
-                acao:
-                  res.status === "ATIVA"
-                    ? "Reserva aprovada"
-                    : "Reserva criada",
-                usuario:
-                  res.userName || res.userId || "Usuário",
-                timestamp:
-                  res.reservationDate ||
-                  new Date().toISOString(),
-                tipo: "reserva",
-              });
-            });
-          }
-        } else {
-          try {
-            const reservasResponse = await api.get(
-              API_ENDPOINTS.RESERVAS.BASE
-            );
-            const reservasArray = Array.isArray(
-              reservasResponse.data
-            )
-              ? reservasResponse.data
-              : reservasResponse.data?.content || [];
-            reservasArray.slice(0, 2).forEach((res: any) => {
-              atividades.push({
-                id: `res-${res.id}`,
-                acao:
-                  res.status === "ATIVA"
-                    ? "Reserva aprovada"
-                    : "Reserva criada",
-                usuario:
-                  res.userName || res.userId || "Usuário",
-                timestamp:
-                  res.reservationDate ||
-                  new Date().toISOString(),
-                tipo: "reserva",
-              });
-            });
-            this._reservesSupported = true;
-          } catch (err: any) {
-            if (err?.response?.status === 405) {
-              console.warn(
-                "GET /reserves não permitido pelo backend - pulando atividades de reservas globais"
-              );
-              this._reservesSupported = false;
-            } else {
-              this._logFriendlyError(
-                "reservas recentes",
-                err
-              );
-            }
-          }
-        }
-      } else {
-        try {
-          const reservasResponse = await api.get(
-            API_ENDPOINTS.RESERVAS.BY_USER
-          );
-          if (Array.isArray(reservasResponse.data)) {
-            reservasResponse.data
-              .slice(0, 2)
-              .forEach((res: any) => {
-                atividades.push({
-                  id: `res-${res.id}`,
-                  acao:
-                    res.status === "ATIVA"
-                      ? "Reserva aprovada"
-                      : "Reserva criada",
-                  usuario:
-                    res.userName ||
-                    res.userId ||
-                    "Usuário",
-                  timestamp:
-                    res.reservationDate ||
-                    new Date().toISOString(),
-                  tipo: "reserva",
-                });
-              });
-          }
-        } catch (error) {
-          this._logFriendlyError(
-            "reservas recentes",
-            error
-          );
-        }
+      // Buscar reservas recentes do usuário autenticado
+      try {
+        const reservasArray = await this._fetchReservesByUser();
+        reservasArray.slice(0, 2).forEach((res: any) => {
+          atividades.push({
+            id: `res-${res.id}`,
+            acao:
+              res.status === "ATIVA"
+                ? "Reserva aprovada"
+                : "Reserva criada",
+            usuario: res.userName || res.userId || "Usuário",
+            timestamp:
+              res.reservationDate ||
+              new Date().toISOString(),
+            tipo: "reserva",
+          });
+        });
+      } catch (error) {
+        this._logFriendlyError("reservas recentes", error);
       }
 
       // Ordenar por timestamp (mais recente primeiro)
