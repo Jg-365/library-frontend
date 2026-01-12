@@ -3,7 +3,8 @@ export interface BookRequest {
   title: string;
   releaseYear: number;
   publisher: string;
-  subCategoryId: number;
+  subCategoryId?: number;
+  subcategoriaId?: number;
   emailAuthor: string;
   coAuthorsEmails: string[];
 }
