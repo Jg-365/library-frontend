@@ -141,9 +141,12 @@ export const reservasService = {
    * Listar reservas do usuário atual
    * GET /reserves/users
    */
-  async listarPorUsuario(): Promise<Reserva[]> {
+  async listarPorUsuario(
+    userId?: number | string
+  ): Promise<Reserva[]> {
     const response = await api.get(
-      API_ENDPOINTS.RESERVAS.BY_USER
+      API_ENDPOINTS.RESERVAS.BY_USER,
+      userId ? { params: { userId } } : undefined
     );
 
     // Verificar se é array ou paginado
