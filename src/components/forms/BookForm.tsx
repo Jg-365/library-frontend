@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ import {
   categoriasService,
   subcategoriasService,
 } from "@/services";
-import type { Livro, Autor, Categoria } from "@/types";
+import type { Livro, Autor, Categoria, Perfil } from "@/types";
 import type { Subcategoria } from "@/types/Filtros";
 import type {
   BookRequest,
@@ -39,6 +40,7 @@ import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { useAuth } from "@/store/AuthContext";
 
 interface BookFormProps {
   livro?: Livro;
@@ -51,6 +53,15 @@ export function BookForm({
   onSuccess,
   onCancel,
 }: BookFormProps) {
+  const { user, role } = useAuth();
+  const perfil = (user?.role ??
+    user?.perfil ??
+    role ??
+    "USUARIO") as Perfil;
+  const canManageCatalog =
+    perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
+  const managementBase =
+    perfil === "ADMIN" ? "/admin" : "/bibliotecario";
   const [isLoading, setIsLoading] = useState(false);
   const [autores, setAutores] = useState<Autor[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>(
@@ -706,9 +717,48 @@ export function BookForm({
             )}
           />
 
+          {canManageCatalog && (
+            <div className="md:col-span-2 flex flex-wrap gap-3 text-sm">
+              <Button
+                asChild
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+              >
+                <Link to={`${managementBase}/categorias`}>
+                  Cadastrar categoria
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+              >
+                <Link to={`${managementBase}/categorias`}>
+                  Cadastrar subcategoria
+                </Link>
+              </Button>
+            </div>
+          )}
+
           {/* Autores */}
           <div className="md:col-span-2 space-y-3">
-            <FormLabel>Autores *</FormLabel>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <FormLabel>Autores *</FormLabel>
+              {canManageCatalog && (
+                <Button
+                  asChild
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0"
+                >
+                  <Link to={`${managementBase}/autores`}>
+                    Cadastrar autor
+                  </Link>
+                </Button>
+              )}
+            </div>
             <Select onValueChange={handleAddAutor}>
               <SelectTrigger>
                 <SelectValue placeholder="Adicionar autor" />
