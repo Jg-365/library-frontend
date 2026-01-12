@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getBookCoverByISBN } from "@/services/googleBooksService";
+import { getBookCoverWithFallback } from "@/services/googleBooksService";
 import { BookOpen } from "lucide-react";
 
 interface BookCoverProps {
@@ -16,7 +16,7 @@ export function BookCover({
   isbn,
   title,
   className = "w-full h-48 object-contain rounded-t-lg",
-  fallbackClassName = "w-full h-48 bg-slate-100 text-gray-700 font-medium flex items-center justify-center rounded-t-lg",
+  fallbackClassName = "w-full h-48 bg-slate-100 text-gray-700 font-medium flex items-center justify-center rounded-t-lg dark:bg-slate-800 dark:text-slate-200",
 }: BookCoverProps) {
   const [coverUrl, setCoverUrl] = useState<string | null>(
     null
@@ -31,7 +31,7 @@ export function BookCover({
       setIsLoading(true);
       setHasError(false);
 
-      const url = await getBookCoverByISBN(isbn);
+      const url = await getBookCoverWithFallback(isbn, title);
 
       if (isMounted) {
         setCoverUrl(url);
@@ -48,14 +48,14 @@ export function BookCover({
     return () => {
       isMounted = false;
     };
-  }, [isbn]);
+  }, [isbn, title]);
 
   // Loading state
   if (isLoading) {
     return (
       <div className={fallbackClassName}>
         <div className="animate-pulse">
-          <BookOpen className="h-16 w-16 text-gray-300" />
+          <BookOpen className="h-16 w-16 text-gray-300 dark:text-slate-500" />
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ export function BookCover({
     <div className={fallbackClassName}>
       <div className="text-center">
         <BookOpen className="h-16 w-16 text-indigo-400 mx-auto mb-2" />
-        <p className="text-xs text-gray-500 px-4">
+        <p className="text-xs text-gray-500 dark:text-slate-400 px-4">
           {title}
         </p>
       </div>

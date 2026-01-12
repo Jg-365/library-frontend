@@ -117,4 +117,19 @@
   body {
     @apply bg-background text-foreground;
   }
+  .dark .text-gray-900 {
+    @apply text-slate-100;
+  }
+  .dark .text-gray-800 {
+    @apply text-slate-100;
+  }
+  .dark .text-gray-700 {
+    @apply text-slate-200;
+  }
+  .dark .text-gray-600 {
+    @apply text-slate-300;
+  }
+  .dark .text-gray-500 {
+    @apply text-slate-400;
+  }
 }

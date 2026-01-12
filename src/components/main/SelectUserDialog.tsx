@@ -61,14 +61,15 @@ export function SelectUserDialog({
 
   useEffect(() => {
     if (searchTerm) {
-      const normalizedSearch = searchTerm.toLowerCase();
+      const normalizedSearch =
+        searchTerm.toLowerCase();
       const filtered = usuarios.filter(
         (u) =>
-          (u.name ?? "")
+          String(u.name ?? "")
             .toLowerCase()
             .includes(normalizedSearch) ||
           String(u.enrollment ?? "").includes(searchTerm) ||
-          (u.email ?? "")
+          String(u.email ?? "")
             .toLowerCase()
             .includes(normalizedSearch)
       );
