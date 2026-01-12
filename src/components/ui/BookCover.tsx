@@ -48,7 +48,7 @@ export function BookCover({
     return () => {
       isMounted = false;
     };
-  }, [isbn]);
+  }, [isbn, title]);
 
   // Loading state
   if (isLoading) {
