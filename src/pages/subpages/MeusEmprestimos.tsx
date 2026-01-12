@@ -185,7 +185,7 @@ export function MeusEmprestimos() {
         </div>
 
         {/* Tabela de Empréstimos */}
-        <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/80">
+        <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/80 dark:bg-slate-900/70 dark:text-slate-100">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
@@ -222,8 +222,8 @@ export function MeusEmprestimos() {
           <CardContent>
             {emprestimos.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16">
-                <BookOpen className="h-16 w-16 text-gray-300 mb-4" />
-                <p className="text-xl font-semibold text-gray-600">
+                <BookOpen className="h-16 w-16 text-gray-300 mb-4 dark:text-slate-600" />
+                <p className="text-xl font-semibold text-gray-600 dark:text-slate-200">
                   Nenhum empréstimo encontrado
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">

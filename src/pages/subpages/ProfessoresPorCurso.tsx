@@ -181,16 +181,16 @@ export function ProfessoresPorCurso() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Professores por Curso
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 mt-1 dark:text-slate-300">
             Selecione um curso e filtre os professores
             vinculados.
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-4 dark:bg-slate-900 dark:text-slate-100">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-gray-700 dark:text-slate-200">
                 Curso
               </label>
               <Select
@@ -222,7 +222,7 @@ export function ProfessoresPorCurso() {
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="professor-search"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-gray-700 dark:text-slate-200"
               >
                 Buscar professor
               </label>
@@ -245,13 +245,13 @@ export function ProfessoresPorCurso() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg">
+        <div className="bg-white rounded-lg shadow-lg dark:bg-slate-900 dark:text-slate-100">
           {loadingProfessores ? (
-            <div className="py-12 text-center text-gray-600">
+            <div className="py-12 text-center text-gray-600 dark:text-slate-300">
               Buscando professores...
             </div>
           ) : !selectedCourseName ? (
-            <div className="py-12 text-center text-gray-600">
+            <div className="py-12 text-center text-gray-600 dark:text-slate-300">
               Selecione um curso para visualizar os
               professores.
             </div>
