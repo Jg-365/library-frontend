@@ -22,7 +22,12 @@ export interface AtividadeRecente {
 
 export const dashboardService = {
   _isPrivileged(perfil?: string) {
-    return perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
+    const normalized =
+      typeof perfil === "string" ? perfil.toUpperCase() : "";
+    return (
+      normalized === "ADMIN" ||
+      normalized === "BIBLIOTECARIO"
+    );
   },
   _logFriendlyError(contexto: string, error: unknown) {
     console.warn(
@@ -150,105 +155,125 @@ export const dashboardService = {
    * Buscar estatísticas gerais do sistema
    */
   async getStats(perfil?: string): Promise<DashboardStats> {
-    const isPrivileged = this._isPrivileged(perfil);
-    let totalUsuarios = 0;
-    let totalLivros = 0;
-    let emprestimosAtivos = 0;
-    let reservasPendentes = 0;
+    const fallback: DashboardStats = {
+      totalUsuarios: 0,
+      totalLivros: 0,
+      emprestimosAtivos: 0,
+      reservasPendentes: 0,
+    };
 
-    // Buscar total de usuários
     try {
-      if (isPrivileged) {
-        const usuariosResponse = await api.get(
-          API_ENDPOINTS.USUARIOS.ALL
-        );
-        totalUsuarios = Array.isArray(usuariosResponse.data)
-          ? usuariosResponse.data.length
-          : 0;
-      } else {
-        const usuarioResponse = await api.get(
-          API_ENDPOINTS.USUARIOS.ME
-        );
-        totalUsuarios = usuarioResponse.data ? 1 : 0;
-      }
-    } catch (error) {
-      this._logFriendlyError("total de usuários", error);
-    }
+      const isPrivileged = this._isPrivileged(perfil);
+      let totalUsuarios = 0;
+      let totalLivros = 0;
+      let emprestimosAtivos = 0;
+      let reservasPendentes = 0;
 
-    let livrosArray: any[] = [];
-
-    // Buscar total de livros
-    try {
-      const livrosResponse = await api.get(
-        API_ENDPOINTS.LIVROS.BASE
-      );
-      const livrosData = livrosResponse.data;
-      livrosArray = this._normalizeArray(livrosData);
-      totalLivros =
-        livrosData?.totalElements || livrosArray.length || 0;
-    } catch (error) {
-      this._logFriendlyError("total de livros", error);
-    }
-
-    // Buscar empréstimos do usuário logado (GET /loans/users)
-    try {
-      const emprestimosResponse = await api.get(
-        API_ENDPOINTS.EMPRESTIMOS.BY_USER
-      );
-      const emprestimosArray = Array.isArray(
-        emprestimosResponse?.data
-      )
-        ? emprestimosResponse?.data
-        : emprestimosResponse?.data?.content || [];
-      const counts = this._classifyLoans(emprestimosArray);
-      emprestimosAtivos = counts.ativos;
-    } catch (error) {
-      this._logFriendlyError(
-        "empréstimos ativos",
-        error
-      );
-    }
-
-    // Buscar reservas do usuário logado
-    // Endpoint: GET /reserves/users ou GET /reserves/books/{isbn}
-    try {
-      let reservasArray: any[] = [];
-
-      if (isPrivileged) {
-        try {
-          reservasArray =
-            await this._fetchReservesByBooks(livrosArray);
-          if (!reservasArray.length) {
-            throw new Error(
-              "Sem dados de reservas globais para livros."
-            );
-          }
-        } catch (error) {
-          console.warn(
-            "Estatísticas globais de reservas indisponíveis. Usando reservas do usuário autenticado.",
-            error
+      // Buscar total de usuários
+      try {
+        if (isPrivileged) {
+          const usuariosResponse = await api.get(
+            API_ENDPOINTS.USUARIOS.ALL
           );
+          totalUsuarios = Array.isArray(
+            usuariosResponse.data
+          )
+            ? usuariosResponse.data.length
+            : 0;
+        } else {
+          const usuarioResponse = await api.get(
+            API_ENDPOINTS.USUARIOS.ME
+          );
+          totalUsuarios = usuarioResponse.data ? 1 : 0;
+        }
+      } catch (error) {
+        this._logFriendlyError("total de usuários", error);
+      }
+
+      let livrosArray: any[] = [];
+
+      // Buscar total de livros
+      try {
+        const livrosResponse = await api.get(
+          API_ENDPOINTS.LIVROS.BASE
+        );
+        const livrosData = livrosResponse.data;
+        livrosArray = this._normalizeArray(livrosData);
+        totalLivros =
+          livrosData?.totalElements ||
+          livrosArray.length ||
+          0;
+      } catch (error) {
+        this._logFriendlyError("total de livros", error);
+      }
+
+      // Buscar empréstimos do usuário logado (GET /loans/users)
+      try {
+        const emprestimosResponse = await api.get(
+          API_ENDPOINTS.EMPRESTIMOS.BY_USER
+        );
+        const emprestimosArray = Array.isArray(
+          emprestimosResponse?.data
+        )
+          ? emprestimosResponse?.data
+          : emprestimosResponse?.data?.content || [];
+        const counts =
+          this._classifyLoans(emprestimosArray);
+        emprestimosAtivos = counts.ativos;
+      } catch (error) {
+        this._logFriendlyError(
+          "empréstimos ativos",
+          error
+        );
+      }
+
+      // Buscar reservas do usuário logado
+      // Endpoint: GET /reserves/users ou GET /reserves/books/{isbn}
+      try {
+        let reservasArray: any[] = [];
+
+        if (isPrivileged) {
+          try {
+            reservasArray =
+              await this._fetchReservesByBooks(livrosArray);
+            if (!reservasArray.length) {
+              throw new Error(
+                "Sem dados de reservas globais para livros."
+              );
+            }
+          } catch (error) {
+            console.warn(
+              "Estatísticas globais de reservas indisponíveis. Usando reservas do usuário autenticado.",
+              error
+            );
+            reservasArray = await this._fetchReservesByUser();
+          }
+        } else {
           reservasArray = await this._fetchReservesByUser();
         }
-      } else {
-        reservasArray = await this._fetchReservesByUser();
+
+        reservasPendentes =
+          this._countPendingReserves(reservasArray);
+      } catch (error) {
+        this._logFriendlyError(
+          "reservas pendentes",
+          error
+        );
       }
 
-      reservasPendentes =
-        this._countPendingReserves(reservasArray);
+      return {
+        totalUsuarios,
+        totalLivros,
+        emprestimosAtivos,
+        reservasPendentes,
+      };
     } catch (error) {
       this._logFriendlyError(
-        "reservas pendentes",
+        "estatísticas do dashboard",
         error
       );
+      return fallback;
     }
-
-    return {
-      totalUsuarios,
-      totalLivros,
-      emprestimosAtivos,
-      reservasPendentes,
-    };
   },
 
   /**
