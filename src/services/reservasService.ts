@@ -20,15 +20,24 @@ import { mapBookResponseToLivro } from "./mappers/bookMapper";
 async function mapReserveResponseToReserva(
   reserve: ReserveResponse
 ): Promise<Reserva> {
+  const normalizeDateOnly = (
+    value?: string
+  ): string | undefined => {
+    if (!value) return undefined;
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return undefined;
+    return date.toISOString().split("T")[0];
+  };
+
   const calculatePrazoRetirada = (
     reserveDate?: string
   ): string | undefined => {
-    if (!reserveDate) return undefined;
-    const date = new Date(reserveDate);
-    if (isNaN(date.getTime())) return undefined;
+    const baseDate = normalizeDateOnly(reserveDate);
+    if (!baseDate) return undefined;
+    const date = new Date(baseDate);
     const prazo = new Date(date);
     prazo.setDate(prazo.getDate() + 4);
-    return prazo.toISOString();
+    return prazo.toISOString().split("T")[0];
   };
 
   const normalizeStatus = (
@@ -62,15 +71,20 @@ async function mapReserveResponseToReserva(
     return undefined;
   };
 
+  const dataReserva =
+    normalizeDateOnly(reserve.reserveDate) ??
+    reserve.reserveDate;
+  const prazoRetirada =
+    calculatePrazoRetirada(reserve.reserveDate) ??
+    dataReserva;
+
   const reserva: Partial<Reserva> = {
     id: reserve.id,
     usuarioId: reserve.userEnrollment,
     livroIsbn: reserve.bookIsbn,
-    dataReserva: reserve.reserveDate,
+    dataReserva,
     status: normalizeStatus(reserve.status) ?? "ATIVA",
-    prazoRetirada: calculatePrazoRetirada(
-      reserve.reserveDate
-    ),
+    prazoRetirada,
   };
 
   // Tentar popular o objeto `livro` para evitar undefined em componentes
