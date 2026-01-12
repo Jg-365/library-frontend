@@ -12,6 +12,8 @@ import {
   GraduationCap,
   BookCheck,
   BookmarkCheck,
+  Moon,
+  Sun,
 } from "lucide-react";
 import type { Perfil } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,7 @@ import {
   CustomSheetTitle,
   CustomSheetTrigger,
 } from "@/components/ui/custom-sheet";
+import { useTheme } from "next-themes";
 
 interface MenuItem {
   label: string;
@@ -155,6 +158,8 @@ export function AppHeader({
   const config = headerConfig[perfil];
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   const isActive = (href: string) => {
     return (
@@ -166,7 +171,7 @@ export function AppHeader({
   return (
     <header
       id="app-header"
-      className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm"
+      className="sticky top-0 z-50 w-full border-b bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-800 dark:bg-slate-950/80"
     >
       <div className="container mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between sm:h-16">
@@ -190,7 +195,7 @@ export function AppHeader({
               >
                 {title || config.title}
               </h1>
-              <p className="text-xs sm:text-sm text-gray-500 hidden md:block">
+              <p className="text-xs sm:text-sm text-gray-500 hidden md:block dark:text-slate-400">
                 {subtitle || config.subtitle}
               </p>
             </div>
@@ -209,8 +214,8 @@ export function AppHeader({
                     transition-all duration-200
                     ${
                       isActiveLink
-                        ? "bg-blue-50 text-blue-600 shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-blue-50 text-blue-600 shadow-sm dark:bg-slate-800 dark:text-blue-300"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     }
                   `}
                 >
@@ -219,13 +224,51 @@ export function AppHeader({
                 </Link>
               );
             })}
-            <div className="ml-2">
+            <div className="ml-2 flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() =>
+                  setTheme(isDarkMode ? "light" : "dark")
+                }
+                className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                aria-label={
+                  isDarkMode
+                    ? "Ativar tema claro"
+                    : "Ativar tema escuro"
+                }
+              >
+                {isDarkMode ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
               <LogoutButton />
             </div>
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="flex lg:hidden items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setTheme(isDarkMode ? "light" : "dark")
+              }
+              className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label={
+                isDarkMode
+                  ? "Ativar tema claro"
+                  : "Ativar tema escuro"
+              }
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
             <CustomSheet
               open={isOpen}
               onOpenChange={setIsOpen}
@@ -278,8 +321,8 @@ export function AppHeader({
                           transition-all duration-200
                           ${
                             isActiveLink
-                              ? "bg-blue-50 text-blue-600 shadow-sm"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              ? "bg-blue-50 text-blue-600 shadow-sm dark:bg-slate-800 dark:text-blue-300"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-white"
                           }
                         `}
                       >
@@ -288,7 +331,7 @@ export function AppHeader({
                       </Link>
                     );
                   })}
-                  <div className="mt-4 pt-4 border-t">
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                     <LogoutButton />
                   </div>
                 </nav>
