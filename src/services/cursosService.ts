@@ -31,11 +31,11 @@ function mapCursoResponse(curso: any): Curso {
 export const cursosService = {
   /**
    * Listar todos os cursos
-   * GET /courses
+   * GET /courses/all
    */
   async listarTodos(): Promise<Curso[]> {
     const response = await api.get(
-      API_ENDPOINTS.CURSOS.BASE
+      API_ENDPOINTS.CURSOS.ALL
     );
     return (response.data || []).map(mapCursoResponse);
   },
