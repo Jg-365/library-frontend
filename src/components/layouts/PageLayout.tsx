@@ -17,7 +17,7 @@ export function PageLayout({
   className = "container mx-auto px-4 py-8",
 }: PageLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <main className={className}>{children}</main>
     </div>
   );
