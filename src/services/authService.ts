@@ -273,12 +273,20 @@ export const authService = {
       payload.graduationDate = data.graduationDate;
     }
 
-    if (data.userType === "PROFESSOR") {
-      if (data.courseCode) {
+    if (
+      data.userType === "PROFESSOR" ||
+      data.userType === "FUNCIONARIO"
+    ) {
+      if (
+        data.userType === "PROFESSOR" &&
+        data.courseCode
+      ) {
         payload.courseCode = data.courseCode;
       }
       payload.hireDate = data.hireDate;
-      payload.workRegime = data.workRegime;
+      if (data.workRegime) {
+        payload.workRegime = data.workRegime;
+      }
     }
 
     await api.post(API_ENDPOINTS.USUARIOS.CREATE, payload);

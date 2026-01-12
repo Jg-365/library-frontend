@@ -370,8 +370,9 @@ export function RegisterForm() {
                   </div>
                 )}
 
-                {/* Campos Específicos - Professor */}
-                {userType === "PROFESSOR" && (
+                {/* Campos Específicos - Professores e Funcionários */}
+                {(userType === "PROFESSOR" ||
+                  userType === "FUNCIONARIO") && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}

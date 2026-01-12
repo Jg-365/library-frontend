@@ -86,9 +86,10 @@ export const registerSchema = z
   )
   .refine(
     (data) => {
-      // Se √© PROFESSOR, hireDate e workRegime s√£o obrigat√≥rios
+      // Se È PROFESSOR ou FUNCIONARIO, hireDate e workRegime s„o obrigatÛrios
       if (
-        data.userType === "PROFESSOR" &&
+        (data.userType === "PROFESSOR" ||
+          data.userType === "FUNCIONARIO") &&
         (!data.hireDate || !data.workRegime)
       ) {
         return false;
@@ -97,7 +98,7 @@ export const registerSchema = z
     },
     {
       message:
-        "Data de contrata√ß√£o e regime de trabalho s√£o obrigat√≥rios para Professores",
+        "Data de contrataÁ„o e regime de trabalho s„o obrigatÛrios para Professores e Funcion·rios",
       path: ["hireDate"],
     }
   );
