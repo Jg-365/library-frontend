@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth as useAuthContext } from "@/store/AuthContext";
+import { getJwtSubject } from "@/lib/jwt";
 import {
   dashboardService,
   type DashboardStats,
@@ -25,7 +26,14 @@ import {
 import { toast } from "sonner";
 
 function BibliotecarioDashboard() {
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
+  const decodedSubject = getJwtSubject(token);
+  const displayName =
+    user?.name ??
+    user?.username ??
+    decodedSubject ??
+    user?.role ??
+    "Bibliotecário";
   const [stats, setStats] = useState<DashboardStats>({
     totalUsuarios: 0,
     totalLivros: 0,
@@ -154,7 +162,7 @@ function BibliotecarioDashboard() {
         {/* Saudação ao bibliotecário */}
         <div className="mb-6">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Olá, {user?.nome || "Bibliotecário"}!
+            Olá, {displayName}!
           </h2>
           <p className="text-muted-foreground mt-1">
             Bem-vindo ao painel de gerenciamento da
