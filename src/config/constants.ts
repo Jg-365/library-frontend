@@ -107,6 +107,7 @@ export const API_ENDPOINTS = {
   // Cursos (Courses)
   CURSOS: {
     BASE: "/courses",
+    ALL: "/courses/all",
     CREATE: "/courses",
     BY_ID: (id: number) => `/courses/${id}`,
     BY_NAME: (courseName: string) =>
