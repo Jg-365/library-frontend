@@ -120,6 +120,29 @@ export function setupMultasHandlers(mock: MockAdapter) {
     return [200, pending];
   });
 
+  mock.onGet(/\/fines\/user\/pending\/\d+$/).reply((config) => {
+    const parts = config.url?.split("/") || [];
+    const userId = parseInt(parts.pop() || "0");
+    const pending = mockMultas.filter(
+      (m) => !m.pago && m.usuarioId === userId
+    );
+    return [200, pending];
+  });
+
+  mock.onGet(/\/fines\/user\/paid$/).reply(200, () => {
+    const paid = mockMultas.filter((m) => m.pago);
+    return [200, paid];
+  });
+
+  mock.onGet(/\/fines\/user\/paid\/\d+$/).reply((config) => {
+    const parts = config.url?.split("/") || [];
+    const userId = parseInt(parts.pop() || "0");
+    const paid = mockMultas.filter(
+      (m) => m.pago && m.usuarioId === userId
+    );
+    return [200, paid];
+  });
+
   mock.onPatch(/\/fines\/pay\/\d+$/).reply((config) => {
     const parts = config.url?.split("/") || [];
     const id = parseInt(parts.pop() || "0");

@@ -20,12 +20,14 @@ interface CreateCursoColumnProps {
   onEdit: (curso: Curso) => void;
   onDelete: (curso: Curso) => void;
   onViewTeachers?: (curso: Curso) => void;
+  onViewStudents?: (curso: Curso) => void;
 }
 
 export function createCursoColumn({
   onEdit,
   onDelete,
   onViewTeachers,
+  onViewStudents,
 }: CreateCursoColumnProps): ColumnDef<Curso>[] {
   return [
     {
@@ -73,6 +75,15 @@ export function createCursoColumn({
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Ver professores
+                </DropdownMenuItem>
+              )}
+              {onViewStudents && (
+                <DropdownMenuItem
+                  onClick={() => onViewStudents(curso)}
+                  className="cursor-pointer"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Ver alunos
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem

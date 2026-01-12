@@ -3,6 +3,7 @@ import DashboardUsuario from "@/pages/subpages/DashboardUsuario";
 import CatalogoLivros from "@/pages/subpages/CatalogoLivros";
 import MeusEmprestimos from "@/pages/subpages/MeusEmprestimos";
 import MinhasReservas from "@/pages/subpages/MinhasReservas";
+import { MinhasMultas } from "@/pages/subpages/MinhasMultas";
 import { PageLayout } from "@/components/layouts";
 
 function UserDashboard() {
@@ -19,6 +20,7 @@ function UserDashboard() {
           path="reservas"
           element={<MinhasReservas />}
         />
+        <Route path="multas" element={<MinhasMultas />} />
       </Routes>
     </PageLayout>
   );

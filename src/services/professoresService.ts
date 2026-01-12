@@ -89,12 +89,15 @@ export const professoresService = {
    * GET /users/teachers/by-course?course=<nome>
    */
   async listarPorCurso(
-    cursoId: number
+    curso: string | number
   ): Promise<MyPage<Professor>> {
+    const courseName = await resolveCourseName(curso);
     const response = await api.get<
       MyPage<Professor> | Professor[]
     >(
-      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?cursoId=${cursoId}`
+      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?course=${encodeURIComponent(
+        courseName
+      )}`
     );
     return normalizeProfessoresPage(response.data);
   },

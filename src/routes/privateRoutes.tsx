@@ -12,6 +12,8 @@ import {
   CadastroEmprestimos,
   CadastroDevolucoes,
   ProfessoresPorCurso,
+  AlunosPorCurso,
+  MultasUsuario,
   Relatorios,
   Seguranca,
   Configuracoes,
@@ -74,6 +76,11 @@ export const privateRoutes: PrivateRoute[] = [
     perfisPermitidos: ["BIBLIOTECARIO"],
   },
   {
+    path: "/bibliotecario/multas",
+    element: <MultasUsuario />,
+    perfisPermitidos: ["BIBLIOTECARIO"],
+  },
+  {
     path: "/bibliotecario/catalogo",
     element: <CatalogoLivros />,
     perfisPermitidos: ["BIBLIOTECARIO"],
@@ -123,6 +130,21 @@ export const privateRoutes: PrivateRoute[] = [
   {
     path: "/admin/professores-por-curso",
     element: <ProfessoresPorCurso />,
+    perfisPermitidos: ["ADMIN"],
+  },
+  {
+    path: "/admin/alunos-por-curso",
+    element: <AlunosPorCurso />,
+    perfisPermitidos: ["ADMIN"],
+  },
+  {
+    path: "/admin/devolucoes",
+    element: <CadastroDevolucoes />,
+    perfisPermitidos: ["ADMIN"],
+  },
+  {
+    path: "/admin/multas",
+    element: <MultasUsuario />,
     perfisPermitidos: ["ADMIN"],
   },
   {

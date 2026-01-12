@@ -110,6 +110,13 @@ export function CadastroCursos() {
         )}`
       );
     },
+    onViewStudents: (curso) => {
+      navigate(
+        `/admin/alunos-por-curso?courseName=${encodeURIComponent(
+          curso.courseName
+        )}`
+      );
+    },
   });
 
   const filteredCursos = useMemo(() => {
@@ -120,7 +127,9 @@ export function CadastroCursos() {
       .trim()
       .toLowerCase();
     return cursos.filter((curso) => {
-      const nameMatch = curso.courseName
+      const nameMatch = String(
+        curso.courseName ?? ""
+      )
         .toLowerCase()
         .includes(normalizedTerm);
       const codeMatch = String(curso.courseCode).includes(
@@ -158,6 +167,15 @@ export function CadastroCursos() {
             >
               <Link to="/admin/professores-por-curso">
                 Buscar professores
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              asChild
+              className="w-full sm:w-auto"
+            >
+              <Link to="/admin/alunos-por-curso">
+                Buscar alunos
               </Link>
             </Button>
             <Button
