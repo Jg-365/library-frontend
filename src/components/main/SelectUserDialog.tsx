@@ -169,33 +169,43 @@ export function SelectUserDialog({
                 <SelectContent className="max-h-[300px]">
                   {filteredUsuarios.length === 0 ? (
                     <div className="p-2 text-sm text-gray-500 text-center">
-                      Nenhum usu√°rio encontrado
+                      Nenhum usu·rio encontrado
                     </div>
                   ) : (
-                    filteredUsuarios.map((usuario) => (
-                      <SelectItem
-                        key={usuario.id}
-                        value={String(usuario.enrollment ?? "")}
-                      >
-                        <div
-                          key={usuario.id + "-content"}
-                          className="flex flex-col"
-                        >
-                          <span className="font-medium">
-                            {(usuario.name ?? "").trim() ||
-                              "Usu√°rio sem nome"}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Matr√≠cula:{" "}
-                            {String(
-                              usuario.enrollment ?? ""
-                            )}
-                            {usuario.email &&
-                              ` ‚Ä¢ ${usuario.email}`}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))
+                    filteredUsuarios
+                      .filter(
+                        (usuario) =>
+                          usuario.enrollment !== undefined ||
+                          usuario.id !== undefined
+                      )
+                      .map((usuario) => {
+                        const enrollmentValue =
+                          usuario.enrollment ??
+                          usuario.id ??
+                          "";
+                        return (
+                          <SelectItem
+                            key={`${usuario.id}-${enrollmentValue}`}
+                            value={String(enrollmentValue)}
+                          >
+                            <div
+                              key={usuario.id + "-content"}
+                              className="flex flex-col"
+                            >
+                              <span className="font-medium">
+                                {(usuario.name ?? "").trim() ||
+                                  "Usu·rio sem nome"}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                MatrÌcula:{" "}
+                                {String(enrollmentValue)}
+                                {usuario.email &&
+                                  ` ∑ ${usuario.email}`}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })
                   )}
                 </SelectContent>
               </Select>

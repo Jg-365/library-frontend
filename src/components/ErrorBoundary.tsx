@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 Ocorreu um erro inesperado na aplicação.
               </AlertDialogDescription>
               {this.state.error && (
-                <div className="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded mt-2">
+                <div className="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded mt-2 dark:bg-slate-900 dark:text-slate-200">
                   {this.state.error.message}
                 </div>
               )}
@@ -76,3 +76,6 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+
+

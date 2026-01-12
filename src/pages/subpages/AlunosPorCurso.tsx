@@ -141,22 +141,34 @@ export function AlunosPorCurso() {
 
   const filteredAlunos = useMemo(() => {
     if (!searchTerm.trim()) {
-      return alunos;
+      return [...alunos].sort((a, b) =>
+        String(a.name ?? a.nome ?? "").localeCompare(
+          String(b.name ?? b.nome ?? ""),
+          "pt-BR"
+        )
+      );
     }
 
     const normalizedTerm = searchTerm
       .trim()
       .toLowerCase();
-    return alunos.filter((aluno) => {
-      const name = aluno.name ?? aluno.nome ?? "";
-      const email = aluno.username ?? aluno.email ?? "";
-      const enrollment = aluno.enrollment ?? aluno.id ?? "";
-      return (
-        String(name).toLowerCase().includes(normalizedTerm) ||
-        String(email).toLowerCase().includes(normalizedTerm) ||
-        String(enrollment).includes(normalizedTerm)
+    return alunos
+      .filter((aluno) => {
+        const name = aluno.name ?? aluno.nome ?? "";
+        const email = aluno.username ?? aluno.email ?? "";
+        const enrollment = aluno.enrollment ?? aluno.id ?? "";
+        return (
+          String(name).toLowerCase().includes(normalizedTerm) ||
+          String(email).toLowerCase().includes(normalizedTerm) ||
+          String(enrollment).includes(normalizedTerm)
+        );
+      })
+      .sort((a, b) =>
+        String(a.name ?? a.nome ?? "").localeCompare(
+          String(b.name ?? b.nome ?? ""),
+          "pt-BR"
+        )
       );
-    });
   }, [alunos, searchTerm]);
 
   const handleCourseChange = (value: string) => {
@@ -192,7 +204,7 @@ export function AlunosPorCurso() {
         />
 
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Alunos por Curso
           </h1>
           <p className="text-gray-600 mt-1 dark:text-slate-300">
@@ -275,3 +287,6 @@ export function AlunosPorCurso() {
     </PageLayout>
   );
 }
+
+
+

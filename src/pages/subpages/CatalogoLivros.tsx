@@ -351,8 +351,8 @@ export function CatalogoLivros() {
         <div className="max-w-7xl mx-auto">
           <Card className="shadow-lg">
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-xl font-semibold text-gray-600">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600 mb-4"></div>
+              <p className="text-xl font-semibold text-gray-600 dark:text-slate-300">
                 Carregando catálogo...
               </p>
             </div>
@@ -378,11 +378,11 @@ export function CatalogoLivros() {
         {/* Título da Página */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-              <BookOpen className="h-8 w-8 text-blue-600" />
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent flex items-center gap-2">
+              <BookOpen className="h-8 w-8 text-sky-600" />
               Catálogo de Livros
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
               Explore nosso acervo e reserve os livros que
               deseja
             </p>
@@ -541,3 +541,6 @@ export function CatalogoLivros() {
 }
 
 export default CatalogoLivros;
+
+
+

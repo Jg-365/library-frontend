@@ -216,7 +216,7 @@ export function CadastroDevolucoes() {
           backTo={basePath}
         />
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Registro de Devoluções
           </h1>
           <p className="text-gray-600 mt-1 dark:text-slate-300">
@@ -260,7 +260,7 @@ export function CadastroDevolucoes() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <BookOpen className="h-5 w-5 text-sky-600 dark:text-cyan-300" />
                             {emprestimo.livro?.titulo ||
                               emprestimo.livros?.[0]?.titulo ||
                               "Livro não informado"}
@@ -308,7 +308,7 @@ export function CadastroDevolucoes() {
                           onClick={() =>
                             handleDevolver(emprestimo)
                           }
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                          className="w-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 hover:from-sky-600 hover:via-cyan-600 hover:to-emerald-600"
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Registrar Devolução
@@ -342,7 +342,7 @@ export function CadastroDevolucoes() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            <BookOpen className="h-5 w-5 text-sky-600 dark:text-cyan-300" />
                             {emprestimo.livro?.titulo ||
                               emprestimo.livros?.[0]?.titulo ||
                               "Livro não informado"}
@@ -434,3 +434,6 @@ export function CadastroDevolucoes() {
     </PageLayout>
   );
 }
+
+
+

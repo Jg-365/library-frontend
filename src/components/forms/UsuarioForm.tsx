@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cursosService, usuariosService } from "@/services";
-import type { Usuario } from "@/types";
+import type { TipoUsuario, Usuario } from "@/types";
 import { getErrorMessage } from "@/lib/errorMessage";
 
 interface Curso {
@@ -48,6 +48,13 @@ export function UsuarioForm({
     useState(true);
   const isEditing = !!usuario;
 
+  const normalizeWorkRegime = (value?: string) => {
+    if (!value) return undefined;
+    if (value === "40") return "INTEGRAL";
+    if (value === "20") return "PARCIAL";
+    return value;
+  };
+
   const form = useForm<UsuarioFormData>({
     resolver: zodResolver(usuarioFormSchema),
     defaultValues: {
@@ -57,16 +64,20 @@ export function UsuarioForm({
       tipoUsuario: usuario?.userType || "ALUNO",
       tipoAcesso: usuario?.role || "USUARIO",
       senha: "",
-      codigoCurso: undefined,
-      dataIngresso: "",
-      dataFormatura: "",
-      dataContratacao: "",
-      regimeTrabalho: undefined,
+      codigoCurso: usuario?.courseCode ?? undefined,
+      dataIngresso: usuario?.ingressDate || "",
+      dataFormatura: usuario?.graduationDate || "",
+      dataContratacao: usuario?.hireDate || "",
+      regimeTrabalho: normalizeWorkRegime(
+        usuario?.workRegime
+      ),
       ativo: usuario?.ativo ?? usuario?.active ?? true,
     },
   });
 
   const tipoUsuarioSelecionado = form.watch("tipoUsuario");
+  const tipoUsuarioEdicao =
+    usuario?.userType ?? tipoUsuarioSelecionado;
 
   // Busca cursos ao montar o componente
   useEffect(() => {
@@ -87,19 +98,63 @@ export function UsuarioForm({
     fetchCursos();
   }, []);
 
+  const mapWorkRegime = (value?: string) => {
+    if (!value) return undefined;
+    if (value === "INTEGRAL") return "40";
+    if (value === "PARCIAL") return "20";
+    return value;
+  };
+
+  const buildUpdatePayload = (
+    data: UsuarioFormData,
+    userType: TipoUsuario | undefined,
+    enrollment?: string | number
+  ) => {
+    const payload: Record<string, unknown> = {
+      enrollment:
+        enrollment !== undefined && enrollment !== null
+          ? Number(enrollment)
+          : undefined,
+      name: data.nome,
+      username: data.email?.trim(),
+      address: data.endereco,
+      active: data.ativo,
+    };
+
+    if (userType === "ALUNO") {
+      if (data.codigoCurso) {
+        payload.courseCode = data.codigoCurso;
+      }
+      if (data.dataFormatura) {
+        payload.graduationDate = data.dataFormatura;
+      }
+    } else if (userType === "PROFESSOR") {
+      if (data.codigoCurso) {
+        payload.courseCode = data.codigoCurso;
+      }
+      const mappedRegime = mapWorkRegime(
+        data.regimeTrabalho
+      );
+      if (mappedRegime) {
+        payload.workRegime = mappedRegime;
+      }
+    }
+
+    return payload;
+  };
+
   const onSubmit = async (data: UsuarioFormData) => {
     setIsSubmitting(true);
     try {
       let savedUsuario: Usuario | null = null;
       if (isEditing) {
-        // Se está editando e não forneceu senha, remove do payload
-        const payload = data.senha
-          ? data
-          : { ...data, senha: undefined };
-
-        // Backend usa enrollment no path, determinar tipo de usuário
-        const enrollment = usuario.enrollment || usuario.id;
-        const userType = usuario.userType;
+        const enrollment = usuario?.enrollment || usuario?.id;
+        const userType = data.tipoUsuario || usuario?.userType;
+        const payload = buildUpdatePayload(
+          data,
+          userType,
+          enrollment
+        );
 
         // Escolher endpoint correto baseado no tipo de usuário
         if (userType === "ALUNO") {
@@ -127,7 +182,7 @@ export function UsuarioForm({
           password: data.senha,
           name: data.nome,
           username:
-            data.email?.split("@")[0] ||
+            data.email?.trim() ||
             data.nome?.toLowerCase().replace(/\s/g, ""),
           address: data.endereco,
           userType: data.tipoUsuario,
@@ -151,7 +206,12 @@ export function UsuarioForm({
           }
           // Campos obrigatórios para PROFESSOR (validação garante que existem)
           backendPayload.hireDate = data.dataContratacao;
-          backendPayload.workRegime = data.regimeTrabalho;
+          const mappedRegime = mapWorkRegime(
+            data.regimeTrabalho
+          );
+          if (mappedRegime) {
+            backendPayload.workRegime = mappedRegime;
+          }
         }
         // FUNCIONARIO não precisa de campos adicionais
 
@@ -214,7 +274,7 @@ export function UsuarioForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6"
+        className="cyber-form-card"
       >
         <FormField
           control={form.control}
@@ -268,74 +328,94 @@ export function UsuarioForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="tipoUsuario"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Usuário</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="ALUNO">
-                    Aluno
-                  </SelectItem>
-                  <SelectItem value="PROFESSOR">
-                    Professor
-                  </SelectItem>
-                  <SelectItem value="FUNCIONARIO">
-                    Funcionário
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditing ? (
+          <FormField
+            control={form.control}
+            name="tipoUsuario"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Usuário</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ALUNO">
+                      Aluno
+                    </SelectItem>
+                    <SelectItem value="PROFESSOR">
+                      Professor
+                    </SelectItem>
+                    <SelectItem value="FUNCIONARIO">
+                      Funcionário
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel>Tipo de Usuário</FormLabel>
+            <Input
+              value={tipoUsuarioEdicao ?? ""}
+              readOnly
+            />
+          </FormItem>
+        )}
 
-        <FormField
-          control={form.control}
-          name="tipoAcesso"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Nível de Acesso no Sistema
-              </FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o nível" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="USUARIO">
-                    Usuário (acesso básico)
-                  </SelectItem>
-                  <SelectItem value="BIBLIOTECARIO">
-                    Bibliotecário
-                  </SelectItem>
-                  <SelectItem value="ADMIN">
-                    Administrador
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditing ? (
+          <FormField
+            control={form.control}
+            name="tipoAcesso"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Nível de Acesso no Sistema
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o nível" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="USUARIO">
+                      Usuário (acesso básico)
+                    </SelectItem>
+                    <SelectItem value="BIBLIOTECARIO">
+                      Bibliotecário
+                    </SelectItem>
+                    <SelectItem value="ADMIN">
+                      Administrador
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel>Nível de Acesso no Sistema</FormLabel>
+            <Input
+              value={usuario?.role ?? ""}
+              readOnly
+            />
+          </FormItem>
+        )}
 
         {/* Campos específicos para ALUNO */}
-        {tipoUsuarioSelecionado === "ALUNO" && (
+        {tipoUsuarioEdicao === "ALUNO" && (
           <>
             <FormField
               control={form.control}
@@ -370,15 +450,26 @@ export function UsuarioForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {cursos.map((curso) => (
-                          <SelectItem
-                            key={curso.courseCode}
-                            value={curso.courseCode.toString()}
-                          >
-                            {curso.courseName} (Cód.{" "}
-                            {curso.courseCode})
-                          </SelectItem>
-                        ))}
+                        {cursos
+                          .filter(
+                            (curso) =>
+                              curso.courseCode !== undefined &&
+                              curso.courseCode !== null
+                          )
+                          .map((curso) => {
+                            const courseValue =
+                              curso.courseCode?.toString() ?? "";
+                            if (!courseValue) return null;
+                            return (
+                              <SelectItem
+                                key={`curso-${curso.courseCode}`}
+                                value={courseValue}
+                              >
+                                {curso.courseName} (Cód.{" "}
+                                {curso.courseCode})
+                              </SelectItem>
+                            );
+                          })}
                       </SelectContent>
                     </Select>
                   )}
@@ -387,19 +478,21 @@ export function UsuarioForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="dataIngresso"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data de Ingresso *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="dataIngresso"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data de Ingresso *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -420,7 +513,7 @@ export function UsuarioForm({
         )}
 
         {/* Campos específicos para PROFESSOR */}
-        {tipoUsuarioSelecionado === "PROFESSOR" && (
+        {tipoUsuarioEdicao === "PROFESSOR" && (
           <>
             <FormField
               control={form.control}
@@ -444,14 +537,16 @@ export function UsuarioForm({
                     </div>
                   ) : (
                     <Select
-                      onValueChange={(value) =>
-                        field.onChange(
-                          value
-                            ? parseInt(value)
-                            : undefined
-                        )
+                      onValueChange={(value) => {
+                        if (value === "NONE") {
+                          field.onChange(undefined);
+                          return;
+                        }
+                        field.onChange(parseInt(value));
+                      }}
+                      value={
+                        field.value?.toString() ?? "NONE"
                       }
-                      value={field.value?.toString()}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -459,7 +554,7 @@ export function UsuarioForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">
+                        <SelectItem value="NONE">
                           Nenhum
                         </SelectItem>
                         {cursos.map((curso) => (
@@ -479,21 +574,23 @@ export function UsuarioForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="dataContratacao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Data de Contratação *
-                  </FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="dataContratacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Data de Contratação *
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -531,31 +628,25 @@ export function UsuarioForm({
           </>
         )}
 
-        <FormField
-          control={form.control}
-          name="senha"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                {isEditing
-                  ? "Nova Senha (deixe em branco para manter a atual)"
-                  : "Senha"}
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder={
-                    isEditing
-                      ? "Digite apenas se quiser alterar"
-                      : "Digite a senha"
-                  }
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!isEditing && (
+          <FormField
+            control={form.control}
+            name="senha"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Senha</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Digite a senha"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
@@ -583,7 +674,7 @@ export function UsuarioForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 hover:from-sky-600 hover:via-cyan-600 hover:to-emerald-600"
           >
             {isSubmitting
               ? "Salvando..."
@@ -596,3 +687,6 @@ export function UsuarioForm({
     </Form>
   );
 }
+
+
+

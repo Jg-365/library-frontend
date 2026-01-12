@@ -41,13 +41,16 @@ export const API_ENDPOINTS = {
   // Livros (Books)
   LIVROS: {
     BASE: "/books",
-    BY_ISBN: (isbn: string) => `/books/${isbn}`,
+    BY_ISBN: (isbn: string) =>
+      `/books/${encodeURIComponent(isbn)}`,
     SEARCH: "/books",
     CREATE: "/books",
-    UPDATE: (isbn: string) => `/books/${isbn}`,
-    DELETE: (isbn: string) => `/books/${isbn}`,
+    UPDATE: (isbn: string) =>
+      `/books/${encodeURIComponent(isbn)}`,
+    DELETE: (isbn: string) =>
+      `/books/${encodeURIComponent(isbn)}`,
     REMOVE_CO_AUTHORS: (isbn: string) =>
-      `/books/${isbn}/co-authors`,
+      `/books/${encodeURIComponent(isbn)}/co-authors`,
   },
 
   // Autores (Authors)
@@ -144,12 +147,15 @@ export const API_ENDPOINTS = {
     BASE: "/copies",
     CREATE: "/copies",
     BY_ID: (sequential: number, isbn: string) =>
-      `/copies/${sequential}/${isbn}`,
-    UPDATE: (sequential: number) => `/copies/${sequential}`,
+      `/copies/${sequential}/${encodeURIComponent(isbn)}`,
+    UPDATE: (sequential: number, isbn: string) =>
+      `/copies/${sequential}/${encodeURIComponent(isbn)}`,
     DELETE: (sequential: number, isbn: string) =>
-      `/copies/${sequential}/${isbn}`,
-    BY_STATUS: (isbn: string) => `/copies/status/${isbn}`,
-    ALL_BY_ISBN: (isbn: string) => `/copies/all/${isbn}`,
+      `/copies/${sequential}/${encodeURIComponent(isbn)}`,
+    BY_STATUS: (isbn: string) =>
+      `/copies/status/${encodeURIComponent(isbn)}`,
+    ALL_BY_ISBN: (isbn: string) =>
+      `/copies/all/${encodeURIComponent(isbn)}`,
   },
 
   // Reservas (Reserves)
@@ -194,3 +200,4 @@ export const PERFIL_ROUTES = {
   BIBLIOTECARIO: "/bibliotecario/dashboard",
   ADMIN: "/admin/dashboard", // Administrador
 } as const;
+

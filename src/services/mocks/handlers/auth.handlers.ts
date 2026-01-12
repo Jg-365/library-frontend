@@ -58,3 +58,4 @@ export function setupAuthHandlers(mock: MockAdapter) {
     return [401, { message: "Token inválido" }];
   });
 }
+

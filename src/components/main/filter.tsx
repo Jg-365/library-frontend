@@ -176,7 +176,7 @@ export function BookFilters({
                 {activeFiltersCount > 0 && (
                   <Badge
                     variant="secondary"
-                    className="ml-1 px-1.5 bg-blue-100 text-blue-700 border-blue-200"
+                    className="ml-1 px-1.5 bg-sky-100 text-sky-700 border-sky-200"
                   >
                     {activeFiltersCount}
                   </Badge>
@@ -408,9 +408,9 @@ export function BookFilters({
 
       {/* Badges de filtros ativos - Responsivo e organizado */}
       {activeFiltersCount > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 dark:border-slate-700 dark:bg-slate-900">
+        <div className="bg-sky-50 border border-sky-200 rounded-lg p-3 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-semibold text-blue-700 flex items-center gap-1 dark:text-blue-200">
+            <span className="text-xs font-semibold text-sky-700 flex items-center gap-1 dark:text-cyan-200">
               <Filter className="h-3 w-3" />
               Filtros ativos:
             </span>
@@ -426,7 +426,7 @@ export function BookFilters({
                 <Badge
                   key={key}
                   variant="secondary"
-                  className="gap-1.5 bg-white border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors pl-2.5 pr-2 py-1 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-200 dark:hover:bg-slate-800"
+                  className="gap-1.5 bg-white border-sky-300 text-sky-700 hover:bg-sky-100 transition-colors pl-2.5 pr-2 py-1 dark:border-slate-700 dark:bg-slate-900 dark:text-cyan-200 dark:hover:bg-slate-800"
                 >
                   <span className="text-xs font-medium">
                     {
@@ -464,3 +464,6 @@ export function BookFilters({
     </div>
   );
 }
+
+
+

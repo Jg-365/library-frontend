@@ -20,3 +20,4 @@ export interface ProfessoresPorCurso {
   professores: Professor[];
   total: number;
 }
+

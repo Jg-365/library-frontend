@@ -66,3 +66,4 @@ export function setupProfessoresHandlers(
       return [200, resultado];
     });
 }
+

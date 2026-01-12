@@ -74,3 +74,4 @@ export function mapBookResponseToLivro(
       book.availableCopies ?? book.numberOfCopies ?? 0,
   };
 }
+

@@ -251,8 +251,8 @@ export function DashboardUsuario() {
         <div className="max-w-7xl mx-auto">
           <Card className="shadow-lg">
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-xl font-semibold text-gray-600">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600 mb-4"></div>
+              <p className="text-xl font-semibold text-gray-600 dark:text-slate-300">
                 Carregando dashboard...
               </p>
             </div>
@@ -268,20 +268,20 @@ export function DashboardUsuario() {
         {/* Título da Página */}
         <div>
           {/* Boas vindas direta ao usuário */}
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Bem-vindo de volta{" "}
             <span className="font-bold">
               {user?.nome || "Usuário"}
             </span>
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
             Explore nosso acervo e gerencie suas reservas e
             empréstimos
           </p>
         </div>
         {/* Quick Actions Section */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-slate-200">
             Ações Rápidas
           </h3>
           <div className="grid gap-6 md:grid-cols-2">
@@ -295,10 +295,10 @@ export function DashboardUsuario() {
                   <Link to={action.href}>
                     <CardHeader>
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-600 transition-all duration-200">
-                          <Icon className="h-5 w-5 text-blue-600 group-hover:text-white transition-colors duration-200" />
+                        <div className="p-2 bg-sky-100 rounded-lg group-hover:bg-sky-600 transition-all duration-200">
+                          <Icon className="h-5 w-5 text-sky-600 group-hover:text-white transition-colors duration-200" />
                         </div>
-                        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-200">
+                        <CardTitle className="text-lg group-hover:text-sky-600 transition-colors duration-200">
                           {action.title}
                         </CardTitle>
                       </div>
@@ -320,8 +320,8 @@ export function DashboardUsuario() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-800">
+                <Clock className="h-5 w-5 text-sky-600" />
+                <h3 className="text-xl font-bold text-gray-800 dark:text-slate-100">
                   Minhas Reservas Ativas
                 </h3>
               </div>
@@ -353,8 +353,8 @@ export function DashboardUsuario() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
-              <h3 className="text-xl font-bold text-gray-800">
+              <BookOpen className="h-5 w-5 text-sky-600" />
+              <h3 className="text-xl font-bold text-gray-800 dark:text-slate-100">
                 Livros Disponíveis
               </h3>
             </div>
@@ -421,3 +421,6 @@ export function DashboardUsuario() {
 }
 
 export default DashboardUsuario;
+
+
+

@@ -21,3 +21,6 @@ export type CategoriaFormValues = z.infer<
 >;
 
 export default categoriaSchema;
+
+
+

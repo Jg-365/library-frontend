@@ -98,3 +98,4 @@ const mockBooksData: Livro[] = [
 // Valida os dados mockados com o schema Zod
 export const mockBooks =
   livrosArraySchema.parse(mockBooksData);
+

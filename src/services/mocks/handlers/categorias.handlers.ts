@@ -73,3 +73,4 @@ export function setupCategoriasHandlers(mock: MockAdapter) {
     return [204];
   });
 }
+

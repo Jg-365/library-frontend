@@ -450,10 +450,10 @@ export function BookForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6"
+        className="cyber-form-card"
       >
         {!livro && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+          <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 text-sm text-sky-800">
             <p className="font-medium mb-1">
               ℹ️ Informação sobre exemplares
             </p>
@@ -890,3 +890,6 @@ export function BookForm({
     </Form>
   );
 }
+
+
+

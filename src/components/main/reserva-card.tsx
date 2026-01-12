@@ -103,13 +103,13 @@ export function ReservaCard({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ATIVA":
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30";
       case "CONCLUIDA":
-        return "bg-blue-100 text-blue-800 border-blue-300";
+        return "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/20 dark:text-cyan-200 dark:border-cyan-500/30";
       case "CANCELADA":
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700";
     }
   };
 
@@ -145,7 +145,7 @@ export function ReservaCard({
 
       <CardContent className="space-y-3">
         {/* Capa do Livro - Miniatura */}
-        <div className="relative h-32 bg-gradient-to-br from-blue-400 via-indigo-400 to-purple-500 rounded-lg overflow-hidden">
+        <div className="relative h-32 bg-gradient-to-br from-sky-400 via-cyan-400 to-emerald-500 rounded-lg overflow-hidden">
           {reserva.livro?.imagemCapa && !imageError ? (
             <>
               <img
@@ -193,7 +193,7 @@ export function ReservaCard({
               className={`flex items-center gap-2 font-semibold ${
                 tempoRestante === "Prazo expirado"
                   ? "text-red-600"
-                  : "text-blue-600"
+                  : "text-sky-600"
               }`}
             >
               <Clock className="h-4 w-4" />
@@ -233,3 +233,6 @@ export function ReservaCard({
     </Card>
   );
 }
+
+
+

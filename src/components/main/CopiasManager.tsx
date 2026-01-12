@@ -134,6 +134,7 @@ export function CopiasManager({
     try {
       await copiasService.atualizar(copia.sequential, {
         status: novoStatus,
+        isbn: copia.isbn,
       });
       toast.success("Status atualizado com sucesso!");
       await carregarCopias();
@@ -179,9 +180,9 @@ export function CopiasManager({
 
   const getStatusBadge = (status: string) => {
     const colors = STATUS_COLORS[status] || {
-      bg: "bg-gray-100",
-      text: "text-gray-800",
-      border: "border-gray-300",
+      bg: "bg-gray-100 dark:bg-slate-800/60",
+      text: "text-gray-800 dark:text-slate-200",
+      border: "border-gray-300 dark:border-slate-700",
     };
 
     return (
@@ -197,7 +198,7 @@ export function CopiasManager({
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
         </CardContent>
       </Card>
     );
@@ -333,7 +334,7 @@ export function CopiasManager({
                         onClick={() =>
                           handleDeletarCopia(copia)
                         }
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-500/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -376,3 +377,8 @@ export function CopiasManager({
     </>
   );
 }
+
+
+
+
+

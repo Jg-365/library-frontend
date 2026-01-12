@@ -16,3 +16,4 @@ export { MultasUsuario } from "./MultasUsuario";
 export { default as Relatorios } from "./Relatorios";
 export { default as Seguranca } from "./Seguranca";
 export { default as Configuracoes } from "./Configuracoes";
+

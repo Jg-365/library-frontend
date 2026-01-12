@@ -52,7 +52,7 @@ export function BookCard({
             "Título não informado"
           }
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          fallbackClassName="w-full h-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center"
+          fallbackClassName="w-full h-full bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-600 flex items-center justify-center"
         />
 
         {/* Badge de Disponibilidade */}
@@ -74,7 +74,7 @@ export function BookCard({
           <div className="absolute bottom-3 left-3">
             <Badge
               variant="secondary"
-              className="bg-white/90 text-gray-800 dark:bg-slate-900/80 dark:text-slate-100"
+              className="bg-white text-gray-800 dark:bg-slate-900 dark:text-slate-100"
             >
               {livro.quantidadeExemplares}{" "}
               {livro.quantidadeExemplares === 1
@@ -216,3 +216,6 @@ export function BookCard({
     </Card>
   );
 }
+
+
+

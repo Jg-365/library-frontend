@@ -50,3 +50,4 @@ export const mockAutores: Autor[] = [
     nacionalidade: "Estados Unidos",
   },
 ];
+

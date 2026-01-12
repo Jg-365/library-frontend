@@ -11,3 +11,4 @@ export { mockCategorias } from "./categorias.mock";
 export { mockSubcategorias } from "./subcategorias.mock";
 export { mockMultas, calcularMulta } from "./multas.mock";
 export { mockProfessores } from "./professores.mock";
+

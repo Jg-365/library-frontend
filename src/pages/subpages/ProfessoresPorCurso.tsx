@@ -143,24 +143,36 @@ export function ProfessoresPorCurso() {
 
   const filteredProfessores = useMemo(() => {
     if (!searchTerm.trim()) {
-      return professores;
+      return [...professores].sort((a, b) =>
+        String(a.name ?? a.nome ?? "").localeCompare(
+          String(b.name ?? b.nome ?? ""),
+          "pt-BR"
+        )
+      );
     }
 
     const normalizedTerm = searchTerm
       .trim()
       .toLowerCase();
-    return professores.filter((professor) => {
-      const name = professor.name ?? professor.nome ?? "";
-      const email =
-        professor.username ?? professor.email ?? "";
-      const enrollment =
-        professor.enrollment ?? professor.id ?? "";
-      return (
-        String(name).toLowerCase().includes(normalizedTerm) ||
-        String(email).toLowerCase().includes(normalizedTerm) ||
-        String(enrollment).includes(normalizedTerm)
+    return professores
+      .filter((professor) => {
+        const name = professor.name ?? professor.nome ?? "";
+        const email =
+          professor.username ?? professor.email ?? "";
+        const enrollment =
+          professor.enrollment ?? professor.id ?? "";
+        return (
+          String(name).toLowerCase().includes(normalizedTerm) ||
+          String(email).toLowerCase().includes(normalizedTerm) ||
+          String(enrollment).includes(normalizedTerm)
+        );
+      })
+      .sort((a, b) =>
+        String(a.name ?? a.nome ?? "").localeCompare(
+          String(b.name ?? b.nome ?? ""),
+          "pt-BR"
+        )
       );
-    });
   }, [professores, searchTerm]);
 
   const handleCourseChange = (value: string) => {
@@ -196,7 +208,7 @@ export function ProfessoresPorCurso() {
         />
 
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Professores por Curso
           </h1>
           <p className="text-gray-600 mt-1 dark:text-slate-300">
@@ -284,3 +296,6 @@ export function ProfessoresPorCurso() {
     </PageLayout>
   );
 }
+
+
+

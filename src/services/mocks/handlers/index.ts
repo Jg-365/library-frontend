@@ -9,3 +9,4 @@ export { setupCursosHandlers } from "./cursos.handlers";
 export { setupSubcategoriasHandlers } from "./subcategorias.handlers";
 export { setupMultasHandlers } from "./multas.handlers";
 export { setupProfessoresHandlers } from "./professores.handlers";
+

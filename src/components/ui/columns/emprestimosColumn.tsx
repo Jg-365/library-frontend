@@ -305,3 +305,6 @@ export const emprestimosColumn: ColumnDef<Emprestimo>[] = [
     },
   },
 ];
+
+
+

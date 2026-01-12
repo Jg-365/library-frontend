@@ -122,11 +122,11 @@ export function Seguranca() {
         />
         {/* Título da Página */}
         <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-            <Shield className="h-8 w-8 text-blue-600" />
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent flex items-center gap-2">
+            <Shield className="h-8 w-8 text-sky-600" />
             Segurança
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
             Gerencie as configurações de segurança da sua
             conta
           </p>
@@ -167,8 +167,8 @@ export function Seguranca() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Icon className="h-5 w-5 text-blue-600" />
+                        <div className="p-2 bg-sky-100 rounded-lg">
+                          <Icon className="h-5 w-5 text-sky-600" />
                         </div>
                         <div>
                           <CardTitle className="text-lg">
@@ -187,8 +187,8 @@ export function Seguranca() {
                         }
                         className={
                           config.ativo
-                            ? "bg-green-100 text-green-800 border-green-300"
-                            : "bg-gray-100 text-gray-800 border-gray-300"
+                            ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30"
+                            : "bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700"
                         }
                       >
                         {config.status}
@@ -218,7 +218,7 @@ export function Seguranca() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-blue-600" />
+              <Lock className="h-5 w-5 text-sky-600" />
               <CardTitle>Alterar Senha</CardTitle>
             </div>
             <CardDescription>
@@ -283,3 +283,6 @@ export function Seguranca() {
 }
 
 export default Seguranca;
+
+
+

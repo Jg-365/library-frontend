@@ -170,15 +170,15 @@ export default function MinhasReservas() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ATIVA":
-        return "bg-blue-100 text-blue-800 border-blue-300";
+        return "bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/20 dark:text-cyan-200 dark:border-cyan-500/30";
       case "CONCLUIDA":
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30";
       case "CANCELADA":
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700";
       case "EXPIRADA":
-        return "bg-red-100 text-red-800 border-red-300";
+        return "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/20 dark:text-red-200 dark:border-red-500/30";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700";
     }
   };
 
@@ -196,10 +196,10 @@ export default function MinhasReservas() {
           backTo={getBasePath()}
         />
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Minhas Reservas
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-slate-300 mt-1">
             Visualize e gerencie suas reservas de livros
           </p>
         </div>
@@ -213,8 +213,8 @@ export default function MinhasReservas() {
         ) : reservas.length === 0 ? (
           <Card className="shadow-lg">
             <CardContent className="py-12 text-center">
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-700">
+              <BookOpen className="h-12 w-12 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-700 dark:text-slate-200">
                 Nenhuma reserva encontrada
               </p>
               <p className="text-gray-500 mt-1">
@@ -232,7 +232,7 @@ export default function MinhasReservas() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5 text-blue-600" />
+                      <BookOpen className="h-5 w-5 text-sky-600" />
                       {reserva.livro?.titulo ||
                         reserva.livroIsbn}
                     </CardTitle>
@@ -306,3 +306,6 @@ export default function MinhasReservas() {
     </PageLayout>
   );
 }
+
+
+

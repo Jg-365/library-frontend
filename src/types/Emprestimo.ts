@@ -28,3 +28,4 @@ export interface CriarEmprestimoRequest {
   isbnCodes: string[]; // Lista de ISBNs para emprestar
   userId?: number; // Opcional, usado apenas por admin
 }
+

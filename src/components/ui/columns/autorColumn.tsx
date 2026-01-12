@@ -18,3 +18,6 @@ export const autorColumn: ColumnDef<typeof autorSchema>[] =
       header: "Name",
     },
   ];
+
+
+

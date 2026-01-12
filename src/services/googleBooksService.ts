@@ -182,3 +182,4 @@ function normalizeCoverUrl(
 
   return httpsUrl.replace(/zoom=1\b/, "zoom=2");
 }
+

@@ -405,3 +405,4 @@ export const dashboardService = {
     return data.toLocaleDateString("pt-BR");
   },
 };
+

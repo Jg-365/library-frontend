@@ -87,3 +87,4 @@ export type Perfil = TipoAcesso;
 
 /** @deprecated Use 'TipoAcesso' instead */
 export type PerfilUsuario = TipoAcesso;
+

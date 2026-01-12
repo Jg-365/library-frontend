@@ -48,3 +48,4 @@ export const calcularMulta = (
   const valorPorDia = 2.5;
   return diasAtraso * valorPorDia;
 };
+

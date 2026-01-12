@@ -46,11 +46,14 @@ export const subcategoriasService = {
     categoryCode: number
   ): Promise<Subcategoria[]> {
     const response = await api.get<SubCategoryResponse[]>(
-      API_ENDPOINTS.SUBCATEGORIAS.BY_CATEGORY(categoryCode)
+      API_ENDPOINTS.SUBCATEGORIAS.BASE
     );
-    return normalizeSubcategoriasResponse(response.data).map(
-      mapSubcategoriaResponse
-    );
+    return normalizeSubcategoriasResponse(response.data)
+      .map(mapSubcategoriaResponse)
+      .filter(
+        (subcategoria) =>
+          subcategoria.categoryCode === categoryCode
+      );
   },
 
   /**
@@ -120,3 +123,4 @@ export const subcategoriasService = {
     );
   },
 };
+

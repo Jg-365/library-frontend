@@ -34,3 +34,4 @@ export const mockCategorias: Categoria[] = [
     description: "Ciência",
   },
 ];
+

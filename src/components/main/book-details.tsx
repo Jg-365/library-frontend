@@ -74,7 +74,7 @@ export function BookDetails({ livro }: BookDetailsProps) {
             <strong className="text-sm font-semibold">
               ISBN:
             </strong>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-300">
               {livro.isbn}
             </p>
           </div>
@@ -82,7 +82,7 @@ export function BookDetails({ livro }: BookDetailsProps) {
             <strong className="text-sm font-semibold">
               Editora:
             </strong>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-300">
               {livro.editora}
             </p>
           </div>
@@ -91,7 +91,7 @@ export function BookDetails({ livro }: BookDetailsProps) {
               <strong className="text-sm font-semibold">
                 Descrição:
               </strong>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
                 {livro.descricao}
               </p>
             </div>
@@ -100,7 +100,7 @@ export function BookDetails({ livro }: BookDetailsProps) {
             <strong className="text-sm font-semibold">
               Exemplares disponíveis:
             </strong>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-300">
               {livro.quantidadeExemplares}
             </p>
           </div>
@@ -110,3 +110,6 @@ export function BookDetails({ livro }: BookDetailsProps) {
   );
 }
 export default BookDetails;
+
+
+

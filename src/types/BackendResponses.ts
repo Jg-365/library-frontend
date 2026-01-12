@@ -98,3 +98,4 @@ export interface LoanRequest {
   userId?: number; // Opcional se autenticado
   isbnCodes: string[]; // Lista de ISBNs para emprestar
 }
+

@@ -37,7 +37,10 @@ api.interceptors.request.use((config) => {
   );
 
   if (!isAuthRoute && token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = {
+      ...(config.headers || {}),
+      Authorization: `Bearer ${token}`,
+    };
 
     // DEBUG: Log para POST /users/create
     if (
@@ -249,3 +252,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

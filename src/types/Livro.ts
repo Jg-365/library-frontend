@@ -21,3 +21,4 @@ export interface Livro {
   autores: Autor[];
   quantidadeExemplares: number;
 }
+

@@ -95,7 +95,7 @@ export function AutorForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={className || "space-y-6"}
+        className={className ?? "cyber-form-card"}
       >
         <FormField
           control={form.control}
@@ -169,3 +169,6 @@ export function AutorForm({
   );
 }
 export default AutorForm;
+
+
+

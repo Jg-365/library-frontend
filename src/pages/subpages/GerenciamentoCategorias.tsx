@@ -225,7 +225,7 @@ export function GerenciamentoCategorias() {
         });
         toast.success("Categoria criada com sucesso!");
       } else if (selectedCategoria) {
-        await api.put(
+        await api.patch(
           API_ENDPOINTS.CATEGORIAS.BY_ID(
             selectedCategoria.categoryCode
           ),
@@ -321,7 +321,7 @@ export function GerenciamentoCategorias() {
         });
         toast.success("Subcategoria criada com sucesso!");
       } else if (selectedSubcategoria) {
-        await api.put(
+        await api.patch(
           API_ENDPOINTS.SUBCATEGORIAS.BY_ID(
             selectedSubcategoria.id
           ),
@@ -421,7 +421,7 @@ export function GerenciamentoCategorias() {
     return (
       <PageLayout perfil={getPerfil()}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600"></div>
         </div>
       </PageLayout>
     );
@@ -440,11 +440,11 @@ export function GerenciamentoCategorias() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-              <FolderTree className="text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-3">
+              <FolderTree className="text-sky-600" />
               Categorias e Subcategorias
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-slate-300">
               Gerencie a hierarquia de categorias do acervo
             </p>
           </div>
@@ -531,7 +531,7 @@ export function GerenciamentoCategorias() {
                             <ChevronRight className="h-5 w-5" />
                           )}
                         </button>
-                        <FolderTree className="h-5 w-5 text-blue-600" />
+                        <FolderTree className="h-5 w-5 text-sky-600" />
                         <div>
                           <p className="font-semibold">
                             {categoria.description}
@@ -539,7 +539,7 @@ export function GerenciamentoCategorias() {
                           <p className="text-sm text-gray-500">
                             Código: {categoria.categoryCode}
                           </p>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-gray-400 dark:text-slate-400 mt-1">
                             {subs.length} subcategoria
                             {subs.length !== 1 ? "s" : ""}
                           </p>
@@ -582,7 +582,7 @@ export function GerenciamentoCategorias() {
                     </div>
 
                     {isExpanded && subs.length > 0 && (
-                      <div className="border-t bg-gray-50 p-4 pl-12 space-y-2 dark:border-slate-800 dark:bg-slate-900/60">
+                      <div className="border-t bg-gray-50 p-4 pl-12 space-y-2 dark:border-slate-800 dark:bg-slate-900">
                         {subs.map((sub) => (
                           <div
                             key={sub.id}
@@ -840,3 +840,6 @@ export function GerenciamentoCategorias() {
     </PageLayout>
   );
 }
+
+
+

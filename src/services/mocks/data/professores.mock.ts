@@ -60,3 +60,4 @@ export const mockProfessores: Professor[] = [
     areaEspecializacao: "Redes de Computadores",
   },
 ];
+

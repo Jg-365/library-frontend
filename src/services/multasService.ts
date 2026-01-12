@@ -7,6 +7,7 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
+import { authService } from "./authService";
 import type { Multa } from "@/types";
 import type {
   FineResponse,
@@ -28,20 +29,55 @@ const mapFineResponseToMulta = (
     options?.pago !== undefined
       ? options.pago
       : Boolean(paymentDate);
+  const fineId =
+    "id" in fine
+      ? fine.id
+      : (fine as any).fineId ?? fine.loanId ?? 0;
+  const bookTitles =
+    "bookTitles" in fine
+      ? fine.bookTitles
+      : (fine as any).bookTitles ?? [];
 
   return {
-    id: fine.id,
-    emprestimoId: fine.loanId,
+    id: fineId,
+    emprestimoId: fine.loanId ?? 0,
     valor: fine.value,
     diasAtraso: fine.daysOverdue,
-    titulosLivros: fine.bookTitles,
+    titulosLivros: bookTitles,
     motivoMulta: formatMotivoMulta(fine.daysOverdue),
-    dataCriacao:
-      paymentDate ||
-      new Date().toISOString().split("T")[0],
+    dataCriacao: paymentDate || undefined,
     pago,
     dataPagamento: paymentDate || undefined,
   };
+};
+
+const normalizeFineList = <T>(
+  data: T[] | { content?: T[] } | null | undefined
+): T[] => {
+  if (Array.isArray(data)) return data;
+  return data?.content ?? [];
+};
+
+const resolveUserEnrollment = async (): Promise<
+  string | undefined
+> => {
+  const stored = authService.getStoredAuth();
+  if (stored?.user?.enrollment) {
+    return String(stored.user.enrollment);
+  }
+
+  try {
+    const response = await api.get(API_ENDPOINTS.USUARIOS.ME);
+    const enrollment =
+      response.data?.enrollment ?? response.data?.matricula;
+    if (enrollment) {
+      return String(enrollment);
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 };
 
 export const multasService = {
@@ -74,12 +110,32 @@ export const multasService = {
    * GET /fines/user/pending
    */
   async obterPendentes(): Promise<Multa[]> {
-    const response = await api.get<PendingFineResponse[]>(
-      API_ENDPOINTS.MULTAS.USER_PENDING
-    );
-    return response.data.map((fine) =>
-      mapFineResponseToMulta(fine, { pago: false })
-    );
+    try {
+      const response = await api.get<
+        PendingFineResponse[] | { content?: PendingFineResponse[] }
+      >(
+        API_ENDPOINTS.MULTAS.USER_PENDING
+      );
+      return normalizeFineList(response.data).map((fine) =>
+        mapFineResponseToMulta(fine, { pago: false })
+      );
+    } catch (error: any) {
+      if (error?.response?.status !== 404) {
+        throw error;
+      }
+      const enrollment = await resolveUserEnrollment();
+      if (!enrollment) {
+        throw error;
+      }
+      const response = await api.get<
+        PendingFineResponse[] | { content?: PendingFineResponse[] }
+      >(
+        API_ENDPOINTS.MULTAS.USER_PENDING_BY_ID(enrollment)
+      );
+      return normalizeFineList(response.data).map((fine) =>
+        mapFineResponseToMulta(fine, { pago: false })
+      );
+    }
   },
 
   /**
@@ -89,10 +145,12 @@ export const multasService = {
   async obterPendentesPorUsuario(
     userId: string
   ): Promise<Multa[]> {
-    const response = await api.get<PendingFineResponse[]>(
+    const response = await api.get<
+      PendingFineResponse[] | { content?: PendingFineResponse[] }
+    >(
       API_ENDPOINTS.MULTAS.USER_PENDING_BY_ID(userId)
     );
-    return response.data.map((fine) =>
+    return normalizeFineList(response.data).map((fine) =>
       mapFineResponseToMulta(fine, { pago: false })
     );
   },
@@ -102,12 +160,32 @@ export const multasService = {
    * GET /fines/user/paid
    */
   async obterPagas(): Promise<Multa[]> {
-    const response = await api.get<FineResponse[]>(
-      API_ENDPOINTS.MULTAS.USER_PAID
-    );
-    return response.data.map((fine) =>
-      mapFineResponseToMulta(fine, { pago: true })
-    );
+    try {
+      const response = await api.get<
+        FineResponse[] | { content?: FineResponse[] }
+      >(
+        API_ENDPOINTS.MULTAS.USER_PAID
+      );
+      return normalizeFineList(response.data).map((fine) =>
+        mapFineResponseToMulta(fine, { pago: true })
+      );
+    } catch (error: any) {
+      if (error?.response?.status !== 404) {
+        throw error;
+      }
+      const enrollment = await resolveUserEnrollment();
+      if (!enrollment) {
+        throw error;
+      }
+      const response = await api.get<
+        FineResponse[] | { content?: FineResponse[] }
+      >(
+        API_ENDPOINTS.MULTAS.USER_PAID_BY_ID(enrollment)
+      );
+      return normalizeFineList(response.data).map((fine) =>
+        mapFineResponseToMulta(fine, { pago: true })
+      );
+    }
   },
 
   /**
@@ -117,11 +195,14 @@ export const multasService = {
   async obterPagasPorUsuario(
     userId: string
   ): Promise<Multa[]> {
-    const response = await api.get<FineResponse[]>(
+    const response = await api.get<
+      FineResponse[] | { content?: FineResponse[] }
+    >(
       API_ENDPOINTS.MULTAS.USER_PAID_BY_ID(userId)
     );
-    return response.data.map((fine) =>
+    return normalizeFineList(response.data).map((fine) =>
       mapFineResponseToMulta(fine, { pago: true })
     );
   },
 };
+

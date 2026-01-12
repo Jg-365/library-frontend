@@ -151,7 +151,7 @@ export function CadastroCursos() {
         />
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
               Gerenciamento de Cursos
             </h1>
             <p className="text-gray-600 mt-1 dark:text-slate-300">
@@ -180,7 +180,7 @@ export function CadastroCursos() {
             </Button>
             <Button
               onClick={handleNewCurso}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:from-blue-700 hover:to-indigo-700 sm:w-auto"
+              className="w-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 shadow-lg hover:from-sky-600 hover:via-cyan-600 hover:to-emerald-600 sm:w-auto"
             >
               <GraduationCap className="h-5 w-5 mr-2" />
               Novo Curso
@@ -288,3 +288,6 @@ export function CadastroCursos() {
     </PageLayout>
   );
 }
+
+
+

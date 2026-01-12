@@ -166,3 +166,4 @@ export function setupMultasHandlers(mock: MockAdapter) {
     return [200, multa];
   });
 }
+

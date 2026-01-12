@@ -14,3 +14,6 @@ export const cursoFormSchema = z.object({
 });
 
 export type CursoFormData = z.infer<typeof cursoFormSchema>;
+
+
+

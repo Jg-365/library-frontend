@@ -10,3 +10,4 @@ export * from "./Multa";
 export * from "./Filtros";
 export * from "./Professor";
 export * from "./Copia";
+

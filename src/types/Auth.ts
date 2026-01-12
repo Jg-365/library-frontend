@@ -33,3 +33,4 @@ export interface RegisterRequest {
   hireDate?: string;
   workRegime?: "20" | "40" | "DE";
 }
+

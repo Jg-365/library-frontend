@@ -20,3 +20,6 @@ export const subcategoriaFormSchema = z.object({
 export type SubcategoriaFormValues = z.infer<
   typeof subcategoriaFormSchema
 >;
+
+
+

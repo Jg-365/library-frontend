@@ -98,3 +98,4 @@ export const cursosService = {
     await api.delete(API_ENDPOINTS.CURSOS.DELETE(id));
   },
 };
+

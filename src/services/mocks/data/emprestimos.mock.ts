@@ -101,3 +101,4 @@ export const adicionarEmprestimo = (
   mockEmprestimos.push(novoEmprestimo);
   return novoEmprestimo;
 };
+

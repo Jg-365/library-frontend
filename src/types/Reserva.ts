@@ -13,3 +13,4 @@ export interface Reserva {
   usuario?: Usuario; // opcional
   livro?: Livro; // opcional
 }
+

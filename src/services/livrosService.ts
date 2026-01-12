@@ -6,7 +6,7 @@
  */
 
 import api from "./api";
-import { API_ENDPOINTS } from "@/config/constants";
+import { API_ENDPOINTS, STORAGE_KEYS } from "@/config";
 import type {
   Livro,
   FiltroLivros,
@@ -181,7 +181,63 @@ export const livrosService = {
    * DELETE /books/{isbn}
    */
   async deletar(isbn: string): Promise<void> {
-    await api.delete(API_ENDPOINTS.LIVROS.DELETE(isbn));
+    const trimmed = isbn?.trim();
+    if (!trimmed) return;
+    try {
+      const token = localStorage.getItem(
+        STORAGE_KEYS.AUTH_TOKEN
+      );
+      await api.delete(API_ENDPOINTS.LIVROS.DELETE(trimmed), {
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : undefined,
+      });
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const responseMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "";
+
+      if (
+        status === 500 &&
+        /foreign key constraint|constraint fails|livro_emprestado/i.test(
+          responseMessage
+        )
+      ) {
+        const constraintError = new Error(
+          "Primeiro exclua as cópias físicas (e registros ativos) deste livro antes de removê-lo."
+        );
+        constraintError.name = "COPY_CONSTRAINT";
+        throw constraintError;
+      }
+
+      const digitsOnly = trimmed.replace(/[^0-9Xx]/g, "");
+      if (
+        status === 404 &&
+        digitsOnly &&
+        digitsOnly !== trimmed
+      ) {
+        const token = localStorage.getItem(
+          STORAGE_KEYS.AUTH_TOKEN
+        );
+        await api.delete(
+          API_ENDPOINTS.LIVROS.DELETE(digitsOnly),
+          {
+            headers: token
+              ? {
+                  Authorization: `Bearer ${token}`,
+                }
+              : undefined,
+          }
+        );
+      } else {
+        throw error;
+      }
+    }
     livrosService._cache.clear();
   },
 

@@ -45,10 +45,14 @@ export const copiasService = {
    */
   async atualizar(
     sequential: number,
-    dados: { status: string }
+    dados: { status: string; isbn: string }
   ): Promise<Copia> {
+    const { isbn } = dados;
+    if (!isbn) {
+      throw new Error("ISBN ausente para atualizar a cópia.");
+    }
     const response = await api.patch<Copia>(
-      API_ENDPOINTS.COPIAS.UPDATE(sequential),
+      API_ENDPOINTS.COPIAS.UPDATE(sequential, isbn),
       dados
     );
     return response.data;
@@ -89,3 +93,4 @@ export const copiasService = {
     return response.data;
   },
 };
+

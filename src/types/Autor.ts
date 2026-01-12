@@ -4,3 +4,4 @@ export interface Autor {
   email: string;
   nacionalidade: string;
 }
+

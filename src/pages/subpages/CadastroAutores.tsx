@@ -46,7 +46,7 @@ export function CadastroAutores() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <UserPen className="h-5 w-5 text-blue-600" />
+              <UserPen className="h-5 w-5 text-sky-600" />
               Cadastro de Autores
             </CardTitle>
             <CardDescription>
@@ -63,3 +63,6 @@ export function CadastroAutores() {
 }
 
 export default CadastroAutores;
+
+
+

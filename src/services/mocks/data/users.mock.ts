@@ -42,3 +42,4 @@ export const mockUsers: (Usuario & {
     ativo: true,
   },
 ];
+

@@ -17,3 +17,4 @@ export interface BookRequestUpdate {
   emailAuthor: string;
   coAuthorsEmails: string[];
 }
+

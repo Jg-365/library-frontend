@@ -79,17 +79,17 @@ export function CadastroEmprestimos() {
           backTo="/bibliotecario/dashboard"
         />
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Gerenciamento de Empréstimos
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-slate-300 mt-1">
             Visualize e gerencie seus empréstimos ativos
           </p>
         </div>
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-slate-300">
               Carregando empréstimos...
             </p>
           </div>
@@ -113,7 +113,7 @@ export function CadastroEmprestimos() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-blue-600" />
+                        <BookOpen className="h-5 w-5 text-sky-600" />
                         {emprestimo.livros &&
                         emprestimo.livros.length > 0
                           ? (emprestimo.livros as any[])
@@ -193,3 +193,6 @@ export function CadastroEmprestimos() {
     </PageLayout>
   );
 }
+
+
+

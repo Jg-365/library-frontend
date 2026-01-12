@@ -28,3 +28,4 @@ export interface ResumoMultasUsuario {
   valorPendente: number;
   multas: Multa[];
 }
+

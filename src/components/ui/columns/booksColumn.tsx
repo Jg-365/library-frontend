@@ -71,7 +71,7 @@ export const createBooksColumn = ({
           nome: string;
         }>) || [];
       return (
-        <div className="text-sm text-gray-600 text-center">
+        <div className="text-sm text-gray-600 dark:text-slate-300 text-center">
           {Array.isArray(autores) && autores.length > 0
             ? autores.map((autor) => autor.nome).join(", ")
             : "-"}
@@ -186,3 +186,6 @@ export const createBooksColumn = ({
 
 // Mantém exportação default para compatibilidade
 export const booksColumn = createBooksColumn();
+
+
+

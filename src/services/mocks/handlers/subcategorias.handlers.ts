@@ -99,3 +99,4 @@ export function setupSubcategoriasHandlers(
     return [204];
   });
 }
+

@@ -161,7 +161,7 @@ function BibliotecarioDashboard() {
       <div className="px-4 md:px-6 lg:px-8">
         {/* Saudação ao bibliotecário */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Olá, {displayName}!
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -183,12 +183,12 @@ function BibliotecarioDashboard() {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
-                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
-                    <Icon className="h-4 w-4 text-blue-600" />
+                  <div className="p-2 bg-gradient-to-br from-sky-100 via-cyan-100 to-emerald-100 rounded-lg">
+                    <Icon className="h-4 w-4 text-sky-600" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
                     {stat.value}
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
@@ -202,7 +202,7 @@ function BibliotecarioDashboard() {
 
         {/* Quick Actions Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             Ações Rápidas
           </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -216,11 +216,11 @@ function BibliotecarioDashboard() {
                   <Link to={action.href}>
                     <CardHeader>
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-200">
-                          <Icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-200" />
+                        <div className="p-3 bg-gradient-to-br from-sky-100 via-cyan-100 to-emerald-100 rounded-lg group-hover:from-sky-600 group-hover:via-cyan-600 group-hover:to-emerald-600 transition-all duration-200">
+                          <Icon className="h-6 w-6 text-sky-600 group-hover:text-white transition-colors duration-200" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg group-hover:text-blue-600 transition-colors duration-200">
+                          <CardTitle className="text-lg group-hover:text-sky-600 transition-colors duration-200">
                             {action.title}
                           </CardTitle>
                         </div>
@@ -241,7 +241,7 @@ function BibliotecarioDashboard() {
         {/* Recent Activity */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <CardTitle className="text-xl bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
               Atividades Recentes
             </CardTitle>
             <CardDescription>
@@ -289,3 +289,6 @@ function BibliotecarioDashboard() {
 }
 
 export default BibliotecarioDashboard;
+
+
+

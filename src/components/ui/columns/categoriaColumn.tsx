@@ -91,3 +91,6 @@ export function createCategoriaColumn(
 
 export const categoriaColumn: ColumnDef<Categoria>[] =
   createCategoriaColumn();
+
+
+

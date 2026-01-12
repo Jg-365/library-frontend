@@ -444,3 +444,4 @@ export const reportsService = {
     downloadBlob(buildPdf(lines), filename);
   },
 };
+

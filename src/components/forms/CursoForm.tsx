@@ -69,7 +69,7 @@ export function CursoForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6"
+        className="cyber-form-card"
       >
         <FormField
           control={form.control}
@@ -92,7 +92,7 @@ export function CursoForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 hover:from-sky-600 hover:via-cyan-600 hover:to-emerald-600"
           >
             {isSubmitting
               ? "Salvando..."
@@ -105,3 +105,6 @@ export function CursoForm({
     </Form>
   );
 }
+
+
+

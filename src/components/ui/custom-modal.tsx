@@ -27,15 +27,15 @@ export function CustomModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 animate-in fade-in-0"
         onClick={() => onOpenChange(false)}
       />
 
-      {/* Content */}
-      <div className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50">
+      {/* Content wrapper to keep scrollbar inside modal */}
+      <div className="relative z-10 w-full max-w-5xl">
         {children}
       </div>
     </div>
@@ -58,7 +58,7 @@ export function CustomModalContent({
   return (
     <div
       className={cn(
-        "bg-background animate-in fade-in-0 zoom-in-95 relative grid w-full gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
+        "bg-white/95 dark:bg-slate-950/95 animate-in fade-in-0 zoom-in-95 relative grid w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] gap-4 rounded-lg border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xl outline-none sm:w-full sm:max-w-lg",
         className
       )}
       {...props}
@@ -121,3 +121,6 @@ export function CustomModalDescription({
     />
   );
 }
+
+
+

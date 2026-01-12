@@ -23,3 +23,4 @@ export interface CourseUpdateRequest {
   courseCode: number;
   courseName: string;
 }
+

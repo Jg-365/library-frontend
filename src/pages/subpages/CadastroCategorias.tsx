@@ -335,8 +335,8 @@ export function CadastroCategorias() {
         <div className="max-w-7xl mx-auto">
           <Card className="shadow-lg">
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-xl font-semibold text-gray-600">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600 mb-4"></div>
+              <p className="text-xl font-semibold text-gray-600 dark:text-slate-300">
                 Carregando categorias...
               </p>
             </div>
@@ -359,11 +359,11 @@ export function CadastroCategorias() {
         {/* Título e Botão de Adicionar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-              <FolderTree className="text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-3">
+              <FolderTree className="text-sky-600" />
               Gerenciamento de Categorias
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-slate-300">
               Cadastre e gerencie as categorias de livros do
               sistema
             </p>
@@ -474,7 +474,7 @@ export function CadastroCategorias() {
           >
             <CustomModalHeader>
               <CustomModalTitle className="flex items-center gap-2">
-                <FolderTree className="h-5 w-5 text-blue-600" />
+                <FolderTree className="h-5 w-5 text-sky-600" />
                 {selectedCategoria
                   ? "Editar Categoria"
                   : "Nova Categoria"}
@@ -507,7 +507,7 @@ export function CadastroCategorias() {
           >
             <CustomModalHeader>
               <CustomModalTitle className="flex items-center gap-2">
-                <List className="h-5 w-5 text-blue-600" />
+                <List className="h-5 w-5 text-sky-600" />
                 {selectedSubcategoria
                   ? "Editar Subcategoria"
                   : "Nova Subcategoria"}
@@ -553,7 +553,7 @@ export function CadastroCategorias() {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 Tem certeza que deseja excluir a categoria{" "}
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-slate-100">
                   {categoriaToDelete?.description}
                 </span>
                 ? Esta ação não pode ser desfeita.
@@ -578,3 +578,6 @@ export function CadastroCategorias() {
 }
 
 export default CadastroCategorias;
+
+
+

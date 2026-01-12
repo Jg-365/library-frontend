@@ -79,7 +79,7 @@ export function BookDetailsDialog({
         onClose={() => onOpenChange(false)}
       >
         <CustomModalHeader>
-          <CustomModalTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <CustomModalTitle className="text-2xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
             {livro.titulo ??
               (livro as any).title ??
               "Título não informado"}
@@ -91,9 +91,9 @@ export function BookDetailsDialog({
 
         <div className="space-y-6">
           {/* ISBN com botão de copiar */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+          <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/60 bg-white/90 px-4 py-3 shadow-sm shadow-slate-200 dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-none sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <Hash className="h-5 w-5 text-blue-600" />
+              <Hash className="h-5 w-5 text-sky-600" />
               <div>
                 <p className="text-xs text-muted-foreground">
                   ISBN
@@ -128,7 +128,7 @@ export function BookDetailsDialog({
           {/* Autores */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
+              <Users className="h-5 w-5 text-sky-600" />
               <h3 className="font-semibold text-lg">
                 Autores
               </h3>
@@ -138,8 +138,8 @@ export function BookDetailsDialog({
                 autoresList.map((autor, index) => (
                   <Badge
                     key={index}
-                    variant="secondary"
-                    className="px-3 py-1 text-sm"
+                    variant="neutral"
+                    className="px-3 py-1 text-sm font-medium"
                   >
                     {autor?.nome || autor?.name || autor}
                   </Badge>
@@ -158,7 +158,7 @@ export function BookDetailsDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-blue-600" />
+                <Building2 className="h-5 w-5 text-sky-600" />
                 <h3 className="font-semibold">Editora</h3>
               </div>
               <p className="text-muted-foreground">
@@ -170,7 +170,7 @@ export function BookDetailsDialog({
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <Calendar className="h-5 w-5 text-sky-600" />
                 <h3 className="font-semibold">
                   Ano de Publicação
                 </h3>
@@ -188,11 +188,14 @@ export function BookDetailsDialog({
           {/* Categoria */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-blue-600" />
+              <Tag className="h-5 w-5 text-sky-600" />
               <h3 className="font-semibold">Categoria</h3>
             </div>
             {livro.categoria ? (
-              <Badge className="px-3 py-1 text-sm bg-gradient-to-r from-blue-600 to-indigo-600">
+              <Badge
+                variant="secondary"
+                className="px-3 py-1 text-sm font-medium"
+              >
                 {livro.categoria}
               </Badge>
             ) : (
@@ -207,13 +210,13 @@ export function BookDetailsDialog({
           {/* Quantidade de Exemplares */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-sky-600" />
               <h3 className="font-semibold">
                 Disponibilidade
               </h3>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
                 {qtdExemplares}
               </span>
               <div>
@@ -234,7 +237,7 @@ export function BookDetailsDialog({
           </div>
 
           {/* Status de disponibilidade visual */}
-          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/70">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
                 Status do Acervo
@@ -276,3 +279,6 @@ export function BookDetailsDialog({
     </CustomModal>
   );
 }
+
+
+

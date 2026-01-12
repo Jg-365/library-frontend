@@ -92,3 +92,4 @@ export const categoriasService = {
     await api.delete(API_ENDPOINTS.CATEGORIAS.DELETE(id));
   },
 };
+

@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from "react";
 import type { TipoAcesso, Usuario } from "@/types/Usuario";
 import { authService } from "@/services/authService";
+import { api } from "@/services/api";
 
 interface AuthContextType {
   user: Usuario | null;
@@ -101,6 +102,9 @@ export function AuthProvider({
       if (isMounted) {
         setToken(storedAuth.token);
       }
+      api.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${storedAuth.token}`;
 
       try {
         const freshUser = authService.getUserFromToken(
@@ -140,6 +144,9 @@ export function AuthProvider({
       username,
       password,
     });
+    api.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${response.token}`;
     setUser(response.user);
     setToken(response.token);
     authService.saveAuth(response.token, response.user);
@@ -147,6 +154,7 @@ export function AuthProvider({
 
   const logout = async () => {
     await authService.logout();
+    delete api.defaults.headers.common.Authorization;
     setUser(null);
     setToken(null);
   };
@@ -179,3 +187,6 @@ export function useAuth() {
   }
   return context;
 }
+
+
+

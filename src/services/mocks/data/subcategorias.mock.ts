@@ -32,3 +32,4 @@ export const mockSubcategorias: Subcategoria[] = [
     categoryCode: 2,
   },
 ];
+

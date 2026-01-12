@@ -65,6 +65,12 @@ export function MinhasMultas() {
   }, []);
 
   const handlePagar = async (multaId: number) => {
+    if (!multaId) {
+      toast.error(
+        "Não foi possível pagar esta multa. Identificador ausente."
+      );
+      return;
+    }
     try {
       setPagandoId(multaId);
       const multaPaga = await multasService.pagar(
@@ -99,7 +105,7 @@ export function MinhasMultas() {
 
         <div>
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 dark:text-slate-100">
-            <CircleDollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <CircleDollarSign className="h-6 w-6 text-sky-600 dark:text-cyan-300" />
             Minhas Multas
           </h2>
           <p className="text-sm text-gray-600 mt-1 dark:text-slate-300">
@@ -110,7 +116,7 @@ export function MinhasMultas() {
         {loading ? (
           <Card className="shadow-lg dark:bg-slate-900 dark:text-slate-100">
             <div className="flex flex-col items-center justify-center py-24">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" />
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mb-4" />
               <p className="text-lg font-semibold text-gray-600 dark:text-slate-300">
                 Carregando multas...
               </p>
@@ -162,7 +168,7 @@ export function MinhasMultas() {
                           size="sm"
                           onClick={() => handlePagar(multa.id)}
                           disabled={pagandoId === multa.id}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-sky-600 hover:bg-sky-700"
                         >
                           {pagandoId === multa.id
                             ? "Processando..."
@@ -225,3 +231,6 @@ export function MinhasMultas() {
     </PageLayout>
   );
 }
+
+
+

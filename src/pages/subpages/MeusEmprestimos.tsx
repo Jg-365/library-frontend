@@ -81,8 +81,8 @@ export function MeusEmprestimos() {
         <div className="max-w-7xl mx-auto">
           <Card className="shadow-lg">
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-xl font-semibold text-gray-600">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-600 mb-4"></div>
+              <p className="text-xl font-semibold text-gray-600 dark:text-slate-300">
                 Carregando seus empréstimos...
               </p>
             </div>
@@ -104,11 +104,11 @@ export function MeusEmprestimos() {
         />
         {/* Título da Página */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-blue-600" />
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
+            <BookOpen className="h-6 w-6 text-sky-600" />
             Meus Empréstimos
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
             Acompanhe todos os seus empréstimos e devoluções
           </p>
         </div>
@@ -137,10 +137,10 @@ export function MeusEmprestimos() {
               <CardTitle className="text-sm font-medium">
                 Empréstimos Ativos
               </CardTitle>
-              <BookOpen className="h-4 w-4 text-blue-600" />
+              <BookOpen className="h-4 w-4 text-sky-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-sky-600">
                 {estatisticas.ativos}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -185,11 +185,11 @@ export function MeusEmprestimos() {
         </div>
 
         {/* Tabela de Empréstimos */}
-        <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/80 dark:bg-slate-900/70 dark:text-slate-100">
+        <Card className="shadow-xl dark:text-slate-100">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
                   Histórico de Empréstimos
                 </CardTitle>
                 <CardDescription className="text-base mt-2">
@@ -245,3 +245,6 @@ export function MeusEmprestimos() {
 }
 
 export default MeusEmprestimos;
+
+
+

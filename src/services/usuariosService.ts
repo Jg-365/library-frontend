@@ -7,8 +7,9 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "@/config/constants";
-import type { Usuario } from "@/types";
+import type { CreateUsuarioPayload, Usuario } from "@/types";
 import type { MyPage } from "@/types/BackendResponses";
+import { cursosService } from "./cursosService";
 
 const normalizeUsuariosPage = (
   data: MyPage<Usuario> | Usuario[]
@@ -118,7 +119,9 @@ export const usuariosService = {
    */
   async atualizarProfessor(
     enrollment: string,
-    dados: Partial<CreateUsuarioPayload>
+    dados: Partial<CreateUsuarioPayload> & {
+      enrollment?: number;
+    }
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_TEACHER(enrollment),
@@ -134,7 +137,9 @@ export const usuariosService = {
    */
   async atualizarAluno(
     enrollment: string,
-    dados: Partial<CreateUsuarioPayload>
+    dados: Partial<CreateUsuarioPayload> & {
+      enrollment?: number;
+    }
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_STUDENT(enrollment),
@@ -150,7 +155,9 @@ export const usuariosService = {
    */
   async atualizarFuncionario(
     enrollment: string,
-    dados: Partial<CreateUsuarioPayload>
+    dados: Partial<CreateUsuarioPayload> & {
+      enrollment?: number;
+    }
   ): Promise<Usuario> {
     const response = await api.patch<Usuario>(
       API_ENDPOINTS.USUARIOS.UPDATE_EMPLOYEE(enrollment),
@@ -221,29 +228,32 @@ export const usuariosService = {
     if (!normalizedCourseName) {
       return normalizeUsuariosPage([]);
     }
-    try {
-      const response = await api.get<
-        MyPage<Usuario> | Usuario[]
-      >(
-        `${API_ENDPOINTS.USUARIOS.STUDENTS_BY_COURSE}?course=${encodeURIComponent(
-          normalizedCourseName
-        )}`
-      );
-      return normalizeUsuariosPage(response.data);
-    } catch (error) {
-      if (courseCode === undefined) {
-        throw error;
-      }
-      const page = await usuariosService.listarTodos({
-        force: true,
-      });
-      const filtered = page.content.filter(
-        (usuario) =>
-          usuario.courseCode === courseCode &&
-          usuario.userType === "ALUNO"
-      );
-      return normalizeUsuariosPage(filtered);
+    const resolvedCourseCode =
+      courseCode ??
+      (await (async () => {
+        try {
+          const course = await cursosService.buscarPorNome(
+            normalizedCourseName
+          );
+          return course.courseCode;
+        } catch {
+          return undefined;
+        }
+      })());
+
+    if (resolvedCourseCode === undefined) {
+      return normalizeUsuariosPage([]);
     }
+
+    const page = await usuariosService.listarTodos({
+      force: true,
+    });
+    const filtered = page.content.filter(
+      (usuario) =>
+        usuario.courseCode === resolvedCourseCode &&
+        usuario.userType === "ALUNO"
+    );
+    return normalizeUsuariosPage(filtered);
   },
 
   /**
@@ -258,26 +268,30 @@ export const usuariosService = {
     if (!normalizedCourseName) {
       return normalizeUsuariosPage([]);
     }
-    try {
-      const response = await api.get<
-        MyPage<Usuario> | Usuario[]
-      >(
-        `${API_ENDPOINTS.USUARIOS.USERS_BY_COURSE}?course=${encodeURIComponent(
-          normalizedCourseName
-        )}`
-      );
-      return normalizeUsuariosPage(response.data);
-    } catch (error) {
-      if (courseCode === undefined) {
-        throw error;
-      }
-      const page = await usuariosService.listarTodos({
-        force: true,
-      });
-      const filtered = page.content.filter(
-        (usuario) => usuario.courseCode === courseCode
-      );
-      return normalizeUsuariosPage(filtered);
+    const resolvedCourseCode =
+      courseCode ??
+      (await (async () => {
+        try {
+          const course = await cursosService.buscarPorNome(
+            normalizedCourseName
+          );
+          return course.courseCode;
+        } catch {
+          return undefined;
+        }
+      })());
+
+    if (resolvedCourseCode === undefined) {
+      return normalizeUsuariosPage([]);
     }
+
+    const page = await usuariosService.listarTodos({
+      force: true,
+    });
+    const filtered = page.content.filter(
+      (usuario) => usuario.courseCode === resolvedCourseCode
+    );
+    return normalizeUsuariosPage(filtered);
   },
 };
+

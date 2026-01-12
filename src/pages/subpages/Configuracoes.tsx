@@ -63,11 +63,11 @@ export function Configuracoes() {
         />
         {/* Título da Página */}
         <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-            <Settings className="h-8 w-8 text-blue-600" />
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent flex items-center gap-2">
+            <Settings className="h-8 w-8 text-sky-600" />
             Configurações
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">
             Personalize sua experiência no sistema de
             biblioteca
           </p>
@@ -77,7 +77,7 @@ export function Configuracoes() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-600" />
+              <Globe className="h-5 w-5 text-sky-600" />
               <CardTitle>Configurações Gerais</CardTitle>
             </div>
             <CardDescription>
@@ -133,7 +133,7 @@ export function Configuracoes() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Palette className="h-5 w-5 text-blue-600" />
+              <Palette className="h-5 w-5 text-sky-600" />
               <CardTitle>Aparência</CardTitle>
             </div>
             <CardDescription>
@@ -189,7 +189,7 @@ export function Configuracoes() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-blue-600" />
+              <Bell className="h-5 w-5 text-sky-600" />
               <CardTitle>Notificações</CardTitle>
             </div>
             <CardDescription>
@@ -208,7 +208,7 @@ export function Configuracoes() {
                     Notificações sobre seus empréstimos
                   </p>
                 </div>
-                <Badge className="bg-green-100 text-green-800 border-green-300">
+                <Badge className="bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30">
                   Ativo
                 </Badge>
               </div>
@@ -220,7 +220,7 @@ export function Configuracoes() {
                     Alertas sobre suas reservas
                   </p>
                 </div>
-                <Badge className="bg-green-100 text-green-800 border-green-300">
+                <Badge className="bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30">
                   Ativo
                 </Badge>
               </div>
@@ -234,7 +234,7 @@ export function Configuracoes() {
                     Novos livros adicionados
                   </p>
                 </div>
-                <Badge className="bg-gray-100 text-gray-800 border-gray-300">
+                <Badge className="bg-gray-100 text-gray-800 border-gray-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-700">
                   Inativo
                 </Badge>
               </div>
@@ -246,7 +246,7 @@ export function Configuracoes() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-blue-600" />
+              <Mail className="h-5 w-5 text-sky-600" />
               <CardTitle>Email</CardTitle>
             </div>
             <CardDescription>
@@ -273,7 +273,7 @@ export function Configuracoes() {
                   Receba um resumo semanal por email
                 </p>
               </div>
-              <Badge className="bg-green-100 text-green-800 border-green-300">
+              <Badge className="bg-green-100 text-green-800 border-green-300 dark:bg-green-500/20 dark:text-green-200 dark:border-green-500/30">
                 Ativo
               </Badge>
             </div>
@@ -327,3 +327,6 @@ export function Configuracoes() {
 }
 
 export default Configuracoes;
+
+
+

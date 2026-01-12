@@ -34,7 +34,6 @@ import { authService } from "@/services/authService";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errorMessage";
 import {
-  UserPlus,
   User,
   Lock,
   Mail,
@@ -43,6 +42,8 @@ import {
   Calendar,
   Briefcase,
   AlertCircle,
+  Globe,
+  Scale,
 } from "lucide-react";
 
 export function RegisterForm() {
@@ -89,22 +90,26 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="min-h-screen w-full flex items-center justify-center cyber-atlas-surface relative p-4 sm:p-6 lg:p-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.08),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_55%)]" />
+      <div className="relative w-full max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white mb-4">
-            <UserPlus className="w-8 h-8" />
+          <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-500 text-white shadow-xl mb-4">
+            <Globe className="w-8 h-8" />
+            <span className="absolute -bottom-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-slate-900 shadow-md dark:bg-slate-900 dark:text-slate-100">
+              <Scale className="h-4 w-4" />
+            </span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Criar Conta
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 bg-clip-text text-transparent">
+            Cyber Atlas
           </h1>
-          <p className="text-sm text-gray-600">
-            Preencha os dados para se cadastrar
+          <p className="text-sm text-gray-600 dark:text-slate-300">
+            Ative sua identidade na democracia digital
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl">
+        <Card className="border border-white/60 shadow-2xl backdrop-blur-sm bg-white/80 dark:border-slate-800/80 dark:bg-slate-900/70">
           <CardContent className="p-6 sm:p-8">
             {error && (
               <Alert variant="destructive" className="mb-6">
@@ -128,7 +133,7 @@ export function RegisterForm() {
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                             <Input
                               placeholder="João Silva"
                               className="pl-10"
@@ -149,7 +154,7 @@ export function RegisterForm() {
                         <FormLabel>Usuário</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                             <Input
                               placeholder="joao.silva"
                               className="pl-10"
@@ -171,7 +176,7 @@ export function RegisterForm() {
                       <FormLabel>Senha</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                           <Input
                             type="password"
                             placeholder="••••••"
@@ -193,7 +198,7 @@ export function RegisterForm() {
                       <FormLabel>Endereço</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                           <Input
                             placeholder="Rua Exemplo, 123"
                             className="pl-10"
@@ -290,7 +295,7 @@ export function RegisterForm() {
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                             <Input
                               type="number"
                               placeholder="101"
@@ -327,7 +332,7 @@ export function RegisterForm() {
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                               <Input
                                 type="date"
                                 className="pl-10"
@@ -350,7 +355,7 @@ export function RegisterForm() {
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                               <Input
                                 type="date"
                                 className="pl-10"
@@ -378,7 +383,7 @@ export function RegisterForm() {
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-slate-500" />
                               <Input
                                 type="date"
                                 className="pl-10"
@@ -430,7 +435,7 @@ export function RegisterForm() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="w-full bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 hover:from-sky-600 hover:via-cyan-600 hover:to-emerald-600"
                   disabled={isLoading}
                 >
                   {isLoading
@@ -439,7 +444,7 @@ export function RegisterForm() {
                 </Button>
 
                 <div className="text-center text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 dark:text-slate-300">
                     Já tem uma conta?{" "}
                   </span>
                   <Button
@@ -459,3 +464,6 @@ export function RegisterForm() {
     </div>
   );
 }
+
+
+

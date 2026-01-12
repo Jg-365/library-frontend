@@ -54,6 +54,18 @@ function extractRoleFromToken(decoded: any): TipoAcesso | null {
   return null;
 }
 
+function parseEnrollmentValue(value: unknown): number | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const normalized = String(value).replace(/[^0-9]/g, "");
+  if (!normalized) {
+    return undefined;
+  }
+  const parsed = Number(normalized);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
 function deriveUserTypeFromRole(
   role: TipoAcesso | null
 ): TipoUsuario | undefined {
@@ -85,7 +97,14 @@ function buildUserFromToken(token: string): Usuario {
   }
 
   const roleFromToken = extractRoleFromToken(decoded);
-  const enrollment = decoded.enrollment ?? 0;
+  const enrollment =
+    parseEnrollmentValue(decoded.enrollment) ??
+    parseEnrollmentValue(decoded.matricula) ??
+    parseEnrollmentValue(decoded.matriculaAluno) ??
+    parseEnrollmentValue(decoded.matriculaFuncionario) ??
+    parseEnrollmentValue(decoded.userId) ??
+    parseEnrollmentValue(decoded.id) ??
+    0;
   const username = decoded.sub ?? decoded.username ?? "";
   const role = roleFromToken ?? "USUARIO";
   const userType = roleFromToken
@@ -197,6 +216,9 @@ export const authService = {
       STORAGE_KEYS.USER_DATA,
       JSON.stringify(normalizedUser)
     );
+    api.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${token}`;
   },
 
   getStoredAuth: (): {
@@ -262,3 +284,4 @@ export const authService = {
     await api.post(API_ENDPOINTS.USUARIOS.CREATE, payload);
   },
 };
+

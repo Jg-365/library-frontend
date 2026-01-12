@@ -39,3 +39,4 @@ export interface Subcategoria {
 }
 
 export interface SubcategoriaComCategoria extends Subcategoria {}
+
