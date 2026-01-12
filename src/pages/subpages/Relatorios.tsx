@@ -18,11 +18,89 @@ import {
   Users,
   BookOpen,
   Calendar,
+  FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  reportsService,
+  type ReportFormat,
+  type ReportType,
+} from "@/services/reportsService";
+
+const RELATORIOS_DISPONIVEIS = [
+  {
+    id: 1,
+    titulo: "Relatório de Empréstimos",
+    descricao:
+      "Resumo completo de todos os empréstimos do período",
+    icon: FileText,
+    tipo: "emprestimos",
+  },
+  {
+    id: 2,
+    titulo: "Relatório de Usuários",
+    descricao:
+      "Estatísticas e atividades dos usuários cadastrados",
+    icon: Users,
+    tipo: "usuarios",
+  },
+  {
+    id: 3,
+    titulo: "Relatório de Acervo",
+    descricao:
+      "Inventário completo de livros e categorias",
+    icon: BookOpen,
+    tipo: "acervo",
+  },
+  {
+    id: 4,
+    titulo: "Relatório de Reservas",
+    descricao: "Análise de reservas ativas e concluídas",
+    icon: Calendar,
+    tipo: "reservas",
+  },
+  {
+    id: 5,
+    titulo: "Relatório de Performance",
+    descricao: "Métricas e KPIs do sistema de biblioteca",
+    icon: TrendingUp,
+    tipo: "performance",
+  },
+] as const;
+
+const RELATORIOS_ENDPOINTS = [
+  {
+    tipo: "emprestimos",
+    endpoint: "GET /loans/users",
+  },
+  {
+    tipo: "usuarios",
+    endpoint: "GET /users/all (admin/bibliotecário) | GET /users/me",
+  },
+  {
+    tipo: "acervo",
+    endpoint: "GET /books",
+  },
+  {
+    tipo: "reservas",
+    endpoint: "GET /reserves/users",
+  },
+  {
+    tipo: "performance",
+    endpoint: "Agregado local (loans/users/books/reserves)",
+  },
+] as const;
 
 export function Relatorios() {
   const [carregando, setCarregando] = useState(false);
+  const [resumo, setResumo] = useState({
+    totalEmprestimos: 0,
+    totalLivros: 0,
+    totalUsuarios: 0,
+    usuariosAtivos: 0,
+  });
+  const [erroResumo, setErroResumo] =
+    useState<string | null>(null);
   const location = useLocation();
 
   const getPerfil = () => {
@@ -35,66 +113,52 @@ export function Relatorios() {
 
   const perfil = getPerfil();
 
-  const relatoriosDisponiveis = [
-    {
-      id: 1,
-      titulo: "Relatório de Empréstimos",
-      descricao:
-        "Resumo completo de todos os empréstimos do período",
-      icon: FileText,
-      tipo: "emprestimos",
-    },
-    {
-      id: 2,
-      titulo: "Relatório de Usuários",
-      descricao:
-        "Estatísticas e atividades dos usuários cadastrados",
-      icon: Users,
-      tipo: "usuarios",
-    },
-    {
-      id: 3,
-      titulo: "Relatório de Acervo",
-      descricao:
-        "Inventário completo de livros e categorias",
-      icon: BookOpen,
-      tipo: "acervo",
-    },
-    {
-      id: 4,
-      titulo: "Relatório de Reservas",
-      descricao: "Análise de reservas ativas e concluídas",
-      icon: Calendar,
-      tipo: "reservas",
-    },
-    {
-      id: 5,
-      titulo: "Relatório de Performance",
-      descricao: "Métricas e KPIs do sistema de biblioteca",
-      icon: TrendingUp,
-      tipo: "performance",
-    },
-  ];
+  useEffect(() => {
+    let ativo = true;
+    const carregarResumo = async () => {
+      setErroResumo(null);
+      try {
+        const dados = await reportsService.getSummary(perfil);
+        if (ativo) {
+          setResumo(dados);
+        }
+      } catch (error) {
+        if (ativo) {
+          setErroResumo(
+            "Não foi possível carregar o resumo dos relatórios."
+          );
+        }
+      }
+    };
+
+    carregarResumo();
+    return () => {
+      ativo = false;
+    };
+  }, [perfil]);
 
   const handleGerarRelatorio = async (
-    tipo: string,
-    titulo: string
+    tipo: ReportType,
+    titulo: string,
+    formato: ReportFormat
   ) => {
     setCarregando(true);
     try {
-      // Simulação de geração de relatório
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1500)
+      const dataset = await reportsService.getReportDataset(
+        tipo,
+        perfil
       );
 
-      toast.success("Relatório gerado com sucesso!", {
-        description: `${titulo} está pronto para download`,
-      });
+      reportsService.downloadReport(dataset, formato);
 
-      // TODO: Integrar com backend para gerar relatório real
-      console.log(`Gerando relatório: ${tipo}`);
+      toast.success("Relatório gerado com sucesso!", {
+        description: `${titulo} pronto para download (${formato.toUpperCase()})`,
+      });
     } catch (error) {
-      toast.error("Erro ao gerar relatório");
+      toast.error("Erro ao gerar relatório", {
+        description:
+          "Não foi possível gerar o relatório agora. Tente novamente.",
+      });
     } finally {
       setCarregando(false);
     }
@@ -146,10 +210,10 @@ export function Relatorios() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                1,284
+                {resumo.totalEmprestimos}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                +12% do mês anterior
+                Dados consolidados do período atual
               </p>
             </CardContent>
           </Card>
@@ -162,10 +226,10 @@ export function Relatorios() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                8,592
+                {resumo.totalLivros}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                +23 novos esta semana
+                Total de registros disponíveis
               </p>
             </CardContent>
           </Card>
@@ -178,14 +242,24 @@ export function Relatorios() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                2,456
+                {resumo.usuariosAtivos}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                89% taxa de atividade
+                {resumo.totalUsuarios > 0
+                  ? `${resumo.totalUsuarios} cadastrados no total`
+                  : "Sem usuários cadastrados"}
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {erroResumo && (
+          <Card>
+            <CardContent className="pt-6 text-sm text-destructive">
+              {erroResumo}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Relatórios Disponíveis */}
         <div>
@@ -193,7 +267,7 @@ export function Relatorios() {
             Relatórios Disponíveis
           </h3>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {relatoriosDisponiveis.map((relatorio) => {
+            {RELATORIOS_DISPONIVEIS.map((relatorio) => {
               const Icon = relatorio.icon;
               return (
                 <Card
@@ -213,13 +287,14 @@ export function Relatorios() {
                       {relatorio.descricao}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <Button
                       className="w-full gap-2"
                       onClick={() =>
                         handleGerarRelatorio(
                           relatorio.tipo,
-                          relatorio.titulo
+                          relatorio.titulo,
+                          "pdf"
                         )
                       }
                       disabled={carregando}
@@ -227,7 +302,24 @@ export function Relatorios() {
                       <Download className="h-4 w-4" />
                       {carregando
                         ? "Gerando..."
-                        : "Gerar Relatório"}
+                        : "Gerar PDF"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2"
+                      onClick={() =>
+                        handleGerarRelatorio(
+                          relatorio.tipo,
+                          relatorio.titulo,
+                          "csv"
+                        )
+                      }
+                      disabled={carregando}
+                    >
+                      <FileDown className="h-4 w-4" />
+                      {carregando
+                        ? "Gerando..."
+                        : "Baixar CSV"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -245,20 +337,39 @@ export function Relatorios() {
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              • Os relatórios são gerados em formato PDF
+              • Os relatórios são gerados diretamente a partir
+              dos dados retornados pela API
             </p>
             <p className="text-sm text-muted-foreground">
-              • Você pode filtrar por período na versão
-              completa
+              • PDF e CSV ficam disponíveis para download
+              imediato após a geração
             </p>
             <p className="text-sm text-muted-foreground">
-              • Relatórios ficam disponíveis para download
-              por 30 dias
+              • Para perfis administrativos, relatórios de
+              usuários usam o endpoint completo
             </p>
-            <p className="text-sm text-muted-foreground">
-              • Em caso de dúvidas, entre em contato com o
-              suporte
-            </p>
+          </CardContent>
+        </Card>
+
+        {/* Endpoints */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Endpoints de Relatórios
+            </CardTitle>
+            <CardDescription>
+              Base atual usada para geração dos relatórios
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {RELATORIOS_ENDPOINTS.map((item) => (
+              <p
+                key={item.tipo}
+                className="text-sm text-muted-foreground"
+              >
+                • {item.tipo}: {item.endpoint}
+              </p>
+            ))}
           </CardContent>
         </Card>
       </div>
