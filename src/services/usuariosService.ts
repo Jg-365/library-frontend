@@ -173,15 +173,21 @@ export const usuariosService = {
 
   /**
    * Listar professores por curso
-   * GET /users/teachers/by-course?course=<nome>
+   * GET /users/teachers/by-course?courseName=<nome>
    */
   async listarProfessoresPorCurso(
-    cursoId: number
+    courseName: string
   ): Promise<MyPage<Usuario>> {
+    const normalizedCourseName = courseName.trim();
+    if (!normalizedCourseName) {
+      return normalizeUsuariosPage([]);
+    }
     const response = await api.get<
       MyPage<Usuario> | Usuario[]
     >(
-      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?cursoId=${cursoId}`
+      `${API_ENDPOINTS.USUARIOS.TEACHERS_BY_COURSE}?courseName=${encodeURIComponent(
+        normalizedCourseName
+      )}`
     );
     return normalizeUsuariosPage(response.data);
   },

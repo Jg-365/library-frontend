@@ -11,6 +11,7 @@ import {
   CadastroCursos,
   CadastroEmprestimos,
   CadastroDevolucoes,
+  ProfessoresPorCurso,
   Relatorios,
   Seguranca,
   Configuracoes,
@@ -117,6 +118,11 @@ export const privateRoutes: PrivateRoute[] = [
   {
     path: "/admin/cursos",
     element: <CadastroCursos />,
+    perfisPermitidos: ["ADMIN"],
+  },
+  {
+    path: "/admin/professores-por-curso",
+    element: <ProfessoresPorCurso />,
     perfisPermitidos: ["ADMIN"],
   },
   {

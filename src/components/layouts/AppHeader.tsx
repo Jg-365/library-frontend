@@ -68,6 +68,11 @@ const menuItemsByPerfil: Record<Perfil, MenuItem[]> = {
       href: "/admin/cursos",
       icon: <GraduationCap className="h-4 w-4 mr-2" />,
     },
+    {
+      label: "Professores",
+      href: "/admin/professores-por-curso",
+      icon: <Users className="h-4 w-4 mr-2" />,
+    },
   ],
   BIBLIOTECARIO: [
     {
