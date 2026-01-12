@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { livrosService } from "@/services/livrosService";
 import { reservasService } from "@/services/reservasService";
 import { emprestimosService } from "@/services/emprestimosService";
@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ChevronDown } from "lucide-react";
+import { BookOpen, ChevronDown, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/config/constants";
 import { useAuth as useAuthContext } from "@/store/AuthContext";
@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/custom-modal";
 
 export function CatalogoLivros() {
-  const { user } = useAuthContext();
+  const { user, role } = useAuthContext();
   const location = useLocation();
   const [livros, setLivros] = useState<Livro[]>([]);
   const [filteredLivros, setFilteredLivros] = useState<
@@ -65,9 +65,15 @@ export function CatalogoLivros() {
     setReservaParaOutroUsuario,
   ] = useState(false);
 
+  const perfil = (user?.role ??
+    user?.perfil ??
+    role ??
+    "USUARIO") as Perfil;
+
   const isAdminOrBibliotecario =
-    user?.perfil === "ADMIN" ||
-    user?.perfil === "BIBLIOTECARIO";
+    perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
+  const managementBase =
+    perfil === "ADMIN" ? "/admin" : "/bibliotecario";
 
   const getPerfil = (): Perfil => {
     if (location.pathname.startsWith("/admin")) {
@@ -370,15 +376,29 @@ export function CatalogoLivros() {
           backTo={getBasePath()}
         />
         {/* Título da Página */}
-        <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-            <BookOpen className="h-8 w-8 text-blue-600" />
-            Catálogo de Livros
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Explore nosso acervo e reserve os livros que
-            deseja
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+              Catálogo de Livros
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Explore nosso acervo e reserve os livros que
+              deseja
+            </p>
+          </div>
+          {isAdminOrBibliotecario && (
+            <Button
+              asChild
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              <Link to={`${managementBase}/livros`}>
+                <Plus className="h-4 w-4" />
+                Cadastrar livro
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Filtros */}

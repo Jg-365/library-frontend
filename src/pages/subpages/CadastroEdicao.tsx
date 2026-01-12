@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { livrosService } from "@/services";
 import { PageBreadcrumb } from "@/components/layouts/PageBreadcrumb";
 import type { Livro, Perfil } from "@/types";
@@ -65,6 +65,10 @@ export function CadastroEdicao() {
   };
 
   const perfil = getPerfil();
+  const canManageCatalog =
+    perfil === "ADMIN" || perfil === "BIBLIOTECARIO";
+  const managementBase =
+    perfil === "ADMIN" ? "/admin" : "/bibliotecario";
 
   // Modal de detalhes
   const [selectedLivro, setSelectedLivro] =
@@ -241,13 +245,37 @@ export function CadastroEdicao() {
                     : "livros encontrados"}
                 </CardDescription>
               </div>
-              <Button
-                onClick={handleNew}
-                className="w-full gap-2 sm:w-auto"
-              >
-                <Plus className="h-4 w-4" />
-                Novo Livro
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {canManageCatalog && (
+                  <>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
+                      <Link to={`${managementBase}/autores`}>
+                        Cadastrar autor
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
+                      <Link to={`${managementBase}/categorias`}>
+                        Cadastrar subcategoria
+                      </Link>
+                    </Button>
+                  </>
+                )}
+                <Button
+                  onClick={handleNew}
+                  className="w-full gap-2 sm:w-auto"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Livro
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
