@@ -73,10 +73,9 @@ export function UsuarioForm({
     const fetchCursos = async () => {
       try {
         setIsLoadingCursos(true);
-        const response = await api.get<Curso[]>(
-          API_ENDPOINTS.CURSOS.BASE
-        );
-        setCursos(response.data || []);
+        const cursosResponse =
+          await cursosService.listarTodos();
+        setCursos(cursosResponse || []);
       } catch (error) {
         console.error("Erro ao buscar cursos:", error);
         toast.error("Erro ao carregar lista de cursos");
