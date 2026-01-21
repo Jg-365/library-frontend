@@ -60,7 +60,7 @@ export function CustomModalContent({
   return (
     <div
       className={cn(
-        "mx-auto bg-white/95 dark:bg-slate-950/95 animate-in fade-in-0 zoom-in-95 relative grid w-full max-w-[min(1100px,calc(100vw-2rem))] max-h-[90vh] overflow-hidden gap-4 rounded-lg border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xl outline-none sm:px-8",
+        "mx-auto bg-white dark:bg-slate-950 animate-in fade-in-0 zoom-in-95 relative grid w-full max-w-[min(1100px,calc(100vw-2rem))] max-h-[90vh] overflow-hidden gap-4 rounded-lg border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xl outline-none sm:px-8",
         className
       )}
       {...props}
@@ -123,6 +123,5 @@ export function CustomModalDescription({
     />
   );
 }
-
 
 
